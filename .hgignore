@@ -1,0 +1,4 @@
+syntax: glob
+pevFind/Debug/*
+pevLib/Debug/*
+*.user
