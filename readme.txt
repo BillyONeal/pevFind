@@ -254,6 +254,7 @@ pevFind is a combination of an enhanced vFind and other tools.
         pLE LE format executable
         pNE NE format executable
         p2 Any format of executable where at least 2 magic numbers are valid. That is, PE, NE, and LE executables
+        p64 PE+ (64 bit) executables
         r Read only
         s System
         t Temporary
