@@ -427,3 +427,7 @@ The switches are exactly the same. There are a few extensions:
 Resolves shell link files entered as input. When one file is entered, then the simple path
 of the file will be printed to the console. If more than one file is entered, then
 they all will be listed using the format "SOURCE -> TARGET".
+
+#### Subprogram: WAIT ####################################################################
+
+Waits the specified number of milliseconds.
