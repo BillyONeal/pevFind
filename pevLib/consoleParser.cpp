@@ -573,6 +573,10 @@ void consoleParser::parseTypeString(commandToken& token, std::vector<boost::shar
             {
                 results.push_back(boost::shared_ptr<criterion>(new is2ExecFile()));
                 it++;
+            } else if (boost::istarts_with(boost::iterator_range<std::wstring::iterator>(it, token.argument.end()), L"p64"))
+            {
+                results.push_back(boost::shared_ptr<criterion>(new isPEPlusFile()));
+                it += 2;
             } else
             {
                 results.push_back(boost::shared_ptr<criterion>(new isPEFile()));

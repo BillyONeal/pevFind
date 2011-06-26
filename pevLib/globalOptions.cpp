@@ -7,8 +7,10 @@
 // implementation file to use.
 #include <vector>
 #include <string>
+#include <limits>
 #include <boost/shared_ptr.hpp>
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 #include "globalOptions.h"
 #include "regex.h"
@@ -24,7 +26,7 @@ std::wstring globalOptions::displaySpecification = L"#f";
 globalOptions::sorts globalOptions::sortMethod[6] = {globalOptions::NONE, globalOptions::NONE, globalOptions::NONE, globalOptions::NONE, globalOptions::NONE, globalOptions::NONE} ;
 globalOptions::encodings globalOptions::encoding = globalOptions::ENCODING_TYPE_ACP;
 unsigned __int64 globalOptions::lineLimit = static_cast <unsigned int> (-1);
-unsigned __int32 globalOptions::timeout = 150000;
+unsigned __int32 globalOptions::timeout = std::numeric_limits<unsigned __int32>::max();
 bool globalOptions::cancel = false;
 unsigned __int64 globalOptions::totalEntries = 0;
 unsigned __int64 globalOptions::visibleEntries = 0;

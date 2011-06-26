@@ -29,6 +29,7 @@
 #include "serviceControl.h"
 #include "dosdev.h"
 #include "linkResolve.h"
+#include "wait.hpp"
 
 int __cdecl wmain(int argc, wchar_t* argv[])
 {
@@ -77,6 +78,8 @@ int __cdecl wmain(int argc, wchar_t* argv[])
 		return linkResolve::main(subArgC, subArgV.get());
 	else if (iequals(firstArgument, L"REXPORT"))
 		return rexport::main(subArgC, subArgV.get());
+	else if (iequals(firstArgument, L"WAIT"))
+		return wait::main(subArgC, subArgV.get());
 	return vFind::main();
 	}
 #ifdef NDEBUG
@@ -89,7 +92,7 @@ std::cerr <<
 "       | |_) |  __/\\ V /|  _| | | | | | (_| |\n"
 "       | .__/ \\___| \\_/ |_|   |_|_| |_|\\__,_|\n"
 "       |_|    by Billy Robert O'Neal III\n"
-"                      Version 1.5.5\n"
+"                      Version 1.5.6\n"
 "  Distributed under the Boost Software License, Version 1.0.\n"
 "         http://www.boost.org/LICENSE_1_0.txt\n"
 "pevFind contains some code from Info-ZIP, used with permission.\n"

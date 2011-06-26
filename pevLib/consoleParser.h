@@ -74,7 +74,7 @@ class consoleParser
     void parseNotTypeString(commandToken& token, std::vector<boost::shared_ptr<criterion> > &results);
     void createSize(commandToken& token, std::vector<boost::shared_ptr<criterion> > &results);
     void createDate(commandToken& token, std::vector<boost::shared_ptr<criterion> > &results);
-    int parseTypeString(TCHAR const *typeString, std::vector<criterion *>& results);
+    void parseTypeString(TCHAR const *typeString, std::vector<criterion *>& results);
     
     void processAbsoluteDate( std::wstring& toProcess, FILETIME& lowerBound, FILETIME& upperBound);
     template <typename lowerClass, typename upperClass> 

@@ -203,6 +203,7 @@
     <ClInclude Include="uZip.h" />
     <ClInclude Include="vFind.h" />
     <ClInclude Include="volumeEnumerate.h" />
+    <ClInclude Include="wait.hpp" />
     <ClInclude Include="zip.h" />
     <ClInclude Include="zipIt.h" />
   </ItemGroup>

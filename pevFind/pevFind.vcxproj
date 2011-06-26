@@ -85,7 +85,6 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>wintrust.lib;shlwapi.lib;Sfc.lib;Version.lib;Userenv.lib;cryptlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -117,7 +116,6 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>wintrust.lib;shlwapi.lib;Sfc.lib;Version.lib;Userenv.lib;cryptlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -141,7 +139,6 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>wintrust.lib;shlwapi.lib;Sfc.lib;Version.lib;Userenv.lib;cryptlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
@@ -176,7 +173,6 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>wintrust.lib;shlwapi.lib;Sfc.lib;Version.lib;Userenv.lib;cryptlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
