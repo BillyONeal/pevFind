@@ -5,6 +5,7 @@
 //
 // utility.cpp -- Provides a bunch of utility functions and classes.
 
+#include "pch.hpp"
 #include <iomanip>
 #include <string>
 #include <vector>

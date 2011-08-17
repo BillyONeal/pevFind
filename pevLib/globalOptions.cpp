@@ -5,6 +5,7 @@
 //
 // globalOptions::cpp -- Gives the global data structure an
 // implementation file to use.
+#include "pch.hpp"
 #include <vector>
 #include <string>
 #include <limits>

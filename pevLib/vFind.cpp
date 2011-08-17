@@ -5,6 +5,7 @@
 //
 // vFind.cpp -- Implements the main entry point for pevFind.
 
+#include "pch.hpp"
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>

@@ -5,6 +5,7 @@
 //
 // sc.cpp -- Implements the sc sub program
 
+#include "pch.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <boost/algorithm/string/predicate.hpp>

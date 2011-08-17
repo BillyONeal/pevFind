@@ -1,4 +1,5 @@
-﻿#include <string>
+﻿#include "pch.hpp"
+#include <string>
 #include <windows.h>
 #include "registry.h"
 

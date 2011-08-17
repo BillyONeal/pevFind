@@ -5,6 +5,7 @@
 //
 // filesScanner.cpp -- Implements the scanner used if one specifies
 // the  --files directive.
+#include "pch.hpp"
 #include <list>
 #include <vector>
 #include <string>

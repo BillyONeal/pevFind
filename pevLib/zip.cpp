@@ -1,3 +1,4 @@
+#include "pch.hpp"
 #include "zip.h"
 #include <tchar.h>
 // THIS FILE is almost entirely based upon code by info-zip.

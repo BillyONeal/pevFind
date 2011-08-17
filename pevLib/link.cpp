@@ -5,6 +5,7 @@
 //
 // moveEx.cpp -- Implements the move on reboot sub program.
 
+#include "pch.hpp"
 #include <stdexcept>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

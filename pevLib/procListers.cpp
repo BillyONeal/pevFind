@@ -5,6 +5,7 @@
 //
 // Provides plist and clist subprograms
 
+#include "pch.hpp"
 #include <vector>
 #include <stdexcept>
 #include <iostream>

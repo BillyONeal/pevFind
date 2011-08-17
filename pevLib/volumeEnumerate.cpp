@@ -6,6 +6,7 @@
 // volumeEnumerate.cpp -- Implements the volume enumeration
 // sub program.
 
+#include "pch.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "volumeEnumerate.h"

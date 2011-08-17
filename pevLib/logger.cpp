@@ -4,6 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 // logger.cpp -- Implements character conversions and file handling.
+#include "pch.hpp"
 #include <string>
 #include <windows.h>
 #include "logger.h"

@@ -5,6 +5,7 @@
 //
 // exec.cpp -- Implements the exec subprogram
 
+#include "pch.hpp"
 #include <stdexcept>
 #include <string>
 #include <windows.h>

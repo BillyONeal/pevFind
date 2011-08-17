@@ -1,3 +1,4 @@
+#include "pch.hpp"
 #include <string>
 #include <boost/algorithm/string/replace.hpp>
 #include "opstruct.h"

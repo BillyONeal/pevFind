@@ -5,6 +5,7 @@
 //
 // uZip.cpp -- Implements the uZip subprogram.
 
+#include "pch.hpp"
 #include <string>
 #include "unzip.h"
 #include "logger.h"

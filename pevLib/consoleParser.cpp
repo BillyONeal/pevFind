@@ -7,6 +7,7 @@
 // processing pevFind's commandline. Implements the recursive
 // descent parser.
 
+#include "pch.hpp"
 #include <stdexcept>
 #ifndef NDEBUG
 #include <iostream> //These are used to print debugging info to disk.

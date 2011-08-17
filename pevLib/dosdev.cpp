@@ -5,6 +5,7 @@
 //
 // dosdev.cpp -- Implements the "ddev" sub program.
 
+#include "pch.hpp"
 #include <string>
 #include <stdexcept>
 #include <iterator>

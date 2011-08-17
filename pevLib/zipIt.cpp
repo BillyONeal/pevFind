@@ -4,6 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 // zipIt.cpp -- Zips results of scan
+#include "pch.hpp"
 #include <string>
 #include <vector>
 #include <list>

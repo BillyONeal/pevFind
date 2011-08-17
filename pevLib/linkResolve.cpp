@@ -5,6 +5,7 @@
 //
 // linkResolve.h -- Implements the linkResolve subprogram and library function.
 
+#include "pch.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <Objbase.h>

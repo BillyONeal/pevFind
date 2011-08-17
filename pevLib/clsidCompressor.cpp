@@ -4,7 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 // clsidCompressor.cpp -- Implements the clsid compressor/decompressor.
-
+#include "pch.hpp"
 #include <exception>
 #include <vector>
 #include <windows.h>

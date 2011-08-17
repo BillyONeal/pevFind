@@ -5,6 +5,7 @@
 //
 // regex.cpp -- Implements some functions for pevFind's
 //               vfind regex node.
+#include "pch.hpp"
 #include <string>
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>

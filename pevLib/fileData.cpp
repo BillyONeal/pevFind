@@ -5,6 +5,7 @@
 //
 // fileData.cpp -- Implements functions for the fileData record type.
 
+#include "pch.hpp"
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -559,7 +560,7 @@ WORD FileData::ChkSum(WORD oldChk, USHORT * ptr, DWORD len) const
 	DWORD c = oldChk;
 	while (len)
 	{
-		int l = min(len, 0x4000);
+		int l = std::min<int>(len, 0x4000);
 		len -= l;
 		for (int j=0; j<l; ++j)
 		{

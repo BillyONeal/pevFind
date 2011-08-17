@@ -4,6 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 // processScanner.cpp -- Implements process kill mode
+#include "pch.hpp"
 #include <vector>
 #include <list>
 #include "processManager.h"

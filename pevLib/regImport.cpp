@@ -4,6 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 // regImport.cpp -- Implements the "rimport" subprogram.
+#include "pch.hpp"
 #include <vector>
 #include <iostream>
 #include <boost/algorithm/string/predicate.hpp>

@@ -4,6 +4,8 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 // timeoutThread.cpp -- Implements the timeout thread function.
+
+#include "pch.hpp"
 #include <cstdlib>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

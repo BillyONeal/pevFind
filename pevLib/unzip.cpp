@@ -1,3 +1,4 @@
+#include "pch.hpp"
 #include <string>
 #include <tchar.h>
 #include "unzip.h"

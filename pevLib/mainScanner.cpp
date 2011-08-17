@@ -6,6 +6,7 @@
 // mainScanner.cpp -- Implements the scanner by default.
 // Recurses into subdirectories.
 
+#include "pch.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "logger.h"

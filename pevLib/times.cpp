@@ -4,6 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 // times.cpp -- Implements the time subprogram.
+#include "pch.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <boost/algorithm/string/predicate.hpp>
