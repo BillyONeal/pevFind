@@ -10,7 +10,6 @@
 // components.
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 class regexClass;
 class criterion;
@@ -19,8 +18,8 @@ class subProgramClass;
 class globalOptions
 {
 public:
-	static std::vector<boost::shared_ptr<regexClass> > regularExpressions;
-	static boost::shared_ptr<criterion> logicalTree;
+	static std::vector<std::tr1::shared_ptr<regexClass> > regularExpressions;
+	static std::tr1::shared_ptr<criterion> logicalTree;
 	static bool showall;
 	static bool debug;
 	static bool fullPath;

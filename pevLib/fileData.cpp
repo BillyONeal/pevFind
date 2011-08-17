@@ -212,7 +212,7 @@ void FileData::initPortableExecutable() const
 	//Store that this function has been called so that it is not called every time
 	bits |= PEENUMERATED;
 	//Get a handle to the file
-	boost::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
+	std::tr1::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
 	//Report false if the file could not be obtained
 	if (hFile.get() == INVALID_HANDLE_VALUE)
 		return;
@@ -408,11 +408,12 @@ void FileData::sigVerify() const
 			DWORD hashLen = 0;
 			//Calculate the file's hash. Get length of required hash len.
 			CryptCATAdminCalcHashFromFileHandle(hFile,&hashLen,NULL,NULL);
-			//Alocate ram for and calculate hash.
-			boost::scoped_array<BYTE> hash(new BYTE[hashLen]);
-			CryptCATAdminCalcHashFromFileHandle(hFile,&hashLen,hash.get(),NULL);
+			//Allocate ram for and calculate hash.
+			std::vector<unsigned char> hash;
+			hash.resize(hashLen);
+			CryptCATAdminCalcHashFromFileHandle(hFile,&hashLen,&hash[0],NULL);
 			//Get the catalog to which that hash corresponds.
-			HCATINFO hCatInfo = CryptCATAdminEnumCatalogFromHash(catalogHandler,hash.get(),hashLen,NULL,NULL);
+			HCATINFO hCatInfo = CryptCATAdminEnumCatalogFromHash(catalogHandler,&hash[0],hashLen,NULL,NULL);
 			if (!hCatInfo)
 			{
 				//The hash is not in any catalog
@@ -630,7 +631,7 @@ typedef struct _PPROTECT_FILE_ENTRY {
   PWSTR InfName;
 }PROTECT_FILE_ENTRY, *PPROTECT_FILE_ENTRY;
 
-typedef NTSTATUS (WINAPI *_SfcGetFiles)(
+typedef NTSTATUS (WINAPI *SfcGetFiles_)(
   PPROTECT_FILE_ENTRY *ProtFileData,
   PULONG FileCount
 );
@@ -640,15 +641,15 @@ void FileData::buildSfcList() const
 	//Load the SFCFiles.dll module.
 	wchar_t buffer[MAX_PATH];
 	ExpandEnvironmentStrings(L"%WINDIR%\\System32\\sfcfiles.dll", buffer, MAX_PATH);
-	boost::shared_ptr<void> sfcFiles(LoadLibrary(buffer), FreeLibrary);
+	std::tr1::shared_ptr<void> sfcFiles(LoadLibrary(buffer), FreeLibrary);
 	if (!(sfcFiles.get()))
 	{
 		sfcState = NO_SFCFILES_DLL;
 		return;
 	}
-	_SfcGetFiles SfcGetFiles;
-	SfcGetFiles = (_SfcGetFiles)GetProcAddress((HMODULE)sfcFiles.get(), "SfcGetFiles");
-	if (!SfcGetFiles)
+	SfcGetFiles_ sfcGetFiles;
+	sfcGetFiles = (SfcGetFiles_)GetProcAddress((HMODULE)sfcFiles.get(), "SfcGetFiles");
+	if (!sfcGetFiles)
 	{
 		sfcState = NO_SFCFILES_DLL;
 		return;
@@ -656,7 +657,7 @@ void FileData::buildSfcList() const
 	NTSTATUS getFilesResult;
 	PROTECT_FILE_ENTRY *fileEntry;
 	ULONG fileCount = 0;
-	getFilesResult = SfcGetFiles(&fileEntry, &fileCount);
+	getFilesResult = sfcGetFiles(&fileEntry, &fileCount);
 	if (getFilesResult != 0)
 	{	
 		sfcState = NO_SFCFILES_DLL;
@@ -706,7 +707,7 @@ void FileData::resetPEHeaderCheckSum()
 	if (isPE() && peHeaderChecksumIsValid() && getPEHeaderCheckSum() != 0) return;
 
 	//Get a handle to the file
-	boost::shared_ptr<void> hFile(getFileHandle(false), CloseHandle);
+	std::tr1::shared_ptr<void> hFile(getFileHandle(false), CloseHandle);
 	//Report false if the file could not be obtained
 	if (hFile.get() == INVALID_HANDLE_VALUE)
 		return;

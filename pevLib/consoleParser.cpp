@@ -24,13 +24,13 @@
 #include "FILTER.h"
 
 //Entry point into the parser system
-boost::shared_ptr<criterion> consoleParser::parseCmdLine(const std::wstring& commandLine)
+std::tr1::shared_ptr<criterion> consoleParser::parseCmdLine(const std::wstring& commandLine)
 {
     tokenize(commandLine);
     curToken++; //Skip past the program directory itself
     if (boost::algorithm::iequals(curToken->argument, L"vfind"))
         curToken++;
-    boost::shared_ptr<criterion> result(andParse());
+    std::tr1::shared_ptr<criterion> result(andParse());
     if (curToken->type != END)
         throw std::runtime_error("Commandline Syntax Error!!");
     return result;
@@ -124,45 +124,45 @@ consoleParser::tokenType consoleParser::makeTypeFromToken(const std::wstring& ar
         return MODIFIER;
     return REGEX;
 }
-boost::shared_ptr<criterion> consoleParser::andParse()
+std::tr1::shared_ptr<criterion> consoleParser::andParse()
 {
-    boost::shared_ptr<criterion> prev(orParse());
+    std::tr1::shared_ptr<criterion> prev(orParse());
     while (curToken->type == AND)
     {
         curToken++;
-        boost::shared_ptr<criterion> cur(orParse());
-        boost::shared_ptr<criterion> newNode(new andAndClass(cur, prev));
+        std::tr1::shared_ptr<criterion> cur(orParse());
+        std::tr1::shared_ptr<criterion> newNode(new andAndClass(cur, prev));
         prev = newNode;
     }
     return prev;
 }
-boost::shared_ptr<criterion> consoleParser::orParse()
+std::tr1::shared_ptr<criterion> consoleParser::orParse()
 {
-    boost::shared_ptr<criterion> prev(xorParse());
+    std::tr1::shared_ptr<criterion> prev(xorParse());
     while (curToken->type == OR)
     {
         curToken++;
-        boost::shared_ptr<criterion> cur(xorParse());
-        boost::shared_ptr<criterion> newNode(new orAndClass(cur, prev));
+        std::tr1::shared_ptr<criterion> cur(xorParse());
+        std::tr1::shared_ptr<criterion> newNode(new orAndClass(cur, prev));
         prev = newNode;
     }
     return prev;
 }
-boost::shared_ptr<criterion> consoleParser::xorParse()
+std::tr1::shared_ptr<criterion> consoleParser::xorParse()
 {
-    boost::shared_ptr<criterion> prev(exprParse());
+    std::tr1::shared_ptr<criterion> prev(exprParse());
     while (curToken->type == XOR)
     {
         curToken++;
-        boost::shared_ptr<criterion> cur(exprParse());
-        boost::shared_ptr<criterion> newNode(new xorAndClass(cur, prev));
+        std::tr1::shared_ptr<criterion> cur(exprParse());
+        std::tr1::shared_ptr<criterion> newNode(new xorAndClass(cur, prev));
         prev = newNode;
     }
     return prev;
 }
-boost::shared_ptr<criterion> consoleParser::exprParse()
+std::tr1::shared_ptr<criterion> consoleParser::exprParse()
 {
-    std::vector<boost::shared_ptr<criterion> > results;
+    std::vector<std::tr1::shared_ptr<criterion> > results;
     while (isExpressionArgumentType())
     {
         switch(curToken->type)
@@ -170,7 +170,7 @@ boost::shared_ptr<criterion> consoleParser::exprParse()
         case NOT:
             {
                 curToken++;
-                boost::shared_ptr<criterion> ptrVal(new notAndClass(exprParse()));
+                std::tr1::shared_ptr<criterion> ptrVal(new notAndClass(exprParse()));
                 results.push_back(ptrVal);
             }
             break;
@@ -184,7 +184,7 @@ boost::shared_ptr<criterion> consoleParser::exprParse()
             break;
         case REGEX:
             {
-                boost::shared_ptr<regexClass> ptrVal(new vFindRegex(curToken->argument));
+                std::tr1::shared_ptr<regexClass> ptrVal(new vFindRegex(curToken->argument));
                 results.push_back(ptrVal);
                 globalOptions::regularExpressions.push_back(ptrVal);
                 curToken++;
@@ -205,29 +205,29 @@ boost::shared_ptr<criterion> consoleParser::exprParse()
     case 1:
         return results[0];
     default:
-        return boost::shared_ptr<criterion>( new bracketClass(results) );
+        return std::tr1::shared_ptr<criterion>( new bracketClass(results) );
     }
 }
-boost::shared_ptr<criterion> consoleParser::createBracket()
+std::tr1::shared_ptr<criterion> consoleParser::createBracket()
 {
     curToken++;
-    boost::shared_ptr<criterion> result = andParse();
+    std::tr1::shared_ptr<criterion> result = andParse();
     if (curToken->type != ENDBRACKET)
         throw std::runtime_error("Unbalanced {}s in your expression.");
     return result;
 }
-boost::shared_ptr<criterion> consoleParser::createIf()
+std::tr1::shared_ptr<criterion> consoleParser::createIf()
 {
     curToken++;
-    boost::shared_ptr<criterion> condition(exprParse());
-    boost::shared_ptr<criterion> then(exprParse());
-    boost::shared_ptr<criterion> els((criterion *)NULL);
+    std::tr1::shared_ptr<criterion> condition(exprParse());
+    std::tr1::shared_ptr<criterion> then(exprParse());
+    std::tr1::shared_ptr<criterion> els((criterion *)NULL);
     if (curToken->type == ELSEARG)
     {
         curToken++;
         els = exprParse();
     }
-    boost::shared_ptr<criterion> result(new ifClass(condition, then, els));
+    std::tr1::shared_ptr<criterion> result(new ifClass(condition, then, els));
     return result;
 }
 bool consoleParser::isExpressionArgumentType()
@@ -243,7 +243,7 @@ bool consoleParser::isExpressionArgumentType()
     }
     return false;
 }
-void consoleParser::createModifier(std::vector<boost::shared_ptr<criterion> > &results)
+void consoleParser::createModifier(std::vector<std::tr1::shared_ptr<criterion> > &results)
 {
     using namespace boost::algorithm;
     commandToken token = *curToken;
@@ -333,7 +333,7 @@ void consoleParser::createModifier(std::vector<boost::shared_ptr<criterion> > &r
         }
         else if (istarts_with(token.argument, L"files"))
         {
-            boost::shared_ptr<regexClass> it(new filesRegexPlaceHolder());
+            std::tr1::shared_ptr<regexClass> it(new filesRegexPlaceHolder());
             results.push_back(it);
             globalOptions::regularExpressions.push_back(it);
             processFilesArgument(token);
@@ -406,7 +406,7 @@ void consoleParser::createModifier(std::vector<boost::shared_ptr<criterion> > &r
         {
             token.argument.clear();
             boost::algorithm::replace_all(token.option, L"##", L"#");
-            boost::shared_ptr<regexClass> ptrVal(new vFindRegex(token.option, false));
+            std::tr1::shared_ptr<regexClass> ptrVal(new vFindRegex(token.option, false));
             results.push_back(ptrVal);
             globalOptions::regularExpressions.push_back(ptrVal);
         }
@@ -430,7 +430,7 @@ void consoleParser::createModifier(std::vector<boost::shared_ptr<criterion> > &r
         {
             token.argument.clear();
             boost::algorithm::replace_all(token.option, L"##", L"#");
-            results.push_back(boost::shared_ptr<regexClass>(new perlRegex(token.option)));
+            results.push_back(std::tr1::shared_ptr<regexClass>(new perlRegex(token.option)));
         }
         else if (istarts_with(token.argument, L"r"))
         {
@@ -460,7 +460,7 @@ void consoleParser::createModifier(std::vector<boost::shared_ptr<criterion> > &r
         else if (istarts_with(token.argument, L"skip"))
         {
             removeArgument(4, token.argument);
-            results.push_back(boost::shared_ptr<criterion>(new skipper(getEndOrOption(token))));
+            results.push_back(std::tr1::shared_ptr<criterion>(new skipper(getEndOrOption(token))));
             token.argument.clear();
         }
         else if (istarts_with(token.argument, L"s"))
@@ -501,7 +501,7 @@ void consoleParser::removeArgument(std::size_t argLength, std::wstring& arg)
     while(it != arg.end() && *it == L':') { it++; };
     arg.erase(arg.begin(), it);
 }
-void consoleParser::parseTypeString(commandToken& token, std::vector<boost::shared_ptr<criterion> > &results)
+void consoleParser::parseTypeString(commandToken& token, std::vector<std::tr1::shared_ptr<criterion> > &results)
 {
     std::wstring::iterator it = token.argument.begin();
     bool foundType = true;
@@ -510,98 +510,98 @@ void consoleParser::parseTypeString(commandToken& token, std::vector<boost::shar
         {
         case L'A':
         case L'a':
-            results.push_back(boost::shared_ptr<criterion>(new isArchive()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isArchive()));
             break;
         case L'B':
         case L'b':
-            results.push_back(boost::shared_ptr<criterion>(new isPEPlusFile()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isPEPlusFile()));
             break;
         case L'C':
         case L'c':
-            results.push_back(boost::shared_ptr<criterion>(new isCompressed()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isCompressed()));
             break;
         case L'D':
         case L'd':
-            results.push_back(boost::shared_ptr<criterion>(new isDirectory()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isDirectory()));
             break;
         case L'E':
         case L'e':
-            results.push_back(boost::shared_ptr<criterion>(new isReparsePoint()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isReparsePoint()));
             break;
         case L'F':
         case L'f':
-            results.push_back(boost::shared_ptr<criterion>(new isFile()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isFile()));
             break;
         case L'G':
         case L'g':
-            results.push_back(boost::shared_ptr<criterion>(new sigIsValid()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new sigIsValid()));
             break;
         case L'I':
         case L'i':
-            results.push_back(boost::shared_ptr<criterion>(new hasSig()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new hasSig()));
             break;
         case L'J':
         case L'j':
-            results.push_back(boost::shared_ptr<criterion>(new timestampValid()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new timestampValid()));
             break;
         case L'K':
         case L'k':
-            results.push_back(boost::shared_ptr<criterion>(new checkSumValid()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new checkSumValid()));
             break;
         case L'L':
         case L'l':
-            results.push_back(boost::shared_ptr<criterion>(new isDLLFile()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isDLLFile()));
             break;
         case L'O':
         case L'o':
-            results.push_back(boost::shared_ptr<criterion>(new isSFCProtected()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isSFCProtected()));
             break;
         case L'P':
         case L'p':
             if (boost::istarts_with(boost::iterator_range<std::wstring::iterator>(it, token.argument.end()), L"pne"))
             {
-                results.push_back(boost::shared_ptr<criterion>(new isNEFile()));
+                results.push_back(std::tr1::shared_ptr<criterion>(new isNEFile()));
                 it += 2;
             } else if (boost::istarts_with(boost::iterator_range<std::wstring::iterator>(it, token.argument.end()), L"ple"))
             {
-                results.push_back(boost::shared_ptr<criterion>(new isLEFile()));
+                results.push_back(std::tr1::shared_ptr<criterion>(new isLEFile()));
                 it += 2;
             } else if (boost::istarts_with(boost::iterator_range<std::wstring::iterator>(it, token.argument.end()), L"pmz"))
             {
-                results.push_back(boost::shared_ptr<criterion>(new isMZFile()));
+                results.push_back(std::tr1::shared_ptr<criterion>(new isMZFile()));
                 it += 2;
             } else if (boost::istarts_with(boost::iterator_range<std::wstring::iterator>(it, token.argument.end()), L"p2"))
             {
-                results.push_back(boost::shared_ptr<criterion>(new is2ExecFile()));
+                results.push_back(std::tr1::shared_ptr<criterion>(new is2ExecFile()));
                 it++;
             } else if (boost::istarts_with(boost::iterator_range<std::wstring::iterator>(it, token.argument.end()), L"p64"))
             {
-                results.push_back(boost::shared_ptr<criterion>(new isPEPlusFile()));
+                results.push_back(std::tr1::shared_ptr<criterion>(new isPEPlusFile()));
                 it += 2;
             } else
             {
-                results.push_back(boost::shared_ptr<criterion>(new isPEFile()));
+                results.push_back(std::tr1::shared_ptr<criterion>(new isPEFile()));
             }
             break;
         case L'H':
         case L'h':
-            results.push_back(boost::shared_ptr<criterion>(new isHidden()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isHidden()));
             break;
         case L'R':
         case L'r':
-            results.push_back(boost::shared_ptr<criterion>(new isReadOnly()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isReadOnly()));
             break;
         case L'S':
         case L's':
-            results.push_back(boost::shared_ptr<criterion>(new isSystem()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isSystem()));
             break;
         case L'V':
         case L'v':
-            results.push_back(boost::shared_ptr<criterion>(new isVolumeLabel()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isVolumeLabel()));
             break;
         case L'W':
         case L'w':
-            results.push_back(boost::shared_ptr<criterion>(new isWritable()));
+            results.push_back(std::tr1::shared_ptr<criterion>(new isWritable()));
             break;
         default:
             foundType = false;
@@ -612,7 +612,7 @@ void consoleParser::parseTypeString(commandToken& token, std::vector<boost::shar
     token.argument.erase(token.argument.begin(), it);
 }
 
-void consoleParser::createDate(commandToken& token, std::vector<boost::shared_ptr<criterion> > &results)
+void consoleParser::createDate(commandToken& token, std::vector<std::tr1::shared_ptr<criterion> > &results)
 {
     removeArgument(1, token.argument);
     switch (token.argument[0])
@@ -1003,37 +1003,37 @@ void consoleParser::descendingSorts(commandToken& token)
         throw std::runtime_error("Invalid sort!");
 }
 
-void consoleParser::parseNotTypeString(commandToken& token, std::vector<boost::shared_ptr<criterion> > &results)
+void consoleParser::parseNotTypeString(commandToken& token, std::vector<std::tr1::shared_ptr<criterion> > &results)
 {
-    std::vector<boost::shared_ptr<criterion> > resTmp;
+    std::vector<std::tr1::shared_ptr<criterion> > resTmp;
     parseTypeString(token, resTmp);
     if (resTmp.size())
     {
-        for (std::vector<boost::shared_ptr<criterion> >::iterator it = resTmp.begin(); it != resTmp.end(); it++)
-            results.push_back( boost::shared_ptr<criterion>(new notAndClass(*it)) );
+        for (std::vector<std::tr1::shared_ptr<criterion> >::iterator it = resTmp.begin(); it != resTmp.end(); it++)
+            results.push_back( std::tr1::shared_ptr<criterion>(new notAndClass(*it)) );
     }
     
 }
-void consoleParser::createSize(commandToken& token, std::vector<boost::shared_ptr<criterion> > &results)
+void consoleParser::createSize(commandToken& token, std::vector<std::tr1::shared_ptr<criterion> > &results)
 {
     removeArgument(1, token.argument);
     wchar_t typeChar = token.argument[0];
     if (      typeChar == L'+' || typeChar == L'G' || typeChar == L'g' )
     {
         removeArgument(1, token.argument);
-        results.push_back(boost::shared_ptr<criterion>( new gtSizeFilter(processUL(token))));
+        results.push_back(std::tr1::shared_ptr<criterion>( new gtSizeFilter(processUL(token))));
     } else if ( typeChar == L'-' || typeChar == L'L' || typeChar == L'l' )
     {
         removeArgument(1, token.argument);
-        results.push_back(boost::shared_ptr<criterion>( new ltSizeFilter(processUL(token))));
+        results.push_back(std::tr1::shared_ptr<criterion>( new ltSizeFilter(processUL(token))));
     } else if ( typeChar == L'=' )
     {
         removeArgument(1, token.argument);
-        results.push_back(boost::shared_ptr<criterion>( new isSizeFilter(processUL(token))));
+        results.push_back(std::tr1::shared_ptr<criterion>( new isSizeFilter(processUL(token))));
     } else if ( typeChar == L'!' )
     {
         removeArgument(1, token.argument);
-        results.push_back(boost::shared_ptr<criterion>( new notSizeFilter(processUL(token))));
+        results.push_back(std::tr1::shared_ptr<criterion>( new notSizeFilter(processUL(token))));
     } else //Number range
     {
         __int64 a = processUL(token);
@@ -1041,7 +1041,7 @@ void consoleParser::createSize(commandToken& token, std::vector<boost::shared_pt
         __int64 b = processUL(token);
         if (a > b)
             std::swap(a, b);
-        results.push_back(boost::shared_ptr<criterion>( new gtSizeFilter(a - 1)));
-        results.push_back(boost::shared_ptr<criterion>( new ltSizeFilter(b + 1)));
+        results.push_back(std::tr1::shared_ptr<criterion>( new gtSizeFilter(a - 1)));
+        results.push_back(std::tr1::shared_ptr<criterion>( new ltSizeFilter(b + 1)));
     }
 }

@@ -9,15 +9,14 @@
 #include <vector>
 #include <string>
 #include <limits>
-#include <boost/shared_ptr.hpp>
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
 #include "globalOptions.h"
 #include "regex.h"
 
-std::vector<boost::shared_ptr<regexClass> > globalOptions::regularExpressions;
-boost::shared_ptr<criterion>  globalOptions::logicalTree;
+std::vector<std::tr1::shared_ptr<regexClass> > globalOptions::regularExpressions;
+std::tr1::shared_ptr<criterion>  globalOptions::logicalTree;
 bool globalOptions::showall = false;
 bool globalOptions::debug = false;
 bool globalOptions::fullPath = false;

@@ -31,7 +31,7 @@ unsigned __int32 operation::getPriorityClass() const
 	return classB;
 
 };
-operation::operation(boost::shared_ptr<criterion> a, boost::shared_ptr<criterion> b) : operandA(a), operandB(b)
+operation::operation(std::tr1::shared_ptr<criterion> a, std::tr1::shared_ptr<criterion> b) : operandA(a), operandB(b)
 {}
 BOOL andAndClass::include(FileData &file) const
 {
@@ -52,7 +52,7 @@ unsigned int andAndClass::directoryCheck(const std::wstring& directory) const
 		return resA;
 	return resA && resB;
 }
-andAndClass::andAndClass(boost::shared_ptr<criterion> a, boost::shared_ptr<criterion> b) : operation(a, b)
+andAndClass::andAndClass(std::tr1::shared_ptr<criterion> a, std::tr1::shared_ptr<criterion> b) : operation(a, b)
 {}
 std::wstring andAndClass::debugTree() const
 {
@@ -79,7 +79,7 @@ unsigned int orAndClass::directoryCheck(const std::wstring& directory) const
 		return resA;
 	return resA || resB;
 }
-orAndClass::orAndClass(boost::shared_ptr<criterion> a, boost::shared_ptr<criterion> b) : operation(a, b)
+orAndClass::orAndClass(std::tr1::shared_ptr<criterion> a, std::tr1::shared_ptr<criterion> b) : operation(a, b)
 {}
 std::wstring orAndClass::debugTree() const
 {
@@ -104,7 +104,7 @@ unsigned int xorAndClass::directoryCheck(const std::wstring& directory) const
 		return resA;
 	return (resA || resB) && !(resA && resB);
 }
-xorAndClass::xorAndClass(boost::shared_ptr<criterion> a, boost::shared_ptr<criterion> b) : operation(a, b)
+xorAndClass::xorAndClass(std::tr1::shared_ptr<criterion> a, std::tr1::shared_ptr<criterion> b) : operation(a, b)
 {}
 std::wstring xorAndClass::debugTree() const
 {
@@ -134,7 +134,7 @@ unsigned int notAndClass::directoryCheck(const std::wstring& directory) const
 	}
 	return DIRECTORY_DONTCARE;
 }
-notAndClass::notAndClass(boost::shared_ptr<criterion> a) : operand(a)
+notAndClass::notAndClass(std::tr1::shared_ptr<criterion> a) : operand(a)
 {}
 std::wstring notAndClass::debugTree() const
 {
@@ -177,14 +177,14 @@ unsigned int bracketClass::directoryCheck(const std::wstring& directory)
 	else
 		return DIRECTORY_INCLUDE;
 }
-bracketClass::bracketClass(std::vector<boost::shared_ptr<criterion> > exprA): expr(exprA)
+bracketClass::bracketClass(std::vector<std::tr1::shared_ptr<criterion> > exprA): expr(exprA)
 { 
 	assert(expr.size() > 1);
 }
 std::wstring bracketClass::debugTree() const
 {
 	std::wstring dbgMsg(L"- BRACKET\r\n");
-	for (std::vector<boost::shared_ptr<criterion> >::const_iterator it = expr.begin(); it != expr.end(); it++)
+	for (std::vector<std::tr1::shared_ptr<criterion> >::const_iterator it = expr.begin(); it != expr.end(); it++)
 	{
 		dbgMsg.append((*it)->debugTree());
 		if (it + 1 != expr.end())
@@ -248,7 +248,7 @@ unsigned int ifClass::directoryCheck(const std::wstring& directory) const
 		return fVal->directoryCheck(directory);
 	}
 }
-ifClass::ifClass(boost::shared_ptr<criterion> condition,boost::shared_ptr<criterion> valueIfTrue,boost::shared_ptr<criterion> valueIfFalse)
+ifClass::ifClass(std::tr1::shared_ptr<criterion> condition,std::tr1::shared_ptr<criterion> valueIfTrue,std::tr1::shared_ptr<criterion> valueIfFalse)
 	: condVal(condition), tVal(valueIfTrue), fVal(valueIfFalse)
 {}
 std::wstring ifClass::debugTree() const
@@ -292,7 +292,7 @@ void notAndClass::makeNonRecursive()
 
 void bracketClass::makeNonRecursive()
 {
-	for (std::vector<boost::shared_ptr<criterion> >::iterator it = expr.begin(); it != expr.end(); it++)
+	for (std::vector<std::tr1::shared_ptr<criterion> >::iterator it = expr.begin(); it != expr.end(); it++)
 	{
 		(*it)->makeNonRecursive();
 	}

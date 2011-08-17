@@ -33,7 +33,7 @@ namespace scanners
 		std::list<std::wstring> foldersToScan;
 		if (globalOptions::noSubDirectories)
 		{
-			for (std::vector<boost::shared_ptr<regexClass> >::iterator it = globalOptions::regularExpressions.begin(); it != globalOptions::regularExpressions.end(); it++)
+			for (std::vector<std::tr1::shared_ptr<regexClass> >::iterator it = globalOptions::regularExpressions.begin(); it != globalOptions::regularExpressions.end(); it++)
 			{
 				std::wstring curRegexRoot((*it)->getPathRoot());
 				if ((*it)->getPathRoot().empty())
@@ -131,14 +131,14 @@ namespace scanners
 		printSummary();
 	}
 
-	std::wstring getRegexesCommonRoot(std::vector<boost::shared_ptr<regexClass> >& targets)
+	std::wstring getRegexesCommonRoot(std::vector<std::tr1::shared_ptr<regexClass> >& targets)
 	{
 		//Sanity check:
 		if (!targets.size()) return L"";
 		std::vector<std::wstring> candidates;
 		candidates.reserve(targets.size());
 		//Keep the roots of the regexes in the running if they are not empty.
-		for(std::vector<boost::shared_ptr<regexClass> >::const_iterator it = targets.begin(); it != targets.end(); it++)
+		for(std::vector<std::tr1::shared_ptr<regexClass> >::const_iterator it = targets.begin(); it != targets.end(); it++)
 		{
 			if (! (**it).getPathRoot().empty() ) candidates.push_back((**it).getPathRoot());
 		}

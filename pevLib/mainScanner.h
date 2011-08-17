@@ -9,13 +9,12 @@
 // the one used by default. It recurses into subdirectories
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 #include "regex.h"
 class FileData;
 
 namespace scanners
 {
-	std::wstring getRegexesCommonRoot(std::vector<boost::shared_ptr<regexClass> >&);
+	std::wstring getRegexesCommonRoot(std::vector<std::tr1::shared_ptr<regexClass> >&);
 	void printSummary();
 	class recursiveScanner
 	{	

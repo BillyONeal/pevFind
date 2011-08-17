@@ -7,7 +7,6 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <boost/shared_ptr.hpp>
 
 class FileData;
 
@@ -39,15 +38,15 @@ public:
 //Functor which converts pointers to criteria to priority classes
 static struct _getPriorityFunctor : std::unary_function<const criterion*, __int32>
 {
-	__int32 operator()(const boost::shared_ptr<criterion> crit)
+	__int32 operator()(const std::tr1::shared_ptr<criterion> crit)
 	{
 		return crit->getPriorityClass();
 	};
 } getPriorityFunctor;
 
-static struct _criterionByPriorityClass : std::binary_function<const boost::shared_ptr<criterion>, boost::shared_ptr<criterion>, bool>
+static struct _criterionByPriorityClass : std::binary_function<const std::tr1::shared_ptr<criterion>, std::tr1::shared_ptr<criterion>, bool>
 {
-	bool operator()(const boost::shared_ptr<criterion> a, const boost::shared_ptr<criterion> b)
+	bool operator()(const std::tr1::shared_ptr<criterion> a, const std::tr1::shared_ptr<criterion> b)
 	{
 		return a->getPriorityClass() < b->getPriorityClass();
 	}

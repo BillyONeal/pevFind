@@ -12,7 +12,6 @@
 #include <string>
 #include <exception>
 #include <windows.h>
-#include <boost/shared_ptr.hpp>
 
 namespace registry
 {

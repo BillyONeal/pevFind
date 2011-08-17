@@ -9,8 +9,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_array.hpp>
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
@@ -86,7 +84,7 @@ class FileData
 	mutable std::vector<LANGANDCODEPAGE> versionTranslations;
 
 	//Hex managment 
-	boost::shared_ptr<std::vector<std::pair<unsigned int, bool> > > hexStorage;
+	std::tr1::shared_ptr<std::vector<std::pair<unsigned int, bool> > > hexStorage;
 
 	//Enumeration functions
 	//When the results aren't cached in the bitset bits, these functions calculate
@@ -498,9 +496,10 @@ std::wstring FileData::getHash() const
 	}
 	hashType hash;
 	DWORD bytesRead = 0;
+	std::vector<unsigned char> buffer;
+	buffer.resize(hash.OptimalBlockSize());
 	DWORD bytesToAttempt = hash.OptimalBlockSize();
-	boost::scoped_array<BYTE> buffer(new BYTE[bytesToAttempt]);
-	while (ReadFile(file,buffer.get(),bytesToAttempt,&bytesRead,NULL))
+	while (ReadFile(file,&buffer[0],bytesToAttempt,&bytesRead,NULL))
 	{
 		if (!bytesRead)
 		{
@@ -514,21 +513,22 @@ std::wstring FileData::getHash() const
 			}
 			break;
 		}
-		hash.Update(buffer.get(),bytesRead);
+		hash.Update(&buffer[0],bytesRead);
 	}
 	CloseHandle(file);
-	DWORD hashLen = hash.DigestSize();
-	boost::scoped_array<BYTE> rawHash(new BYTE[hashLen]);
-	hash.Final(rawHash.get());
+	std::vector<unsigned char> rawHash;
+	rawHash.resize(hash.DigestSize());
+	hash.Final(&rawHash[0]);
 
-	DWORD printedLen = hashLen * 2;
-	boost::scoped_array<wchar_t> hexString(new wchar_t[printedLen]);
-	for (unsigned short int idx = 0; idx < hashLen; idx++)
+	std::wstring result;
+	result.resize(hash.DigestSize() * 2);
+	DWORD len = hash.DigestSize();
+	for (unsigned short int idx = 0; idx < len; idx++)
 	{
-		hexString[(printedLen-1)-2*idx] = constantHexArray[(rawHash[(hashLen-1)-idx] & 0x0F)];
-		hexString[(printedLen-1)-(2*idx+1)] = constantHexArray[(rawHash[(hashLen-1)-idx] & 0xF0) >> 4];
+		result[(len*2-1)-2*idx] = constantHexArray[(rawHash[(len-1)-idx] & 0x0F)];
+		result[(len*2-1)-(2*idx+1)] = constantHexArray[(rawHash[(len-1)-idx] & 0xF0) >> 4];
 	};
-	return std::wstring(hexString.get(),printedLen);
+	return result;
 }
 
 inline void FileData::setupWin32Attributes() const

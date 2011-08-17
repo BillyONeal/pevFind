@@ -18,7 +18,7 @@
 std::wstring loadFileAsString(const std::wstring &fileName)
 {
 	std::wstring fileString;
-	{ // This scope ensures the scoped_array is destroyed when we want
+	{ // This scope ensures the vector is destroyed when we want
 		HANDLE fileHandle;
 		DWORD trash = 0;
 		fileHandle = CreateFile(fileName.c_str(),GENERIC_READ,FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
