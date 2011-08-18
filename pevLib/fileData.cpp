@@ -212,7 +212,7 @@ void FileData::initPortableExecutable() const
 	//Store that this function has been called so that it is not called every time
 	bits |= PEENUMERATED;
 	//Get a handle to the file
-	std::tr1::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
+	std::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
 	//Report false if the file could not be obtained
 	if (hFile.get() == INVALID_HANDLE_VALUE)
 		return;
@@ -641,7 +641,7 @@ void FileData::buildSfcList() const
 	//Load the SFCFiles.dll module.
 	wchar_t buffer[MAX_PATH];
 	ExpandEnvironmentStrings(L"%WINDIR%\\System32\\sfcfiles.dll", buffer, MAX_PATH);
-	std::tr1::shared_ptr<void> sfcFiles(LoadLibrary(buffer), FreeLibrary);
+	std::shared_ptr<void> sfcFiles(LoadLibrary(buffer), FreeLibrary);
 	if (!(sfcFiles.get()))
 	{
 		sfcState = NO_SFCFILES_DLL;
@@ -707,7 +707,7 @@ void FileData::resetPEHeaderCheckSum()
 	if (isPE() && peHeaderChecksumIsValid() && getPEHeaderCheckSum() != 0) return;
 
 	//Get a handle to the file
-	std::tr1::shared_ptr<void> hFile(getFileHandle(false), CloseHandle);
+	std::shared_ptr<void> hFile(getFileHandle(false), CloseHandle);
 	//Report false if the file could not be obtained
 	if (hFile.get() == INVALID_HANDLE_VALUE)
 		return;

@@ -15,8 +15,8 @@
 #include "globalOptions.h"
 #include "regex.h"
 
-std::vector<std::tr1::shared_ptr<regexClass> > globalOptions::regularExpressions;
-std::tr1::shared_ptr<criterion>  globalOptions::logicalTree;
+std::vector<std::shared_ptr<regexClass> > globalOptions::regularExpressions;
+std::shared_ptr<criterion>  globalOptions::logicalTree;
 bool globalOptions::showall = false;
 bool globalOptions::debug = false;
 bool globalOptions::fullPath = false;

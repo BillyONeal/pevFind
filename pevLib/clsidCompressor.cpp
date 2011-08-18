@@ -181,7 +181,7 @@ int compress(const std::wstring& inFileName, const std::wstring& outFileName)
 	hFile = CreateFile(outFileName.c_str(),GENERIC_WRITE, 0,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 		throw std::runtime_error("Could not open output file.");
-	if (!WriteFile(hFile,&compressedBytes[0],compressedBytes.size(),&squat,NULL))
+	if (!WriteFile(hFile,&compressedBytes[0],static_cast<DWORD>(compressedBytes.size()),&squat,NULL))
 		throw std::runtime_error("Could not write to output file.");
 	CloseHandle(hFile);
 

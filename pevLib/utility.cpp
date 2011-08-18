@@ -85,20 +85,20 @@ FILETIME UnixTimeToFileTime(const DWORD &t)
 
 std::string convertUnicode(const std::wstring &uni)
 {
-	DWORD length;
+	INT length;
 	BOOL blank;
-	length = WideCharToMultiByte(CP_ACP,WC_NO_BEST_FIT_CHARS,uni.c_str(),uni.length(),NULL,NULL,"?",&blank);
+	length = WideCharToMultiByte(CP_ACP,WC_NO_BEST_FIT_CHARS,uni.c_str(),static_cast<int>(uni.length()),NULL,NULL,"?",&blank);
 	std::vector<char> resultRaw(length);
-	WideCharToMultiByte(CP_ACP,WC_NO_BEST_FIT_CHARS,uni.c_str(),uni.length(),&resultRaw[0],length,"?",&blank);
+	WideCharToMultiByte(CP_ACP,WC_NO_BEST_FIT_CHARS,uni.c_str(),static_cast<int>(uni.length()),&resultRaw[0],length,"?",&blank);
 	std::string result(resultRaw.begin(), resultRaw.end());
 	return result;
 }
 std::wstring convertUnicode(const std::string &uni)
 {
-	DWORD length;
-	length = MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),uni.length(),NULL,NULL);
+	INT length;
+	length = MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),static_cast<int>(uni.length()),NULL,NULL);
 	std::vector<wchar_t> resultRaw(length);
-	MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),uni.length(),&resultRaw[0],length);
+	MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),static_cast<int>(uni.length()),&resultRaw[0],length);
 	std::wstring result(resultRaw.begin(), resultRaw.end());
 	return result;
 }

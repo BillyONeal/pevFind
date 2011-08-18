@@ -309,9 +309,9 @@ bool regscriptCompiler::parseValueSpec()
 		if (ansi && type == 1 || type == 2 || type == 7) //Convert to Unicode if needed.
 		{
 			int newLength =
-				MultiByteToWideChar(CP_ACP, NULL, (char *)hexData.data, hexData.dataLength, NULL, NULL);
+				MultiByteToWideChar(CP_ACP, NULL, (char *)hexData.data, static_cast<int>(hexData.dataLength), NULL, NULL);
 			void * unicodeData = malloc(newLength * sizeof(wchar_t));
-			MultiByteToWideChar(CP_ACP, NULL,  (char *)hexData.data, hexData.dataLength, (wchar_t *)unicodeData, newLength);
+			MultiByteToWideChar(CP_ACP, NULL,  (char *)hexData.data, static_cast<int>(hexData.dataLength), (wchar_t *)unicodeData, newLength);
 			free(hexData.data);
 			hexData.dataLength = newLength * sizeof(wchar_t);
 			hexData.data = unicodeData;
@@ -538,6 +538,7 @@ wchar_t getHexChar(char toConvert)
 
 void regscriptCompiler::printASM()
 {
+	HKEY temp;
 	for(std::vector<opCode>::const_iterator it = parsedResults.begin(); it != parsedResults.end(); it++)
 	{
 		switch(it->code)
@@ -547,21 +548,25 @@ void regscriptCompiler::printASM()
 			break;
 		case loadKeyRoot:
 			outputText << L"LDROOT: ";
-			switch((unsigned long)(*((HANDLE *) it->data)))
+			temp = *(static_cast<HKEY*>(it->data));
+			if (temp == HKEY_LOCAL_MACHINE)
 			{
-			case HKEY_LOCAL_MACHINE:
 				outputText << L"HKEY_LOCAL_MACHINE";
-				break;
-			case HKEY_CLASSES_ROOT:
+			}
+			else if (temp == HKEY_CLASSES_ROOT)
+			{
 				outputText << L"HKEY_CLASSES_ROOT";
-				break;
-			case HKEY_CURRENT_USER:
+			}
+			else if (temp == HKEY_CURRENT_USER)
+			{
 				outputText << L"HKEY_CURRENT_USER";
-				break;
-			case HKEY_USERS:
+			}
+			else if (temp == HKEY_USERS)
+			{
 				outputText << L"HKEY_USERS";
-				break;
-			default:
+			}
+			else
+			{
 				outputText << L"HKEY_BUG!!";
 			}
 			outputText << std::endl;

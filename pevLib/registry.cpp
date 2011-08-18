@@ -160,7 +160,7 @@ registryValue& registryValue::operator=(const registryValue& rhs)
 void registryValue::setString(const std::wstring & toSet)
 {
 	LSTATUS result;
-	result = RegSetValueEx(parent_->hWin32, name_.c_str(), 0, REG_SZ, (const LPBYTE)toSet.c_str(), (toSet.length() + 1) * sizeof(wchar_t));
+	result = RegSetValueEx(parent_->hWin32, name_.c_str(), 0, REG_SZ, (const LPBYTE)toSet.c_str(), (static_cast<int>(toSet.length()) + 1) * sizeof(wchar_t));
 	if (result != ERROR_SUCCESS)
 		throw registryException("Failed to set value.");
 }
