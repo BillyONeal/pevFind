@@ -212,7 +212,7 @@ void FileData::initPortableExecutable() const
 	//Store that this function has been called so that it is not called every time
 	bits |= PEENUMERATED;
 	//Get a handle to the file
-	std::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
+	std::tr1::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
 	//Report false if the file could not be obtained
 	if (hFile.get() == INVALID_HANDLE_VALUE)
 		return;
@@ -513,20 +513,15 @@ std::wstring FileData::getVersionInformationString(const std::wstring& requested
 			<< versionTranslations[idx].wCodePage;
 		versionQuery << L'\\' << requestedResourceType;
 		std::wstring versionQueryString(versionQuery.str());
-		if (!VerQueryValue(&versionInformationBlock[0],versionQueryString.c_str(),(LPVOID *)&retString,&retStringLength))
+		VerQueryValue(&versionInformationBlock[0],versionQueryString.c_str(),(LPVOID *)&retString,&retStringLength);
+		if (retStringLength)
 		{
-			DWORD error = GetLastError();
-			if (error == 1813)
-				continue;
-			std::wstringstream errorMessage;
-			errorMessage << L"ERROR: 0x" << std::hex << error;
-			return errorMessage.str();
+			if (!result.empty())
+			{
+				result.append(L" / ");
+			}
+			result.append(retString, retStringLength);
 		}
-		if (!result.empty())
-			result.append(L" / ");
-		std::wstring tempString(retString);
-		boost::algorithm::trim(tempString);
-		result.append(tempString);
 	}
 	return result;
 }
@@ -641,7 +636,7 @@ void FileData::buildSfcList() const
 	//Load the SFCFiles.dll module.
 	wchar_t buffer[MAX_PATH];
 	ExpandEnvironmentStrings(L"%WINDIR%\\System32\\sfcfiles.dll", buffer, MAX_PATH);
-	std::shared_ptr<void> sfcFiles(LoadLibrary(buffer), FreeLibrary);
+	std::tr1::shared_ptr<void> sfcFiles(LoadLibrary(buffer), FreeLibrary);
 	if (!(sfcFiles.get()))
 	{
 		sfcState = NO_SFCFILES_DLL;
@@ -707,7 +702,7 @@ void FileData::resetPEHeaderCheckSum()
 	if (isPE() && peHeaderChecksumIsValid() && getPEHeaderCheckSum() != 0) return;
 
 	//Get a handle to the file
-	std::shared_ptr<void> hFile(getFileHandle(false), CloseHandle);
+	std::tr1::shared_ptr<void> hFile(getFileHandle(false), CloseHandle);
 	//Report false if the file could not be obtained
 	if (hFile.get() == INVALID_HANDLE_VALUE)
 		return;

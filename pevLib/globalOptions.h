@@ -18,8 +18,8 @@ class subProgramClass;
 class globalOptions
 {
 public:
-	static std::vector<std::shared_ptr<regexClass> > regularExpressions;
-	static std::shared_ptr<criterion> logicalTree;
+	static std::vector<std::tr1::shared_ptr<regexClass> > regularExpressions;
+	static std::tr1::shared_ptr<criterion> logicalTree;
 	static bool showall;
 	static bool debug;
 	static bool fullPath;

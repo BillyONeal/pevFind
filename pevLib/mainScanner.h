@@ -14,7 +14,7 @@ class FileData;
 
 namespace scanners
 {
-	std::wstring getRegexesCommonRoot(std::vector<std::shared_ptr<regexClass> >&);
+	std::wstring getRegexesCommonRoot(std::vector<std::tr1::shared_ptr<regexClass> >&);
 	void printSummary();
 	class recursiveScanner
 	{	

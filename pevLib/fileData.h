@@ -84,7 +84,7 @@ class FileData
 	mutable std::vector<LANGANDCODEPAGE> versionTranslations;
 
 	//Hex managment 
-	std::shared_ptr<std::vector<std::pair<unsigned int, bool> > > hexStorage;
+	std::tr1::shared_ptr<std::vector<std::pair<unsigned int, bool> > > hexStorage;
 
 	//Enumeration functions
 	//When the results aren't cached in the bitset bits, these functions calculate
