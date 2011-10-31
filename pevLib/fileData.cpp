@@ -211,6 +211,11 @@ void FileData::initPortableExecutable() const
 		return;
 	//Store that this function has been called so that it is not called every time
 	bits |= PEENUMERATED;
+
+	//If a file is less than 133 bytes, it can't be a valid PE file. Avoid opening the file in such cases.
+	if (getSize() < 133)
+		return;
+
 	//Get a handle to the file
 	std::tr1::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
 	//Report false if the file could not be obtained
