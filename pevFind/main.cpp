@@ -12,6 +12,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include "processManager.h"
 #include "utility.h"
+#include "Version.hpp"
 
 //Subprogram definitions
 #include "clsidCompressor.h"
@@ -75,29 +76,23 @@ int __cdecl wmain(int argc, wchar_t* argv[])
 		return wait::main(argc, argv);
 	return vFind::main();
 	}
-#ifdef NDEBUG
-	catch(...)
-	{
-std::cerr << 
-"                         _____ _           _ \n"
-"        _ __   _____   _|  ___(_)_ __   __| |\n"
-"       | '_ \\ / _ \\ \\ / / |_  | | '_ \\ / _` |\n"
-"       | |_) |  __/\\ V /|  _| | | | | | (_| |\n"
-"       | .__/ \\___| \\_/ |_|   |_|_| |_|\\__,_|\n"
-"       |_|    by Billy Robert O'Neal III\n"
-"                      Version 1.5.9\n"
-"  Distributed under the Boost Software License, Version 1.0.\n"
-"         http://www.boost.org/LICENSE_1_0.txt\n"
-"pevFind contains some code from Info-ZIP, used with permission.\n"
-"  In accordance with Info-ZIP's License, it can be found at\n"
-"           http://billy-oneal.com/infozip.txt\n"
-"            Filename regular expressions library is\n"
-" Copyright (C)1997-1998 by David R. Tribble, all rights reserved.\n\n";
-	}
-#else
 	catch (std::exception& except)
 	{
-		std::cerr << except.what();
+		std::cerr << 
+		"                         _____ _           _ \n"
+		"        _ __   _____   _|  ___(_)_ __   __| |\n"
+		"       | '_ \\ / _ \\ \\ / / |_  | | '_ \\ / _` |\n"
+		"       | |_) |  __/\\ V /|  _| | | | | | (_| |\n"
+		"       | .__/ \\___| \\_/ |_|   |_|_| |_|\\__,_|\n"
+		"       |_|    by Billy Robert O'Neal III\n"
+		"                      Version " PEVFIND_VERSION "\n"
+		"  Distributed under the Boost Software License, Version 1.0.\n"
+		"         http://www.boost.org/LICENSE_1_0.txt\n"
+		"pevFind contains some code from Info-ZIP, used with permission.\n"
+		"  In accordance with Info-ZIP's License, it can be found at\n"
+		"           http://billy-oneal.com/infozip.txt\n"
+		"            Filename regular expressions library is\n"
+		" Copyright (C)1997-1998 by David R. Tribble, all rights reserved.\n\n";
+		std::cerr << except.what() << "\n";
 	}
-#endif
 }

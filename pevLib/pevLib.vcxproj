@@ -168,6 +168,8 @@
     <ClCompile Include="regImport.cpp" />
     <ClCompile Include="registry.cpp" />
     <ClCompile Include="regscriptCompiler.cpp" />
+    <ClCompile Include="reportAssembler.cpp" />
+    <ClCompile Include="reportComponents.cpp" />
     <ClCompile Include="rexport.cpp" />
     <ClCompile Include="serviceControl.cpp" />
     <ClCompile Include="timeoutThread.cpp" />
@@ -205,6 +207,8 @@
     <ClInclude Include="regImport.h" />
     <ClInclude Include="registry.h" />
     <ClInclude Include="regscriptCompiler.h" />
+    <ClInclude Include="reportAssembler.hpp" />
+    <ClInclude Include="reportComponents.hpp" />
     <ClInclude Include="rexport.h" />
     <ClInclude Include="serviceControl.h" />
     <ClInclude Include="timeoutThread.h" />
@@ -212,6 +216,7 @@
     <ClInclude Include="unzip.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="uZip.h" />
+    <ClInclude Include="Version.hpp" />
     <ClInclude Include="vFind.h" />
     <ClInclude Include="volumeEnumerate.h" />
     <ClInclude Include="wait.hpp" />

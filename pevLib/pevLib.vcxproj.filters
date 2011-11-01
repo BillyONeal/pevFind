@@ -116,6 +116,12 @@
     <ClCompile Include="pch.cpp">
       <Filter>Header Files\Precompiled</Filter>
     </ClCompile>
+    <ClCompile Include="reportComponents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="reportAssembler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="clsidCompressor.h">
@@ -225,6 +231,15 @@
     </ClInclude>
     <ClInclude Include="pch.hpp">
       <Filter>Header Files\Precompiled</Filter>
+    </ClInclude>
+    <ClInclude Include="Version.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="reportAssembler.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="reportComponents.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
