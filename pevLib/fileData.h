@@ -497,8 +497,8 @@ std::wstring FileData::getHash() const
 	hashType hash;
 	DWORD bytesRead = 0;
 	std::vector<unsigned char> buffer;
-	buffer.resize(hash.OptimalBlockSize());
-	DWORD bytesToAttempt = hash.OptimalBlockSize();
+	DWORD bytesToAttempt = 1024*1024*1024; //1MB
+	buffer.resize(bytesToAttempt);
 	while (ReadFile(file,&buffer[0],bytesToAttempt,&bytesRead,NULL))
 	{
 		if (!bytesRead)
