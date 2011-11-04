@@ -9,10 +9,15 @@
 
 namespace vFind {
 
+std::vector<FileData> IFilter::Results()
+{
+	return std::vector<FileData>();
+}
 
-	std::vector<FileData> IFilter::Results()
-	{
-		return std::vector<FileData>();
-	}
+
+FileInput::FileInput( const std::wstring& rootPath )
+{
+	hSearch = FindFirstFile(rootPath.c_str(), &data);
+}
 
 }

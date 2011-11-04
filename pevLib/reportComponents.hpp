@@ -20,10 +20,10 @@ struct IInputProvider
 
 class FileInput : public IInputProvider
 {
-	std::wstring root;
+	WIN32_FIND_DATAW data;
 	HANDLE hSearch;
 public:
-	FileInput(const std::wstring& rootPath) : root(rootPath), hSearch(0) {}
+	FileInput(const std::wstring& rootPath);
 	~FileInput();
 	virtual FileData Next();
 };
@@ -56,6 +56,29 @@ class StatisticsFilter : public IFilter
 {
 	virtual bool Apply(const FileData&);
 	virtual std::vector<FileData> Results();
+};
+
+class SortingFilter : public IFilter
+{
+
+};
+
+struct IOutput
+{
+	virtual ~IOutput() {};
+	virtual void Write(const FileData&) = 0;
+};
+
+class ConsoleOutput : public IOutput
+{
+public:
+	virtual void Write(const FileData&);
+};
+
+class ProcessKillOutput : public IOutput
+{
+public:
+	virtual void Write(const FileData&);
 };
 
 }
