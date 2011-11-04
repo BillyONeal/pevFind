@@ -1,10 +1,14 @@
-          Copyright Billy O'Neal 2011
- Distributed under the Boost Software License, Version 1.0.
-    (See accompanying file LICENSE_1_0.txt or copy at
-          http://www.boost.org/LICENSE_1_0.txt)
+pevFind is under the BSL, for it's code. As this file is documentatoin, the
+BSL is not appropriate. Therefore, I am releasing this file in the package
+under the Creative Commons Attribution 3.0 Unported license. For more info,
+see: http://creativecommons.org/licenses/by/3.0/
 
-README.txt -- Primary documentation file.
------------------------------------------------------------------------------------------
+Note that pevFind depends on CryptoPP (under Public Domain) for it's hashing
+functions, InfoZIP (under InfoZip's license) for it's zipping functions, and
+more generally, Boost, which is also under the BSL. Unit tests depend on
+Google Mock and Google Test, which are Google's property.
+
+Before copying a file of this distribution into a commercial work, be sure to check the license of the file you are working with. Each file has the license and copyright holder listed a the top. :)
 
 pevFind <subprogram> <options>
 
