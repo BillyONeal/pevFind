@@ -111,7 +111,7 @@ std::wstring& GetFullPathName(std::wstring &inputPath)
 	inputPath.assign(&resultRaw[0], neededLength - 1);
 	return inputPath;
 }
-void getShortPathName(const std::basic_string<TCHAR>& longPath, std::basic_string<TCHAR>& shortPath)
+void getShortPathName(const std::wstring& longPath, std::wstring& shortPath)
 {
 	DWORD bufferlen = GetShortPathName(longPath.c_str(),NULL,NULL);
     if (bufferlen == 0)

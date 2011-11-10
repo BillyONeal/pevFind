@@ -66,24 +66,23 @@ namespace scanners
 			}
 			//Remove the \* suffix used for the find functions
 			currentSearchDirectory.erase(currentSearchDirectory.length()-1);
-			if (globalOptions::showall)
-				globalOptions::showall = false; //. and .. should not be shown for recursed subdirectories
-			else
+			if (findData.cFileName[0] == L'.' && findData.cFileName[1] == NULL)
 			{
-				if (findData.cFileName[0] == L'.' && findData.cFileName[1] == NULL)
-					if (!FindNextFile(hFind,&findData)) //Skip .
-					{
-						disable64.enableFS();
-						foldersToScan.pop_front();
-						continue;
-					};
-				if (findData.cFileName[0] == L'.' && findData.cFileName[1] == L'.' && findData.cFileName[2] == NULL)
-					if (!FindNextFile(hFind,&findData)) //Skip ..
-					{
-						disable64.enableFS();
-						foldersToScan.pop_front();
-						continue;
-					};
+				if (!FindNextFile(hFind,&findData)) //Skip .
+				{
+					disable64.enableFS();
+					foldersToScan.pop_front();
+					continue;
+				}
+			}
+			if (findData.cFileName[0] == L'.' && findData.cFileName[1] == L'.' && findData.cFileName[2] == NULL)
+			{
+				if (!FindNextFile(hFind,&findData)) //Skip ..
+				{
+					disable64.enableFS();
+					foldersToScan.pop_front();
+					continue;
+				}
 			}
 			std::list<std::wstring>::iterator insPos = foldersToScan.begin();
 			insPos++;

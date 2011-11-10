@@ -98,7 +98,7 @@ class FileData
 	void setAttributesAccordingToDWORD(DWORD win32Attribs) const;
 
 	//Internal calculation functions
-	void inline appendAttributeCharacter(std::basic_string<TCHAR> &result, const TCHAR attributeCharacter, const size_t curBit) const;
+	void inline appendAttributeCharacter(std::wstring &result, const TCHAR attributeCharacter, const size_t curBit) const;
 	std::wstring getVersionInformationString(const std::wstring&) const;
 	template <typename hashType> std::wstring getHash() const;
 
@@ -121,7 +121,7 @@ public:
 	//Returns the Win32 handle for the file
 	HANDLE getFileHandle(bool readOnly = true) const;
 	//Construct a fileData record using a Win32FindData structure and a search path.
-	FileData(const WIN32_FIND_DATA &rawData, const std::basic_string<TCHAR>& root);
+	FileData(const WIN32_FIND_DATA &rawData, const std::wstring& root);
 	//Construct a fileData record using a raw filename
 	FileData(const std::wstring &fileNameBuild);
 
@@ -137,7 +137,7 @@ public:
 	inline unsigned __int64 getSize() const;
 
 	//Filename
-	inline const std::basic_string<TCHAR> & getFileName() const;
+	inline const std::wstring & getFileName() const;
 
 	//Access times
 	inline const FILETIME getLastAccessTime() const;
@@ -222,7 +222,7 @@ inline unsigned __int64 FileData::getSize() const
 	result |= attributeData.nFileSizeLow;
 	return result;
 }
-inline const std::basic_string<TCHAR> & FileData::getFileName() const
+inline const std::wstring & FileData::getFileName() const
 {
 	return fileName;
 }

@@ -4,7 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 #pragma once
-#include <funtional>
+#include <functional>
 
 template <typename T>
 struct Deleter : public std::unary_function<void, T>

@@ -29,10 +29,6 @@ int main()
 	{
 		std::wcout << L"# DEBUGGING OUTPUT #\n";
 		std::wcout << L"Format:\n" << globalOptions::displaySpecification << L"\n\n";
-		if (globalOptions::showall)
-			std::wcout << "Include . and ..\n";
-		else
-			std::wcout << "Exclude . and ..\n";
 		if (globalOptions::debug)
 			std::wcout << L"Display debugging output\n";
 		if (globalOptions::fullPath)

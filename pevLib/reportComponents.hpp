@@ -1,40 +1,41 @@
-//          Copyright Billy O'Neal 2011
+//              Copyright Billy O'Neal 2011
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 #pragma once
-#include <windows.h>
 #include <vector>
 #include <string>
-
-namespace vFind {
+#include <functional>
+#include <windows.h>
+#include <boost/optional/optional_fwd.hpp>
 
 class FileData;
 
+namespace vFind {
+
+// An input. Serves as a source of input items.
 struct IInputProvider
 {
 	virtual ~IInputProvider() { }
-	virtual FileData Next() = 0;
+	// Returns all entries from a given input by calling the indicated functor.
+	virtual void Enumerate(const std::tr1::function<void(const FileData&)> nextStage) = 0;
 };
 
 class FileInput : public IInputProvider
 {
-	WIN32_FIND_DATAW data;
-	HANDLE hSearch;
+	std::wstring root;
 public:
 	FileInput(const std::wstring& rootPath);
-	~FileInput();
-	virtual FileData Next();
+	virtual void Enumerate(const std::tr1::function<void(const FileData&)> nextStage);
 };
 
-class ProcessInput : public IInputProvider
+class RecursiveFileInput : public IInputProvider
 {
-	std::vector<std::wstring> processes;
-	std::vector<std::wstring>::iterator current;
+	std::wstring root;
 public:
-	ProcessInput();
-	virtual FileData Next();
+	RecursiveFileInput(const std::wstring& rootPath);
+	virtual void Enumerate(const std::tr1::function<void(const FileData&)> nextStage);
 };
 
 struct IFilter

@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 #include <windows.h>
 #include <shlwapi.h>
 #include <Wincrypt.h>
@@ -30,16 +31,15 @@ const wchar_t constantHexArray[] = L"0123456789ABCDEF";
 
 //Constructors
 // Build filedata records
-FileData::FileData(const WIN32_FIND_DATA &rawData, const std::basic_string<TCHAR>& root)
+FileData::FileData(const WIN32_FIND_DATA &rawData, const std::wstring& root)
 {
 	bits = 0;
 
 	//Copy the contents of the win32finddata structure to our internals
-	fileName = rawData.cFileName;
+	std::size_t cFileNameLen = std::wcslen(rawData.cFileName);
+	fileName.reserve(root.size() + cFileNameLen);
+	fileName.append(root).append(rawData.cFileName, cFileNameLen);
 	setAttributesAccordingToDWORD(rawData.dwFileAttributes);
-
-	//Add the path root to the current filename
-	fileName.insert(0,root);
 }
 FileData::FileData(const std::wstring& fileNameBuild) : fileName(fileNameBuild), versionInformationBlock(NULL)
 {
@@ -131,9 +131,9 @@ bool FileData::operator<(FileData& rhs)
 	} while (*sortPointer++);
 	return 0;
 }
-std::basic_string<TCHAR> FileData::getAttributesString() const
+std::wstring FileData::getAttributesString() const
 {
-	std::basic_string<TCHAR> result;
+	std::wstring result;
 	result.reserve(7);
 	if (bits & DIRECTORY)
 		result.append(1, L'd');
@@ -153,11 +153,11 @@ std::basic_string<TCHAR> FileData::getAttributesString() const
 	appendAttributeCharacter(result, L'e', REPARSE);
 	return result;
 }
-std::basic_string<TCHAR> FileData::getPEAttribsString() const
+std::wstring FileData::getPEAttribsString() const
 {
 	if (!(bits & PEENUMERATED))
 		initPortableExecutable();
-	std::basic_string<TCHAR> result;
+	std::wstring result;
 	result.reserve(6);
 	appendAttributeCharacter(result, L'1', ISPE);
 	appendAttributeCharacter(result, L'2', DEBUG);
@@ -174,7 +174,7 @@ std::basic_string<TCHAR> FileData::getPEAttribsString() const
 	return result;
 }
 
-void inline FileData::appendAttributeCharacter(std::basic_string<TCHAR> &result, const TCHAR attributeCharacter, const size_t curBit) const
+void inline FileData::appendAttributeCharacter(std::wstring &result, const TCHAR attributeCharacter, const size_t curBit) const
 {
 	if (bits & curBit)
 		result.append(1, attributeCharacter);
