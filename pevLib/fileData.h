@@ -9,6 +9,8 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <iostream>
+#include <iomanip>
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
@@ -140,6 +142,7 @@ public:
 	inline const std::wstring & getFileName() const;
 
 	//Access times
+	inline const WIN32_FILE_ATTRIBUTE_DATA getAttributeData() const;
 	inline const FILETIME getLastAccessTime() const;
 	inline const FILETIME getLastModTime() const;
 	inline const FILETIME getCreationTime() const;
@@ -226,41 +229,33 @@ inline const std::wstring & FileData::getFileName() const
 {
 	return fileName;
 }
+
+inline const WIN32_FILE_ATTRIBUTE_DATA FileData::getAttributeData() const
+{
+	disable64.disableFS();
+	WIN32_FILE_ATTRIBUTE_DATA attributeData;
+	if(GetFileAttributesEx(fileName.c_str(), GetFileExInfoStandard, &attributeData) == 0)
+	{
+		ZeroMemory(&attributeData, sizeof(attributeData));
+		DWORD lastError = ::GetLastError();
+		std::wcerr << L"DEBUG DEBUG DEBUG: Last Error: 0x" << std::hex << lastError << std::dec << L" " << fileName << std::endl;
+		std::abort();
+	}
+	disable64.enableFS();
+	return attributeData;
+}
+
 inline const FILETIME FileData::getLastAccessTime() const
 {
-	WIN32_FILE_ATTRIBUTE_DATA attributeData;
-	if(!GetFileAttributesEx(fileName.c_str(), GetFileExInfoStandard, &attributeData))
-	{
-		FILETIME zero;
-		zero.dwLowDateTime = 0;
-		zero.dwHighDateTime = 0;
-		return zero;
-	}
-	return attributeData.ftLastAccessTime;
+	return getAttributeData().ftLastAccessTime;
 }
 inline const FILETIME FileData::getLastModTime() const
 {
-	WIN32_FILE_ATTRIBUTE_DATA attributeData;
-	if(!GetFileAttributesEx(fileName.c_str(), GetFileExInfoStandard, &attributeData))
-	{
-		FILETIME zero;
-		zero.dwLowDateTime = 0;
-		zero.dwHighDateTime = 0;
-		return zero;
-	}
-	return attributeData.ftLastWriteTime;
+	return getAttributeData().ftLastWriteTime;
 }
 inline const FILETIME FileData::getCreationTime() const
 {
-	WIN32_FILE_ATTRIBUTE_DATA attributeData;
-	if(!GetFileAttributesEx(fileName.c_str(), GetFileExInfoStandard, &attributeData))
-	{
-		FILETIME zero;
-		zero.dwLowDateTime = 0;
-		zero.dwHighDateTime = 0;
-		return zero;
-	}
-	return attributeData.ftCreationTime;
+	return getAttributeData().ftCreationTime;
 }
 inline const FILETIME FileData::getPEHeaderTime() const
 {
