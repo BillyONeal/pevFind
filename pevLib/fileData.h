@@ -237,9 +237,6 @@ inline const WIN32_FILE_ATTRIBUTE_DATA FileData::getAttributeData() const
 	if(GetFileAttributesEx(fileName.c_str(), GetFileExInfoStandard, &attributeData) == 0)
 	{
 		ZeroMemory(&attributeData, sizeof(attributeData));
-		DWORD lastError = ::GetLastError();
-		std::wcerr << L"DEBUG DEBUG DEBUG: Last Error: 0x" << std::hex << lastError << std::dec << L" " << fileName << std::endl;
-		std::abort();
 	}
 	disable64.enableFS();
 	return attributeData;
