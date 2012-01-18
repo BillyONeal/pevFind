@@ -158,7 +158,7 @@ namespace scanners
 			wchar_t currentCharacter = towlower(candidates[0][endingIndex]);
 			for(std::vector<std::wstring>::const_iterator it = candidates.begin(); it != candidates.end(); it++)
 			{
-				if (it->size() < endingIndex) goto done;
+				if (it->size() <= endingIndex) goto done;
 				if (towlower(it->at(endingIndex)) != currentCharacter) goto done;
 			}
 		}

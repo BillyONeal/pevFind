@@ -5,4 +5,4 @@
 //
 #pragma once
 
-#define PEVFIND_VERSION "1.5.10"
+#define PEVFIND_VERSION "1.5.11"
