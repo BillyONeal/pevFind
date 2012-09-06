@@ -1,6 +1,6 @@
 #ifndef _PROC_MANAGER_H_INCLUDED
 #define _PROC_MANAGER_H_INCLUDED
-//          Copyright Billy O'Neal 2011
+//          Copyright Billy O'Neal 2012
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -339,7 +339,7 @@ typedef NTSTATUS (NTAPI *_NtAdjustPrivilegesToken)(
 	OUT PTOKEN_PRIVILEGES OPTIONAL,
 	OUT PULONG OPTIONAL ); 
 
-typedef enum _PROCESS_INFORMATION_CLASS {
+typedef enum _PROCESS_INFORMATION_CLASS_PEV {
 	ProcessBasicInformation,
 	ProcessQuotaLimits,
 	ProcessIoCounters,
@@ -364,12 +364,12 @@ typedef enum _PROCESS_INFORMATION_CLASS {
 	ProcessAffinityMask,
 	ProcessPriorityBoost,
 	MaxProcessInfoClass
-} PROCESS_INFORMATION_CLASS, *PPROCESS_INFORMATION_CLASS;
+} PROCESS_INFORMATION_CLASS_PEV, *PPROCESS_INFORMATION_CLASS_PEV;
 
 
 typedef NTSTATUS (NTAPI *_NtQueryInformationProcess)(
 	IN HANDLE,
-	IN PROCESS_INFORMATION_CLASS,
+	IN PROCESS_INFORMATION_CLASS_PEV,
 	OUT PVOID,
 	IN ULONG,
 	OUT PULONG); 

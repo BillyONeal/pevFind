@@ -1,6 +1,6 @@
 #ifndef _GLOBAL_OPTIONS_H_INCLUDED
 #define _GLOBAL_OPTIONS_H_INCLUDED
-//          Copyright Billy O'Neal 2011
+//          Copyright Billy O'Neal 2012
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -10,6 +10,7 @@
 // components.
 #include <string>
 #include <vector>
+#include <memory>
 
 class regexClass;
 class criterion;
@@ -18,8 +19,8 @@ class subProgramClass;
 class globalOptions
 {
 public:
-	static std::vector<std::tr1::shared_ptr<regexClass> > regularExpressions;
-	static std::tr1::shared_ptr<criterion> logicalTree;
+	static std::vector<std::shared_ptr<regexClass> > regularExpressions;
+	static std::shared_ptr<criterion> logicalTree;
 	static bool debug;
 	static bool fullPath;
 	static bool summary;

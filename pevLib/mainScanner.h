@@ -1,6 +1,6 @@
 #ifndef _MAINSCANNER_H_FILE_INCLUDED
 #define _MAINSCANNER_H_FILE_INCLUDED
-//          Copyright Billy O'Neal 2011
+//          Copyright Billy O'Neal 2012
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -14,7 +14,7 @@ class FileData;
 
 namespace scanners
 {
-	std::wstring getRegexesCommonRoot(std::vector<std::tr1::shared_ptr<regexClass> >&);
+	std::wstring getRegexesCommonRoot(std::vector<std::shared_ptr<regexClass> >&);
 	void printSummary();
 	class recursiveScanner
 	{	

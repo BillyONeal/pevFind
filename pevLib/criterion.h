@@ -1,4 +1,4 @@
-//          Copyright Billy O'Neal 2011
+//          Copyright Billy O'Neal 2012
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -38,15 +38,15 @@ public:
 //Functor which converts pointers to criteria to priority classes
 static struct _getPriorityFunctor : std::unary_function<const criterion*, __int32>
 {
-	__int32 operator()(const std::tr1::shared_ptr<criterion> crit)
+	__int32 operator()(const std::shared_ptr<criterion> crit)
 	{
 		return crit->getPriorityClass();
 	};
 } getPriorityFunctor;
 
-static struct _criterionByPriorityClass : std::binary_function<const std::tr1::shared_ptr<criterion>, std::tr1::shared_ptr<criterion>, bool>
+static struct _criterionByPriorityClass : std::binary_function<const std::shared_ptr<criterion>, std::shared_ptr<criterion>, bool>
 {
-	bool operator()(const std::tr1::shared_ptr<criterion> a, const std::tr1::shared_ptr<criterion> b)
+	bool operator()(const std::shared_ptr<criterion> a, const std::shared_ptr<criterion> b)
 	{
 		return a->getPriorityClass() < b->getPriorityClass();
 	}
