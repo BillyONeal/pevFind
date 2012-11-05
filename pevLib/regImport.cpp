@@ -28,7 +28,7 @@ int main(int argc, wchar_t* argv[], DWORD wow64flags)
 	{
 		op.parse(loadFileAsString(argv[num]));
 	}
-    op.SetWow64Flags(wow64Flags);
+    op.SetWow64Flags(wow64flags);
 #ifdef NDEBUG
 	if (loose || op.succeeded())
 		op.execute();

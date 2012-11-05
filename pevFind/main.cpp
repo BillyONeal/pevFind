@@ -61,7 +61,7 @@ int __cdecl wmain(int argc, wchar_t* argv[])
 	else if (iequals(firstArgument, L"TIME"))
 		return times::main(argc, argv);
 	else if (iequals(firstArgument, L"RIMPORT"))
-        return regImport::main(argc, argv);
+        return regImport::main(argc, argv, KEY_WOW64_32KEY);
 	else if (iequals(firstArgument, L"RIMPORT32"))
         return regImport::main(argc, argv, KEY_WOW64_32KEY);
 	else if (iequals(firstArgument, L"RIMPORT64"))
