@@ -47,7 +47,9 @@ class regscriptCompiler
 	DWORD parseDword();
     std::basic_stringstream<wchar_t> outputText;
 	bool fixNull;
+    DWORD wow64Flags;
 public:
+    void SetWow64Flags(DWORD flags);
     bool parse(boost::iterator_range<std::wstring::const_iterator> inputScript);
     ~regscriptCompiler();
     std::wstring getOutput() { return outputText.str(); };

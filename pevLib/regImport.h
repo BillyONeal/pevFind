@@ -9,6 +9,6 @@
 
 namespace regImport
 {
-	int main(int argc, wchar_t* argv[]);
+	int main(int argc, wchar_t* argv[], DWORD wow64Flags);
 };
 #endif _REG_IMPORT_H_INCLUDED

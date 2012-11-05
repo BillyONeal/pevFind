@@ -9,6 +9,11 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "regscriptCompiler.h"
 
+void regscriptCompiler::SetWow64Flags(DWORD flags)
+{
+    this->wow64Flags = flags;
+}
+
 regscriptCompiler::~regscriptCompiler()
 {
     for (std::vector<opCode>::iterator it = parsedResults.begin(); it != parsedResults.end(); it++)
@@ -666,6 +671,18 @@ void recursiveKeyDelete(HKEY root, const wchar_t * name)
 
 void regscriptCompiler::execute()
 {
+    DWORD extraFlags = this->wow64Flags;
+    OSVERSIONINFOW verInfo;
+    verInfo.dwOSVersionInfoSize = sizeof(verInfo);
+    if (::GetVersionExW(&verInfo) != 0)
+    {
+        if (verInfo.dwMajorVersion == 5 && verInfo.dwMinorVersion == 0)
+        {
+            // Windows 2000 doesn't support WOW64
+            extraFlags = 0;
+        }
+    }
+    
 	HKEY hRun = (HKEY) INVALID_HANDLE_VALUE;
 	HKEY hRoot = (HKEY) INVALID_HANDLE_VALUE;
 	LPBYTE dataPtr = NULL;
@@ -686,7 +703,7 @@ void regscriptCompiler::execute()
 			dataPtrLen = (DWORD)it->dataLength;
 			break;
 		case createKey:
-			if (RegCreateKeyEx(hRoot, namePtr, NULL, NULL, NULL, KEY_SET_VALUE, NULL, &hRun, NULL) != ERROR_SUCCESS)
+			if (RegCreateKeyEx(hRoot, namePtr, 0, nullptr, extraFlags, KEY_SET_VALUE, nullptr, &hRun, nullptr) != ERROR_SUCCESS)
 				hRun = (HKEY) INVALID_HANDLE_VALUE;
 			break;
 		case closeKey:

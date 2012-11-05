@@ -16,7 +16,7 @@ namespace regImport {
 
 void import(const std::wstring& fileName);
 
-int main(int argc, wchar_t* argv[])
+int main(int argc, wchar_t* argv[], DWORD wow64flags)
 {
 	if (argc <= 1) throw std::invalid_argument("At least one argument is required to RIMPORT!");
 	bool loose = false;
@@ -28,6 +28,7 @@ int main(int argc, wchar_t* argv[])
 	{
 		op.parse(loadFileAsString(argv[num]));
 	}
+    op.SetWow64Flags(wow64Flags);
 #ifdef NDEBUG
 	if (loose || op.succeeded())
 		op.execute();
