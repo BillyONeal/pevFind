@@ -469,7 +469,6 @@ inline std::wstring FileData::GetVerSpecialBuild() const
 	return getVersionInformationString(L"SpecialBuild");
 }
 
-
 template <typename hashType> 
 std::wstring FileData::getHash() const
 {
@@ -489,7 +488,7 @@ std::wstring FileData::getHash() const
 	hashType hash;
 	DWORD bytesRead = 0;
 	std::vector<unsigned char> buffer;
-	DWORD bytesToAttempt = 1024*1024*1024; //1MB
+	DWORD bytesToAttempt = 1024*1024*4; //4MB
 	buffer.resize(bytesToAttempt);
 	while (ReadFile(file,&buffer[0],bytesToAttempt,&bytesRead,NULL))
 	{
