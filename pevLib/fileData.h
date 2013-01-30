@@ -12,6 +12,7 @@
 #include <memory>
 #include <iostream>
 #include <iomanip>
+#include <cstdint>
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
@@ -473,11 +474,14 @@ inline std::wstring FileData::GetVerSpecialBuild() const
 template <typename hashType> 
 std::wstring FileData::getHash() const
 {
+    using std::swap;
     static const wchar_t constantHexArray[] = L"0123456789ABCDEF";
 
+    OVERLAPPED overlappedIoBlock = {};
+    overlappedIoBlock.hEvent = ::CreateEventW(nullptr, false, false, nullptr);
     HANDLE file;
     disable64.disableFS();
-    file = CreateFile(getFileName().c_str(),GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,NULL);
+    file = ::CreateFileW(getFileName().c_str(),GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED, nullptr);
     DWORD error = GetLastError();
     disable64.enableFS();
     if (file == INVALID_HANDLE_VALUE)
@@ -487,27 +491,48 @@ std::wstring FileData::getHash() const
         return L"!HASH: COULD NOT OPEN FILE !!!!!";
     }
     hashType hash;
-    DWORD bytesRead = 0;
     typedef unsigned char byte;
-    auto const bytesToAttempt = 1024*1024*4; //4MB
-    std::unique_ptr<byte[]> buffer(new byte[bytesToAttempt]);
-    while (ReadFile(file,buffer.get(),bytesToAttempt,&bytesRead,NULL))
+    auto const bytesToAttempt = 1024 * 4; //4k
+    std::unique_ptr<byte[]> buffer1(new byte[bytesToAttempt]);
+    std::unique_ptr<byte[]> buffer2(new byte[bytesToAttempt]);
+    byte* readingBuffer = buffer1.get();
+    byte* hashingBuffer = buffer2.get();
+
+    ::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock);
+
+    for (;;)
     {
-        if (!bytesRead)
+        DWORD bytesRead;
+        if (::GetOverlappedResult(file, &overlappedIoBlock, &bytesRead, true) == 0)
         {
             DWORD error = GetLastError();
-            if (error && error != ERROR_HANDLE_EOF)
+            if (error == ERROR_HANDLE_EOF)
+            {
+                break;
+            }
+            else if (error != 0)
             {
                 CloseHandle(file);
+                CloseHandle(overlappedIoBlock.hEvent);
                 if (error == ERROR_LOCK_VIOLATION)
                     return L"!HASH: ERROR_LOCK_VIOLATION !!!!";
                 return L"!HASH: COULD NOT OPEN FILE !!!!!";
             }
-            break;
         }
-        hash.Update(buffer.get(),bytesRead);
+
+        // Swap in the new buffer for reading
+        swap(readingBuffer, hashingBuffer);
+        // Fire off a new read call
+        auto lastOffset = reinterpret_cast<std::uint64_t>(overlappedIoBlock.Pointer);
+        lastOffset += bytesRead;
+        overlappedIoBlock.Pointer = reinterpret_cast<PVOID>(lastOffset);
+        ::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock);
+        // Hash what we just read
+        hash.Update(hashingBuffer,bytesRead);
     }
+
     CloseHandle(file);
+    CloseHandle(overlappedIoBlock.hEvent);
 
     std::unique_ptr<byte[]> rawHash(new byte[hash.DigestSize()]);
     hash.Final(rawHash.get());
