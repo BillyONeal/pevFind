@@ -15,10 +15,10 @@ namespace link {
 
 int main(int argc, wchar_t* argv[])
 {
-	if (argc < 3)
-		throw std::runtime_error("Invalid syntax!");
-	CreateHardLink(argv[2], argv[1], NULL);
-	return 0;
+    if (argc < 3)
+        throw std::runtime_error("Invalid syntax!");
+    CreateHardLink(argv[2], argv[1], NULL);
+    return 0;
 }
 
 };

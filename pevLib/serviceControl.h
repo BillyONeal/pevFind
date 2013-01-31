@@ -9,6 +9,6 @@
 
 namespace serviceControl
 {
-	int main(int argc, wchar_t* argv[]);
+    int main(int argc, wchar_t* argv[]);
 };
 #endif _SERVICE_CONTROL_H_INCLUDED

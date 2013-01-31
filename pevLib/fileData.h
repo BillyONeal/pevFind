@@ -23,36 +23,36 @@ class FileData
     //Defines for the individual bits in the bitset containing properties for this filedata object
     enum
     {
-        ARCHIVE =				0x00000001,  // Standard Win32 Attributes
-        COMPRESSED = 			0x00000002,
-        DIRECTORY = 			0x00000004,
-        FILE =					0x00000008,
-        HIDDEN =				0x00000010,
-        READONLY = 				0x00000020,
-        SYSTEM = 				0x00000040,
-        VOLLABEL = 				0x00000080,
-        WRITABLE = 				0x00000100,
-        REPARSE = 				0x00000200,
-        TEMPORARY = 			0x00000400,
-        WIN32ENUMD = 			0x00000800,
+        ARCHIVE =                0x00000001,  // Standard Win32 Attributes
+        COMPRESSED =             0x00000002,
+        DIRECTORY =             0x00000004,
+        FILE =                    0x00000008,
+        HIDDEN =                0x00000010,
+        READONLY =                 0x00000020,
+        SYSTEM =                 0x00000040,
+        VOLLABEL =                 0x00000080,
+        WRITABLE =                 0x00000100,
+        REPARSE =                 0x00000200,
+        TEMPORARY =             0x00000400,
+        WIN32ENUMD =             0x00000800,
         // END Standard Win32 Attributes
         // Signature Attributes
-        SIGPRESENT = 			0x00001000,
-        SIGVALID = 				0x00002000,
+        SIGPRESENT =             0x00001000,
+        SIGVALID =                 0x00002000,
         // Executable Attribtutes
-        DLL = 					0x00004000,
-        DEBUG = 				0x00008000,
-        ISPE = 					0x00010000,
-        ISNE = 					0x00020000,
-        ISLE = 					0x00040000,
-        ISMZ = 					0x00080000,
+        DLL =                     0x00004000,
+        DEBUG =                 0x00008000,
+        ISPE =                     0x00010000,
+        ISNE =                     0x00020000,
+        ISLE =                     0x00040000,
+        ISMZ =                     0x00080000,
         //Internal state attributes
         //These are used to check if the more time consuming attributes need to be enumerated.
-        PEENUMERATED =			0x00100000,
-        PECHKSUM =				0x00200000,
-        SIGENUMERATED =			0x00400000,
-        CRYPTSVCERROR =			0x00800000,
-        VERSIONINFOCHECKED =	0x01000000,
+        PEENUMERATED =            0x00100000,
+        PECHKSUM =                0x00200000,
+        SIGENUMERATED =            0x00400000,
+        CRYPTSVCERROR =            0x00800000,
+        VERSIONINFOCHECKED =    0x01000000,
         //Looks like I had to add another executable attribute
         PEPLUS =                0x02000000
     };

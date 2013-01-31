@@ -26,28 +26,28 @@ class FileData;
 class criterion
 {
 public:
-	virtual unsigned __int32 getPriorityClass() const = 0;
-	virtual BOOL include(FileData &file) const = 0;
-	virtual void reorderTree() {};
-	virtual unsigned int directoryCheck(const std::wstring& /*directory*/) { return DIRECTORY_DONTCARE; };
-	virtual std::wstring debugTree() const = 0;
-	virtual ~criterion() {}; //Virtual destructor DO NOT REMOVE!
-	virtual void makeNonRecursive() {};
+    virtual unsigned __int32 getPriorityClass() const = 0;
+    virtual BOOL include(FileData &file) const = 0;
+    virtual void reorderTree() {};
+    virtual unsigned int directoryCheck(const std::wstring& /*directory*/) { return DIRECTORY_DONTCARE; };
+    virtual std::wstring debugTree() const = 0;
+    virtual ~criterion() {}; //Virtual destructor DO NOT REMOVE!
+    virtual void makeNonRecursive() {};
 };
 
 //Functor which converts pointers to criteria to priority classes
 static struct _getPriorityFunctor : std::unary_function<const criterion*, __int32>
 {
-	__int32 operator()(const std::shared_ptr<criterion> crit)
-	{
-		return crit->getPriorityClass();
-	};
+    __int32 operator()(const std::shared_ptr<criterion> crit)
+    {
+        return crit->getPriorityClass();
+    };
 } getPriorityFunctor;
 
 static struct _criterionByPriorityClass : std::binary_function<const std::shared_ptr<criterion>, std::shared_ptr<criterion>, bool>
 {
-	bool operator()(const std::shared_ptr<criterion> a, const std::shared_ptr<criterion> b)
-	{
-		return a->getPriorityClass() < b->getPriorityClass();
-	}
+    bool operator()(const std::shared_ptr<criterion> a, const std::shared_ptr<criterion> b)
+    {
+        return a->getPriorityClass() < b->getPriorityClass();
+    }
 } criterionByPriorityClass;

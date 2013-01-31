@@ -9,6 +9,6 @@
 
 namespace uZip
 {
-	int main(int argc, wchar_t* argv[]);
+    int main(int argc, wchar_t* argv[]);
 };
 #endif //_UZIP_H_INCLUDED

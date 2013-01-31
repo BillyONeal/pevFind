@@ -7,5 +7,5 @@
 // by the CLSID compressor and decompressor.
 
 namespace clsidCompressor {
-	int main(int argc, wchar_t* argv[]);
+    int main(int argc, wchar_t* argv[]);
 }; //namespace clsidCompressor

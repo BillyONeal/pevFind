@@ -12,7 +12,7 @@ namespace scanners {
 class filesScanner
 {
 public:
-	void scan();
+    void scan();
 };
 
 }; //Namespace scanners

@@ -6,6 +6,6 @@
 // vFind.h -- Defines the main entry point for vFind.
 
 namespace vFind {
-	int main();
+    int main();
 } //namespace vFind
 

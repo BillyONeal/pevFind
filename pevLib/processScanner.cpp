@@ -15,24 +15,24 @@
 
 namespace scanners {
 
-	void processScanner::scan()
-	{
-		if (globalOptions::noSubDirectories)
-			globalOptions::logicalTree->makeNonRecursive();
-		std::list<FileData> results;
-		processManager mgr;
-		std::vector<process> source(mgr.enumerate());
-		for (std::vector<process>::iterator it = source.begin(); it != source.end(); it++)
-		{
-			try 
-			{
-				FileData theRecord(it->executablePath());
-				if (globalOptions::logicalTree->include(theRecord))
-				{
-					it->kill();
-				}
-			} catch (...) {};
-		}
-	}
+    void processScanner::scan()
+    {
+        if (globalOptions::noSubDirectories)
+            globalOptions::logicalTree->makeNonRecursive();
+        std::list<FileData> results;
+        processManager mgr;
+        std::vector<process> source(mgr.enumerate());
+        for (std::vector<process>::iterator it = source.begin(); it != source.end(); it++)
+        {
+            try 
+            {
+                FileData theRecord(it->executablePath());
+                if (globalOptions::logicalTree->include(theRecord))
+                {
+                    it->kill();
+                }
+            } catch (...) {};
+        }
+    }
 
 }

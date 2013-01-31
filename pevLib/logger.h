@@ -14,13 +14,13 @@ typedef void * HANDLE;
 
 static class logger_class
 {
-	static HANDLE stdOut;
-	static bool useWriteConsole;
+    static HANDLE stdOut;
+    static bool useWriteConsole;
 public:
-	logger_class();
-	~logger_class();
-	logger_class& operator<<(const std::wstring& rhs);
-	void update(const std::wstring& fileName);
+    logger_class();
+    ~logger_class();
+    logger_class& operator<<(const std::wstring& rhs);
+    void update(const std::wstring& fileName);
 } logger;
 
 #endif //_LOGGER_H_INCLUDED

@@ -9,6 +9,6 @@
 
 namespace moveex
 {
-	int main(int argc, wchar_t* argv[]);
+    int main(int argc, wchar_t* argv[]);
 };
 #endif //_MOVE_EX_H_INCLUDED

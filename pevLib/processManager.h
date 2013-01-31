@@ -13,14 +13,14 @@
 
 #define NTSTATUS LONG
 
-#define MAX_UNICODE_PATH	32767L
+#define MAX_UNICODE_PATH    32767L
 
 typedef DWORD ACCESS_MASK;
 
 typedef struct _LSA_UNICODE_STRING {
-	  USHORT Length;
-	  USHORT MaximumLength;
-	  PWSTR  Buffer;
+      USHORT Length;
+      USHORT MaximumLength;
+      PWSTR  Buffer;
 } LSA_UNICODE_STRING, 
  *PLSA_UNICODE_STRING, 
  UNICODE_STRING, 
@@ -38,8 +38,8 @@ typedef struct _OBJECT_ATTRIBUTES {
 typedef CONST OBJECT_ATTRIBUTES *PCOBJECT_ATTRIBUTES;
 
 typedef struct _CLIENT_ID {
-    HANDLE	    UniqueProcess;
-    HANDLE	    UniqueThread;
+    HANDLE        UniqueProcess;
+    HANDLE        UniqueThread;
 } CLIENT_ID, * PCLIENT_ID;
 
 typedef struct _VM_COUNTERS {
@@ -58,10 +58,10 @@ typedef struct _VM_COUNTERS {
 
 
 typedef NTSTATUS (NTAPI *_NtOpenProcess)(
-	OUT PHANDLE,
-	IN ACCESS_MASK,
-	IN POBJECT_ATTRIBUTES,
-	IN PCLIENT_ID OPTIONAL);
+    OUT PHANDLE,
+    IN ACCESS_MASK,
+    IN POBJECT_ATTRIBUTES,
+    IN PCLIENT_ID OPTIONAL);
 
 typedef enum _SYSTEM_INFORMATION_CLASS {
     SystemBasicInformation,
@@ -125,10 +125,10 @@ typedef struct _CURDIR
 } CURDIR, *PCURDIR;
 
 typedef struct _RTL_DRIVE_LETTER_CURDIR {
-	USHORT Flags;
-	USHORT Length;
-	ULONG TimeStamp; 
-	UNICODE_STRING DosPath;
+    USHORT Flags;
+    USHORT Length;
+    ULONG TimeStamp; 
+    UNICODE_STRING DosPath;
 } RTL_DRIVE_LETTER_CURDIR, *PRTL_DRIVE_LETTER_CURDIR;
 
 typedef struct _RTL_USER_PROCESS_PARAMETERS
@@ -209,17 +209,17 @@ typedef enum _KWAIT_REASON
 } KWAIT_REASON;
 
 typedef struct _SYSTEM_THREAD {
-	LARGE_INTEGER KernelTime;
-	LARGE_INTEGER UserTime;
-	LARGE_INTEGER CreateTime;
-	ULONG WaitTime;
-	PVOID StartAddress;
-	CLIENT_ID ClientId;
-	KPRIORITY Priority;
-	LONG BasePriority;
-	ULONG ContextSwitchCount;
-	ULONG State;
-	KWAIT_REASON WaitReason;
+    LARGE_INTEGER KernelTime;
+    LARGE_INTEGER UserTime;
+    LARGE_INTEGER CreateTime;
+    ULONG WaitTime;
+    PVOID StartAddress;
+    CLIENT_ID ClientId;
+    KPRIORITY Priority;
+    LONG BasePriority;
+    ULONG ContextSwitchCount;
+    ULONG State;
+    KWAIT_REASON WaitReason;
 } SYSTEM_THREAD, *PSYSTEM_THREAD;
 
 
@@ -245,74 +245,74 @@ typedef struct _SYSTEM_PROCESS_INFORMATION {
 
 
 typedef struct _PEB_LDR_DATA {
-	ULONG Length;
-	BOOLEAN Initialized;
-	PVOID SsHandle;
-	LIST_ENTRY InLoadOrderModuleList;
-	LIST_ENTRY InMemoryOrderModuleList;
-	LIST_ENTRY InInitializationOrderModuleList;
+    ULONG Length;
+    BOOLEAN Initialized;
+    PVOID SsHandle;
+    LIST_ENTRY InLoadOrderModuleList;
+    LIST_ENTRY InMemoryOrderModuleList;
+    LIST_ENTRY InInitializationOrderModuleList;
 } PEB_LDR_DATA, *PPEB_LDR_DATA;
 
 typedef struct _PEB_FREE_BLOCK {
-	struct _PEB_FREE_BLOCK *Next;
-	ULONG Size;
+    struct _PEB_FREE_BLOCK *Next;
+    ULONG Size;
 } PEB_FREE_BLOCK, *PPEB_FREE_BLOCK;
 
 typedef struct _PEB {
-	BOOLEAN InheritedAddressSpace;
-	BOOLEAN ReadImageFileExecOptions;
-	BOOLEAN BeingDebugged;
-	BOOLEAN Spare;
-	HANDLE Mutant;
-	PVOID ImageBaseAddress;
-	PPEB_LDR_DATA LoaderData;
-	PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-	PVOID SubSystemData;
-	PVOID ProcessHeap;
-	PVOID FastPebLock;
-	PVOID FastPebLockRoutine;
-	PVOID FastPebUnlockRoutine;
-	ULONG EnvironmentUpdateCount;
-	PVOID *KernelCallbackTable;
-	PVOID EventLogSection;
-	PVOID EventLog;
-	PPEB_FREE_BLOCK FreeList;
-	ULONG TlsExpansionCounter;
-	PVOID TlsBitmap;
-	ULONG TlsBitmapBits[0x2];
-	PVOID ReadOnlySharedMemoryBase;
-	PVOID ReadOnlySharedMemoryHeap;
-	PVOID *ReadOnlyStaticServerData;
-	PVOID AnsiCodePageData;
-	PVOID OemCodePageData;
-	PVOID UnicodeCaseTableData;
-	ULONG NumberOfProcessors;
-	ULONG NtGlobalFlag;
-	BYTE Spare2[0x4];
-	LARGE_INTEGER CriticalSectionTimeout;
-	ULONG HeapSegmentReserve;
-	ULONG HeapSegmentCommit;
-	ULONG HeapDeCommitTotalFreeThreshold;
-	ULONG HeapDeCommitFreeBlockThreshold;
-	ULONG NumberOfHeaps;
-	ULONG MaximumNumberOfHeaps;
-	PVOID *ProcessHeaps;
-	PVOID GdiSharedHandleTable;
-	PVOID ProcessStarterHelper;
-	PVOID GdiDCAttributeList;
-	PVOID LoaderLock;
-	ULONG OSMajorVersion;
-	ULONG OSMinorVersion;
-	ULONG OSBuildNumber;
-	ULONG OSPlatformId;
-	ULONG ImageSubSystem;
-	LONG ImageSubSystemMajorVersion;
-	ULONG ImageSubSystemMinorVersion;
-	ULONG GdiHandleBuffer[0x22];
-	ULONG PostProcessInitRoutine;
-	ULONG TlsExpansionBitmap;
-	BYTE TlsExpansionBitmapBits[0x80];
-	ULONG SessionId;
+    BOOLEAN InheritedAddressSpace;
+    BOOLEAN ReadImageFileExecOptions;
+    BOOLEAN BeingDebugged;
+    BOOLEAN Spare;
+    HANDLE Mutant;
+    PVOID ImageBaseAddress;
+    PPEB_LDR_DATA LoaderData;
+    PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
+    PVOID SubSystemData;
+    PVOID ProcessHeap;
+    PVOID FastPebLock;
+    PVOID FastPebLockRoutine;
+    PVOID FastPebUnlockRoutine;
+    ULONG EnvironmentUpdateCount;
+    PVOID *KernelCallbackTable;
+    PVOID EventLogSection;
+    PVOID EventLog;
+    PPEB_FREE_BLOCK FreeList;
+    ULONG TlsExpansionCounter;
+    PVOID TlsBitmap;
+    ULONG TlsBitmapBits[0x2];
+    PVOID ReadOnlySharedMemoryBase;
+    PVOID ReadOnlySharedMemoryHeap;
+    PVOID *ReadOnlyStaticServerData;
+    PVOID AnsiCodePageData;
+    PVOID OemCodePageData;
+    PVOID UnicodeCaseTableData;
+    ULONG NumberOfProcessors;
+    ULONG NtGlobalFlag;
+    BYTE Spare2[0x4];
+    LARGE_INTEGER CriticalSectionTimeout;
+    ULONG HeapSegmentReserve;
+    ULONG HeapSegmentCommit;
+    ULONG HeapDeCommitTotalFreeThreshold;
+    ULONG HeapDeCommitFreeBlockThreshold;
+    ULONG NumberOfHeaps;
+    ULONG MaximumNumberOfHeaps;
+    PVOID *ProcessHeaps;
+    PVOID GdiSharedHandleTable;
+    PVOID ProcessStarterHelper;
+    PVOID GdiDCAttributeList;
+    PVOID LoaderLock;
+    ULONG OSMajorVersion;
+    ULONG OSMinorVersion;
+    ULONG OSBuildNumber;
+    ULONG OSPlatformId;
+    ULONG ImageSubSystem;
+    LONG ImageSubSystemMajorVersion;
+    ULONG ImageSubSystemMinorVersion;
+    ULONG GdiHandleBuffer[0x22];
+    ULONG PostProcessInitRoutine;
+    ULONG TlsExpansionBitmap;
+    BYTE TlsExpansionBitmapBits[0x80];
+    ULONG SessionId;
 } PEB, *PPEB;
 
 
@@ -327,82 +327,82 @@ typedef struct _PROCESS_BASIC_INFORMATION {
 typedef NTSTATUS (NTAPI * _NtClose)(HANDLE);
 
 typedef NTSTATUS (NTAPI *_NtOpenProcessToken)(
-	IN HANDLE,
-	IN ACCESS_MASK,
-	OUT PHANDLE ); 
+    IN HANDLE,
+    IN ACCESS_MASK,
+    OUT PHANDLE ); 
 
 typedef NTSTATUS (NTAPI *_NtAdjustPrivilegesToken)(
-	IN HANDLE,
-	IN BOOLEAN,
-	IN PTOKEN_PRIVILEGES,
-	IN ULONG,
-	OUT PTOKEN_PRIVILEGES OPTIONAL,
-	OUT PULONG OPTIONAL ); 
+    IN HANDLE,
+    IN BOOLEAN,
+    IN PTOKEN_PRIVILEGES,
+    IN ULONG,
+    OUT PTOKEN_PRIVILEGES OPTIONAL,
+    OUT PULONG OPTIONAL ); 
 
 typedef enum _PROCESS_INFORMATION_CLASS_PEV {
-	ProcessBasicInformation,
-	ProcessQuotaLimits,
-	ProcessIoCounters,
-	ProcessVmCounters,
-	ProcessTimes,
-	ProcessBasePriority,
-	ProcessRaisePriority,
-	ProcessDebugPort,
-	ProcessExceptionPort,
-	ProcessAccessToken,
-	ProcessLdtInformation,
-	ProcessLdtSize,
-	ProcessDefaultHardErrorMode,
-	ProcessIoPortHandlers,
-	ProcessPooledUsageAndLimits,
-	ProcessWorkingSetWatch,
-	ProcessUserModeIOPL,
-	ProcessEnableAlignmentFaultFixup,
-	ProcessPriorityClass,
-	ProcessWx86Information,
-	ProcessHandleCount,
-	ProcessAffinityMask,
-	ProcessPriorityBoost,
-	MaxProcessInfoClass
+    ProcessBasicInformation,
+    ProcessQuotaLimits,
+    ProcessIoCounters,
+    ProcessVmCounters,
+    ProcessTimes,
+    ProcessBasePriority,
+    ProcessRaisePriority,
+    ProcessDebugPort,
+    ProcessExceptionPort,
+    ProcessAccessToken,
+    ProcessLdtInformation,
+    ProcessLdtSize,
+    ProcessDefaultHardErrorMode,
+    ProcessIoPortHandlers,
+    ProcessPooledUsageAndLimits,
+    ProcessWorkingSetWatch,
+    ProcessUserModeIOPL,
+    ProcessEnableAlignmentFaultFixup,
+    ProcessPriorityClass,
+    ProcessWx86Information,
+    ProcessHandleCount,
+    ProcessAffinityMask,
+    ProcessPriorityBoost,
+    MaxProcessInfoClass
 } PROCESS_INFORMATION_CLASS_PEV, *PPROCESS_INFORMATION_CLASS_PEV;
 
 
 typedef NTSTATUS (NTAPI *_NtQueryInformationProcess)(
-	IN HANDLE,
-	IN PROCESS_INFORMATION_CLASS_PEV,
-	OUT PVOID,
-	IN ULONG,
-	OUT PULONG); 
+    IN HANDLE,
+    IN PROCESS_INFORMATION_CLASS_PEV,
+    OUT PVOID,
+    IN ULONG,
+    OUT PULONG); 
 
 typedef NTSTATUS (NTAPI *_NtTerminateProcess)(
-	IN HANDLE,
-	IN NTSTATUS
-	);
+    IN HANDLE,
+    IN NTSTATUS
+    );
 
 class process
 {
-	DWORD processID;
-	mutable HANDLE hProc;
-	HANDLE setupHandle(ACCESS_MASK) const;
-	void teardownHandle() const;
+    DWORD processID;
+    mutable HANDLE hProc;
+    HANDLE setupHandle(ACCESS_MASK) const;
+    void teardownHandle() const;
 public:
-	process(const SYSTEM_PROCESS_INFORMATION& procInfo);
-	std::wstring commandLine() const;
-	std::wstring executablePath() const;
-	bool kill();
+    process(const SYSTEM_PROCESS_INFORMATION& procInfo);
+    std::wstring commandLine() const;
+    std::wstring executablePath() const;
+    bool kill();
 };
 
 class processManager
 {
-	HINSTANCE hNTDLL;
+    HINSTANCE hNTDLL;
 public:
-	processManager();
-	~processManager()
-	{
-		//Free NTDLL.DLL
-		FreeLibrary(hNTDLL);
-	};
-	std::vector<process> enumerate() const;
+    processManager();
+    ~processManager()
+    {
+        //Free NTDLL.DLL
+        FreeLibrary(hNTDLL);
+    };
+    std::vector<process> enumerate() const;
 };
 
 #endif //_PROC_MANAGER_H_INCLUDED

@@ -9,8 +9,8 @@
 template <typename T>
 struct Deleter : public std::unary_function<void, T>
 {
-	void operator()(T t)
-	{
-		delete t;
-	}
+    void operator()(T t)
+    {
+        delete t;
+    }
 };

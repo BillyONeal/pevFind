@@ -9,6 +9,6 @@
 
 namespace rexport
 {
-	int main(int argc, wchar_t* argv[]);
+    int main(int argc, wchar_t* argv[]);
 };
 #endif //_REXPORT_H_INCLUDED

@@ -17,16 +17,16 @@ namespace rexport
 {
 int main(int argc, wchar_t* argv[])
 {
-	if (argc != 3)
-		throw std::invalid_argument("2 arguments required for REXPORT!");
-	std::wstring key(argv[1]);
-	logger.update(argv[2]);
-	logger << L"Windows Registry Editor Version 5.00\r\n"
-	       << L"\r\n"
-		   << L";Generator: pevFind by Billy O'Neal III\r\n"
-		   << L";Start in: " << key << L"\r\n"
-		   << L";;;\r\n\r\n";
+    if (argc != 3)
+        throw std::invalid_argument("2 arguments required for REXPORT!");
+    std::wstring key(argv[1]);
+    logger.update(argv[2]);
+    logger << L"Windows Registry Editor Version 5.00\r\n"
+           << L"\r\n"
+           << L";Generator: pevFind by Billy O'Neal III\r\n"
+           << L";Start in: " << key << L"\r\n"
+           << L";;;\r\n\r\n";
 
-	return 0;
+    return 0;
 }
 };

@@ -38,24 +38,24 @@ class regscriptCompiler
     void skipWhitespace();
     void parseVersion();
     bool parseKeySpec();
-	bool parseValueSpec();
+    bool parseValueSpec();
     bool loadNameAndRoot();
-	void pushArgumentlessOpcode(const std::size_t code);
-	std::wstring::const_iterator getEndOfKeyName();
-	void parseCString(wchar_t ** str, std::size_t *length);
-	void parseHexValueSpec(char ** str, std::size_t *length);
-	DWORD parseDword();
+    void pushArgumentlessOpcode(const std::size_t code);
+    std::wstring::const_iterator getEndOfKeyName();
+    void parseCString(wchar_t ** str, std::size_t *length);
+    void parseHexValueSpec(char ** str, std::size_t *length);
+    DWORD parseDword();
     std::basic_stringstream<wchar_t> outputText;
-	bool fixNull;
+    bool fixNull;
     DWORD wow64Flags;
 public:
     void SetWow64Flags(DWORD flags);
     bool parse(boost::iterator_range<std::wstring::const_iterator> inputScript);
     ~regscriptCompiler();
     std::wstring getOutput() { return outputText.str(); };
-	void printASM();
-	void execute();
-	bool succeeded();
+    void printASM();
+    void execute();
+    bool succeeded();
 };
 
 #endif // REGSCRIPTCOMPILER_H_INCLUDED

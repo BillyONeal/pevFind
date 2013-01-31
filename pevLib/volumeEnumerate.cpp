@@ -14,20 +14,20 @@
 
 int volumeEnumerate::main()
 {
-	DWORD logicalDrives = GetLogicalDrives();
-	DWORD bitMask = 1;
-	wchar_t driveTemp[] = L"A:\\";
-	for (register size_t idx = 0; idx < 26; idx++)
-	{
-		if (logicalDrives & bitMask)
-		{
-			driveTemp[0] = (wchar_t) idx + L'A';
-			if (GetDriveType(driveTemp) == DRIVE_FIXED)
-			{
-				logger << driveTemp << L"\r\n";
-			}
-		}
-		bitMask <<= 1;
-	}
-	return 0;
+    DWORD logicalDrives = GetLogicalDrives();
+    DWORD bitMask = 1;
+    wchar_t driveTemp[] = L"A:\\";
+    for (register size_t idx = 0; idx < 26; idx++)
+    {
+        if (logicalDrives & bitMask)
+        {
+            driveTemp[0] = (wchar_t) idx + L'A';
+            if (GetDriveType(driveTemp) == DRIVE_FIXED)
+            {
+                logger << driveTemp << L"\r\n";
+            }
+        }
+        bitMask <<= 1;
+    }
+    return 0;
 }

@@ -11,8 +11,8 @@
 
 namespace linkResolve
 {
-	int main(int argc, wchar_t * argv[]);
-	std::wstring resolveLink(std::wstring& lnkPath);
+    int main(int argc, wchar_t * argv[]);
+    std::wstring resolveLink(std::wstring& lnkPath);
 };
 
 #endif //_LINK_RESOLVE_H_INCLUDED

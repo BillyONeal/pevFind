@@ -60,7 +60,7 @@ void consoleParser::makeTokens(const std::wstring& commandLine, std::vector<comm
 {
     using namespace boost::xpressive;
     mark_tag argument(2), option(3);
-    wsregex tokenRegex =	(argument= as_xpr(L"{")) | (argument= as_xpr("}")) | as_xpr(L'"') >> (*as_xpr(L'-') >> (argument= as_xpr(L'-') >> +(~set[_s | (set= L'"', L'#', L'{', L'}') ])) >>
+    wsregex tokenRegex =    (argument= as_xpr(L"{")) | (argument= as_xpr("}")) | as_xpr(L'"') >> (*as_xpr(L'-') >> (argument= as_xpr(L'-') >> +(~set[_s | (set= L'"', L'#', L'{', L'}') ])) >>
         !(as_xpr(L'#') >> (option= +(as_xpr(L'#') >> set[range(L'A', L'Z') | range(L'a', L'z') | range(L'0', L'9')
         | L'#' ]| ~set[L'#'])) >> L'#' | as_xpr(L'"') >> (option= +(L"\"\"" | ~set[L'"'])) >> L'"')) >> L'"' |
                             as_xpr(L'"') >> (argument= +(L"\"\"" |~set[L'"'])) >> L'"' |
@@ -251,7 +251,7 @@ void consoleParser::createModifier(std::vector<std::shared_ptr<criterion> > &res
     do {
         if(      istarts_with(token.argument, L"custom"))
         {
-            globalOptions::displaySpecification = token.option;	
+            globalOptions::displaySpecification = token.option;    
             return;
         }
         else if (istarts_with(token.argument, L"c"))
@@ -642,7 +642,7 @@ void consoleParser::createDate(commandToken& token, std::vector<std::shared_ptr<
 }
 void consoleParser::processAbsoluteDate( std::wstring& toProcess, FILETIME& lowerBound, FILETIME& upperBound)
 {
-    long		v;
+    long        v;
     SYSTEMTIME now;
     SYSTEMTIME st;
     int significantFigures = 0;

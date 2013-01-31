@@ -14,12 +14,12 @@ class FileData;
 
 namespace scanners
 {
-	std::wstring getRegexesCommonRoot(std::vector<std::shared_ptr<regexClass> >&);
-	void printSummary();
-	class recursiveScanner
-	{	
-	public:
-		void scan();
-	};
+    std::wstring getRegexesCommonRoot(std::vector<std::shared_ptr<regexClass> >&);
+    void printSummary();
+    class recursiveScanner
+    {    
+    public:
+        void scan();
+    };
 };
 #endif

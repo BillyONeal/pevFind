@@ -14,13 +14,13 @@
 
 int times::main(int argc, wchar_t* argv[])
 {
-	SYSTEMTIME timestruct;
-	if ((argc >= 2) && boost::algorithm::iequals(argv[1],L"utc"))
-		GetSystemTime(&timestruct);
-	else
-		GetLocalTime(&timestruct);
-	FILETIME fTimeStruct;
-	SystemTimeToFileTime(&timestruct, &fTimeStruct);
-	logger << getDateAsString(fTimeStruct) << L"\r\n";
-	return 0;
+    SYSTEMTIME timestruct;
+    if ((argc >= 2) && boost::algorithm::iequals(argv[1],L"utc"))
+        GetSystemTime(&timestruct);
+    else
+        GetLocalTime(&timestruct);
+    FILETIME fTimeStruct;
+    SystemTimeToFileTime(&timestruct, &fTimeStruct);
+    logger << getDateAsString(fTimeStruct) << L"\r\n";
+    return 0;
 }

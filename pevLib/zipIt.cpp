@@ -17,38 +17,38 @@ void addAllToZipColonStripped(HZIP zip, const std::vector<std::wstring>& inputSr
 
 void zipIt(const std::wstring& fileTarget,const std::list<FileData>& files)
 {
-	static const char error[] = "Couldn't create zip!";
+    static const char error[] = "Couldn't create zip!";
 
-	//Sanity check
-	if (files.empty())
-		return;
-	std::vector<std::wstring> fileStrings;
-	fileStrings.reserve(files.size());
-	std::copy(files.begin(), files.end(), back_inserter(fileStrings));
+    //Sanity check
+    if (files.empty())
+        return;
+    std::vector<std::wstring> fileStrings;
+    fileStrings.reserve(files.size());
+    std::copy(files.begin(), files.end(), back_inserter(fileStrings));
 
-	std::size_t chop = 0;
-	if (fileStrings.size() > 1)
-	 	chop = iLongestCommonPrefixLength(fileStrings);
-	if (chop)
-	{
-		while(fileStrings[0][chop] != L'\\') {chop--; };
-		chop++;
-	}
+    std::size_t chop = 0;
+    if (fileStrings.size() > 1)
+         chop = iLongestCommonPrefixLength(fileStrings);
+    if (chop)
+    {
+        while(fileStrings[0][chop] != L'\\') {chop--; };
+        chop++;
+    }
 
-	//Create the zip
-	HZIP hZip = CreateZip(fileTarget.c_str(), NULL);
-	if (!hZip)
-	throw std::runtime_error(error);
+    //Create the zip
+    HZIP hZip = CreateZip(fileTarget.c_str(), NULL);
+    if (!hZip)
+    throw std::runtime_error(error);
 
-	//Add all files to zip
-	if(chop || fileStrings[0][1] != L':')
-		for(std::vector<std::wstring>::iterator it = fileStrings.begin(); it != fileStrings.end(); it++)
-			ZipAdd(hZip, it->c_str() + chop, it->c_str());
-	else
-		addAllToZipColonStripped(hZip, fileStrings);
+    //Add all files to zip
+    if(chop || fileStrings[0][1] != L':')
+        for(std::vector<std::wstring>::iterator it = fileStrings.begin(); it != fileStrings.end(); it++)
+            ZipAdd(hZip, it->c_str() + chop, it->c_str());
+    else
+        addAllToZipColonStripped(hZip, fileStrings);
 
-	//Close the zip
-	CloseZip(hZip);
+    //Close the zip
+    CloseZip(hZip);
 }
 
 
@@ -69,39 +69,39 @@ L"C:\Win\Blah"}
 This would be the case insensitive version -- unused here
 std::size_t longestCommonPrefixLength(const std::vector<std::wstring>& input)
 {
-	std::size_t chop = 0;
-	for(; chop != input[0].length(); chop++)
-	{
-		std::size_t lastMatch = 1;
-		for (; lastMatch != input.size() && input[lastMatch][chop] == input[0][chop]; lastMatch++);
-		if (lastMatch != input.size())
-			break;
-	}
-	return chop;
+    std::size_t chop = 0;
+    for(; chop != input[0].length(); chop++)
+    {
+        std::size_t lastMatch = 1;
+        for (; lastMatch != input.size() && input[lastMatch][chop] == input[0][chop]; lastMatch++);
+        if (lastMatch != input.size())
+            break;
+    }
+    return chop;
 }*/
 
 std::size_t iLongestCommonPrefixLength(const std::vector<std::wstring>& input)
 {
-	std::size_t chop = 0;
-	for(; chop != input[0].length(); chop++)
-	{
-		std::size_t lastMatch = 1;
-		for (; lastMatch != input.size() && towlower(input[lastMatch][chop]) == towlower(input[0][chop]); lastMatch++);
-		if (lastMatch != input.size())
-			break;
-	}
-	return chop;
+    std::size_t chop = 0;
+    for(; chop != input[0].length(); chop++)
+    {
+        std::size_t lastMatch = 1;
+        for (; lastMatch != input.size() && towlower(input[lastMatch][chop]) == towlower(input[0][chop]); lastMatch++);
+        if (lastMatch != input.size())
+            break;
+    }
+    return chop;
 }
 
 void addAllToZipColonStripped(HZIP zip, const std::vector<std::wstring>& inputSrc)
 {
-	std::vector<std::wstring> dest;
-	dest.reserve(inputSrc.size());
-	std::copy(inputSrc.begin(), inputSrc.end(), std::back_inserter(dest));
-	//The zip paths cannot contain colons. If the common variable is zero, then the
-	//files are on different drives. To support this, colons are erased:
-	for(std::vector<std::wstring>::iterator it = dest.begin(); it != dest.end(); it++)
-		it->erase(it->begin()+1, it->begin()+2);
-	for(size_t idx = 0; idx < inputSrc.size(); idx++)
-		ZipAdd(zip, dest[idx].c_str(), inputSrc[idx].c_str());
+    std::vector<std::wstring> dest;
+    dest.reserve(inputSrc.size());
+    std::copy(inputSrc.begin(), inputSrc.end(), std::back_inserter(dest));
+    //The zip paths cannot contain colons. If the common variable is zero, then the
+    //files are on different drives. To support this, colons are erased:
+    for(std::vector<std::wstring>::iterator it = dest.begin(); it != dest.end(); it++)
+        it->erase(it->begin()+1, it->begin()+2);
+    for(size_t idx = 0; idx < inputSrc.size(); idx++)
+        ZipAdd(zip, dest[idx].c_str(), inputSrc[idx].c_str());
 }

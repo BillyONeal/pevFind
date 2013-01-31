@@ -18,25 +18,25 @@ void import(const std::wstring& fileName);
 
 int main(int argc, wchar_t* argv[], DWORD wow64flags)
 {
-	if (argc <= 1) throw std::invalid_argument("At least one argument is required to RIMPORT!");
-	bool loose = false;
-	regscriptCompiler op;
-	if (boost::algorithm::iequals(argv[1], L"LOOSE")) loose = true;
-	if (loose && argc <= 1) throw std::invalid_argument("At least two arguments are required in LOOSE mode!");
-	//Allow multiple files to be imported.
-	for(int num = loose ? 2 : 1; num < argc; num++)
-	{
-		op.parse(loadFileAsString(argv[num]));
-	}
+    if (argc <= 1) throw std::invalid_argument("At least one argument is required to RIMPORT!");
+    bool loose = false;
+    regscriptCompiler op;
+    if (boost::algorithm::iequals(argv[1], L"LOOSE")) loose = true;
+    if (loose && argc <= 1) throw std::invalid_argument("At least two arguments are required in LOOSE mode!");
+    //Allow multiple files to be imported.
+    for(int num = loose ? 2 : 1; num < argc; num++)
+    {
+        op.parse(loadFileAsString(argv[num]));
+    }
     op.SetWow64Flags(wow64flags);
 #ifdef NDEBUG
-	if (loose || op.succeeded())
-		op.execute();
+    if (loose || op.succeeded())
+        op.execute();
 #else
-	op.printASM();
+    op.printASM();
 #endif
-	std::wcerr << op.getOutput();
-	return 0;
+    std::wcerr << op.getOutput();
+    return 0;
 }
 
 } //namespace regImport
