@@ -93,26 +93,31 @@ std::wstring::const_iterator findEndOfCommandline(std::wstring::const_iterator i
 class commandlineProcessor
 {
 public:
+    commandlineProcessor();
     bool s; // Start the process as System
     bool e; // Start the process using a new environment
     bool w; // Wait for the process after starting it
     std::wstring::const_iterator process(std::wstring::const_iterator begin, std::wstring::const_iterator end);
 };
 
+inline commandlineProcessor::commandlineProcessor()
+    : s(false)
+    , e(false)
+    , w(false)
+{
+}
+
 static int execute(const std::wstring& commandLine, const commandlineProcessor& options);
 
-void initProcessor(std::wstring& commandLine, commandlineProcessor& options)
+static std::wstring initProcessor(commandlineProcessor& options)
 {
-    commandLine.assign(GetCommandLine());
+    std::wstring commandLine(GetCommandLine());
     std::wstring::const_iterator endOfOptions = commandLine.begin();
     //pevFind.exe
     endOfOptions = findEndOfCommandline(endOfOptions, commandLine.end());
     //EXEC
     endOfOptions = findEndOfCommandline(endOfOptions, commandLine.end());
-    
-    options.e = false; //Clear
-    options.s = false;
-    options.w = false;
+
     endOfOptions = options.process(endOfOptions, commandLine.end());
     
     //Sanity check
@@ -122,13 +127,13 @@ void initProcessor(std::wstring& commandLine, commandlineProcessor& options)
     }    
     
     commandLine.erase(commandLine.begin(), endOfOptions);
+    return std::move(commandLine);
 }
 
 int main()
 {
-    std::wstring commandLine;
     commandlineProcessor options;
-    initProcessor(commandLine, options);
+    std::wstring commandLine(initProcessor(options));
     wchar_t * environment;
     HANDLE userToken;
 
@@ -137,17 +142,13 @@ int main()
         // Impersonate SYSTEM by stealing the token from csrss.
     }
 
-    if (options.e)
-    {
-        OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &userToken);
-        CreateEnvironmentBlock(
-            reinterpret_cast<LPVOID *>(&environment),
-            userToken,
-            FALSE
-        );
-        CloseHandle(userToken);
-    }
-
+    OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &userToken);
+    CreateEnvironmentBlock(
+        reinterpret_cast<LPVOID *>(&environment),
+        userToken,
+        options.e ? FALSE : TRUE
+    );
+    CloseHandle(userToken);
 
     BOOL noError;
     STARTUPINFO startupInfo;
@@ -165,7 +166,7 @@ int main()
         nullptr,                                       //lpThreadAttributes
         FALSE,                                         //bInheritHandles
         CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, //dwCreationFlags
-        options.e ? environment : NULL,                //lpEnvironment
+        environment,                                   //lpEnvironment
         nullptr,                                       //lpCurrentDirectory
         &startupInfo,                                  //lpStartupInfo
         &processInformation                            //lpProcessInformation
