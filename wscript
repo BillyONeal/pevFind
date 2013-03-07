@@ -8,10 +8,10 @@ def configure(ctx):
 	ctx.check_waf_version(mini='1.7.9')
 	ctx.env.MSVC_TARGETS = ['x86']
 	ctx.load('compiler_cxx')
-	ctx.env.CXXFLAGS = ['/nologo', '/W4', '/EHsc']
+	ctx.env.CXXFLAGS = ['/nologo', '/W3', '/EHsc']
 	ctx.env.append_value('INCLUDES', ['.', 'C:\\boost_1_53_0', 'C:\\cryptopp561'])
 	ctx.env.append_value('LIBPATH', ['C:\\boost_1_53_0\\stage\\lib32'])
-	ctx.env.append_value('DEFINES', ['UNICODE', '_UNICODE', 'DISABLE_RECOMPILED_HEADERS'])
+	ctx.env.append_value('DEFINES', ['UNICODE', '_UNICODE', 'DISABLE_RECOMPILED_HEADERS', '_SCL_SECURE_NO_WARNINGS', '_CRT_SECURE_NO_WARNINGS'])
 	ctx.env.append_value('STLIB', ['advapi32', 'user32', 'kernel32', 'userenv', 'wintrust', 'ole32', 'shlwapi', 'version', 'sfc', 'cryptlib'])
 	base_env = ctx.env.derive()
 
