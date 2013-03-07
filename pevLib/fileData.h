@@ -490,6 +490,7 @@ std::wstring FileData::getHash() const
             return L"!HASH: ERROR_LOCK_VIOLATION !!!!";
         return L"!HASH: COULD NOT OPEN FILE !!!!!";
     }
+
     hashType hash;
     typedef unsigned char byte;
     auto const bytesToAttempt = 1024 * 4; //4k
@@ -526,7 +527,20 @@ std::wstring FileData::getHash() const
         auto lastOffset = reinterpret_cast<std::uint64_t>(overlappedIoBlock.Pointer);
         lastOffset += bytesRead;
         overlappedIoBlock.Pointer = reinterpret_cast<PVOID>(lastOffset);
-        ::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock);
+        if (::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock) == 0)
+        {
+            DWORD error = GetLastError();
+            if (error == ERROR_HANDLE_EOF)
+            {
+                break;
+            }
+            else if (error != 0)
+            {
+                CloseHandle(file);
+                CloseHandle(overlappedIoBlock.hEvent);
+            }
+        }
+
         // Hash what we just read
         hash.Update(hashingBuffer,bytesRead);
     }
