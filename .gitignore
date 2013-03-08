@@ -1,0 +1,11 @@
+Debug
+Release
+x64
+ipch
+*.sdf
+*.opensdf
+*.suo
+*.user
+.lock-waf_win32_build
+build/
+waf3-1.7.9-16e1644c17ba46b94844133bac6e2a8c/

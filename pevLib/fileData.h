@@ -13,6 +13,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdint>
+#include <strsafe.h>
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
@@ -471,6 +472,20 @@ inline std::wstring FileData::GetVerSpecialBuild() const
     return getVersionInformationString(L"SpecialBuild");
 }
 
+inline std::wstring GetHashErrorMessage(DWORD error)
+{
+    if (error == ERROR_LOCK_VIOLATION)
+    {
+        return std::wstring(L"!HASH: ERROR_LOCK_VIOLATION !!!!", 32);
+    }
+    else
+    {
+        wchar_t buff[33];
+        _snwprintf_s(buff, 32, L"!HASH: WIN32 ERROR 0x%08X !!", error);
+        return std::wstring(buff, 32);
+    }
+}
+
 template <typename hashType> 
 std::wstring FileData::getHash() const
 {
@@ -486,10 +501,9 @@ std::wstring FileData::getHash() const
     disable64.enableFS();
     if (file == INVALID_HANDLE_VALUE)
     {
-        if (error == ERROR_LOCK_VIOLATION)
-            return L"!HASH: ERROR_LOCK_VIOLATION !!!!";
-        return L"!HASH: COULD NOT OPEN FILE !!!!!";
+        return GetHashErrorMessage(::GetLastError());
     }
+
     hashType hash;
     typedef unsigned char byte;
     auto const bytesToAttempt = 1024 * 4; //4k
@@ -498,7 +512,14 @@ std::wstring FileData::getHash() const
     byte* readingBuffer = buffer1.get();
     byte* hashingBuffer = buffer2.get();
 
-    ::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock);
+    if (::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock) == 0)
+    {
+    	DWORD error = ::GetLastError();
+        if (error != ERROR_IO_PENDING)
+        {
+            return GetHashErrorMessage(error);
+        }
+    }
 
     for (;;)
     {
@@ -514,9 +535,7 @@ std::wstring FileData::getHash() const
             {
                 CloseHandle(file);
                 CloseHandle(overlappedIoBlock.hEvent);
-                if (error == ERROR_LOCK_VIOLATION)
-                    return L"!HASH: ERROR_LOCK_VIOLATION !!!!";
-                return L"!HASH: COULD NOT OPEN FILE !!!!!";
+                return GetHashErrorMessage(error);
             }
         }
 
@@ -526,7 +545,17 @@ std::wstring FileData::getHash() const
         auto lastOffset = reinterpret_cast<std::uint64_t>(overlappedIoBlock.Pointer);
         lastOffset += bytesRead;
         overlappedIoBlock.Pointer = reinterpret_cast<PVOID>(lastOffset);
-        ::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock);
+        if (::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock) == 0)
+        {
+            DWORD error = ::GetLastError();
+            if (error != ERROR_IO_PENDING)
+            {
+                CloseHandle(file);
+                CloseHandle(overlappedIoBlock.hEvent);
+                return GetHashErrorMessage(error);
+            }
+        }
+
         // Hash what we just read
         hash.Update(hashingBuffer,bytesRead);
     }

@@ -1,3 +1,4 @@
+#ifndef DISABLE_PRECOMPILED_HEADERS
 #include <memory>
 #include <vector>
 #include <string>
@@ -17,3 +18,5 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
 #include <boost/xpressive/xpressive_dynamic.hpp>
+#endif
+
