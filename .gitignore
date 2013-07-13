@@ -9,3 +9,8 @@ ipch
 .lock-waf_win32_build
 build/
 waf3-1.7.9-16e1644c17ba46b94844133bac6e2a8c/
+_UpgradeReport_Files/*
+thirdParty/cryptopp562/adhoc.cpp.copied
+UpgradeLog.htm
+UpgradeLog.XML
+thirdParty/cryptopp562/adhoc.cpp
