@@ -12,12 +12,6 @@
     <Filter Include="Precompiled">
       <UniqueIdentifier>{fde33c8a-7b14-420a-a07c-30155b312cac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Whitelists">
-      <UniqueIdentifier>{960e73c8-6776-4c56-bae9-fd2115f6b151}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Protocol Buffers">
-      <UniqueIdentifier>{b54d4d76-1712-4a80-8a25-22198b8f2108}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="File.cpp">
@@ -50,9 +44,6 @@
     <ClCompile Include="StockOutputFormats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Whitelist.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ServiceControlManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -69,9 +60,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SecurityCenter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CompiledProtocolBuffers\Whitelist.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Wmi.cpp">
@@ -193,21 +181,5 @@
     <ClInclude Include="Expected.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="CommonWhitelists.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Running Processes.txt">
-      <Filter>Whitelists</Filter>
-    </None>
-    <None Include="Services Drivers.txt">
-      <Filter>Whitelists</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="Whitelist.proto">
-      <Filter>Protocol Buffers</Filter>
-    </CustomBuild>
   </ItemGroup>
 </Project>

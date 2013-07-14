@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptlib", "thirdParty\cryptopp562\cryptlib.vcxproj", "{3423EC9A-52E4-4A4D-9753-EDEBC38785EF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LogCommon", "LogCommon\LogCommon.vcxproj", "{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -47,6 +49,14 @@ Global
 		{3423EC9A-52E4-4A4D-9753-EDEBC38785EF}.Release|Win32.Build.0 = Release|Win32
 		{3423EC9A-52E4-4A4D-9753-EDEBC38785EF}.Release|x64.ActiveCfg = Release|x64
 		{3423EC9A-52E4-4A4D-9753-EDEBC38785EF}.Release|x64.Build.0 = Release|x64
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Debug|Win32.Build.0 = Debug|Win32
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Debug|x64.ActiveCfg = Debug|x64
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Debug|x64.Build.0 = Debug|x64
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Release|Win32.ActiveCfg = Release|Win32
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Release|Win32.Build.0 = Release|Win32
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Release|x64.ActiveCfg = Release|x64
+		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

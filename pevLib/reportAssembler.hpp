@@ -11,18 +11,16 @@ namespace vFind
 
 class QueryChain
 {
-    std::vector<IInputProvider*> inputs;
-    std::vector<IFilter* > filters;
-    std::vector<IOutput* > outputs;
+    std::vector<std::unique_ptr<IInputProvider>> inputs;
+    std::vector<std::unique_ptr<IFilter>> filters;
+    std::vector<std::unique_ptr<IOutput>> outputs;
 
     void RunInput(IInputProvider&);
 
 public:
-    ~QueryChain();
-
-    void Install(std::auto_ptr<IInputProvider> newInput);
-    void Install(std::auto_ptr<IFilter> newFilter);
-    void Install(std::auto_ptr<IOutput> newOutput);
+    void Install(std::unique_ptr<IInputProvider> newInput);
+    void Install(std::unique_ptr<IFilter> newFilter);
+    void Install(std::unique_ptr<IOutput> newOutput);
 
     void Run();
 };

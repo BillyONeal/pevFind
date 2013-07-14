@@ -10,7 +10,6 @@
 #include <fstream>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include "processManager.h"
 #include "utility.h"
 #include "Version.hpp"
 
@@ -51,7 +50,7 @@ int __cdecl wmain(int argc, wchar_t* argv[])
     else if (iequals(firstArgument, L"PLIST"))
         return plist::main(argc, argv);
     else if (iequals(firstArgument, L"CLIST"))
-        return clist::main();
+        return clist::main(argc, argv);
     else if (iequals(firstArgument, L"LINK"))
         return link::main(argc, argv);
     else if (iequals(firstArgument, L"VOLUME"))

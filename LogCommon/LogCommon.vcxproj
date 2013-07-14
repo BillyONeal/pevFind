@@ -238,26 +238,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Com.cpp" />
-    <ClCompile Include="CompiledProtocolBuffers\Whitelist.pb.cc">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_TraceOn|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_TraceOn|x64'">NotUsing</PrecompiledHeader>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</TreatWarningAsError>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release_TraceOn|Win32'">TurnOffAllWarnings</WarningLevel>
-      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</TreatWarningAsError>
-      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release_TraceOn|Win32'">false</TreatWarningAsError>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
-      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release_TraceOn|x64'">TurnOffAllWarnings</WarningLevel>
-      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
-      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release_TraceOn|x64'">false</TreatWarningAsError>
-    </ClCompile>
     <ClCompile Include="Dns.cpp" />
     <ClCompile Include="EventLog.cpp" />
     <ClCompile Include="File.cpp" />
@@ -286,7 +266,6 @@
     <ClCompile Include="SharpStreams.cpp" />
     <ClCompile Include="StockOutputFormats.cpp" />
     <ClCompile Include="StringUtilities.cpp" />
-    <ClCompile Include="Whitelist.cpp" />
     <ClCompile Include="Win32Exception.cpp" />
     <ClCompile Include="Win32Glue.cpp" />
     <ClCompile Include="Wmi.cpp" />
@@ -333,27 +312,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="CommonWhitelists.rc">
-      <NullTerminateStrings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</NullTerminateStrings>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="PseudoHjt.cpp" />
-    <None Include="Running Processes.txt" />
-    <None Include="Services Drivers.txt" />
-    <CustomBuild Include="Whitelist.proto">
-      <FileType>Document</FileType>
-      <Command>rmdir /s /q "$(ProjectDir)CompiledProtocolBuffers"
-mkdir "$(ProjectDir)CompiledProtocolBuffers"
-"$(SolutionDir)ThirdParty\protobuf-2.4.1\protoc.exe"  --proto_path="$(ProjectDir)\" --cpp_out="$(ProjectDir)CompiledProtocolBuffers" "%(FullPath)"</Command>
-      <Message>Building Protocol Buffers File: %(Identity)</Message>
-      <Outputs>$(ProjectDir)CompiledProtocolBuffers;$(ProjectDir)CompiledProtocolBuffers\Whitelist.pb.h;$(ProjectDir)CompiledProtocolBuffers\Whitelist.pb.cc;%(Outputs)</Outputs>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)ThirdParty\protobuf-2.4.1\vsprojects\libprotobuf-lite.vcxproj">
-      <Project>{49ea010d-706f-4be2-a397-77854b72a040}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

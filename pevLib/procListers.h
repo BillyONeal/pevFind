@@ -12,5 +12,5 @@ namespace plist
 
 namespace clist
 {
-    int main();
+    int main(int argc, wchar_t * argv[]);
 };

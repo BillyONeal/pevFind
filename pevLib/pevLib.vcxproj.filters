@@ -65,9 +65,6 @@
     <ClCompile Include="procListers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="procManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="regex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -170,9 +167,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OPSTRUCT.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="processManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="processScanner.h">

@@ -6,33 +6,35 @@
 // processScanner.cpp -- Implements process kill mode
 #include "pch.hpp"
 #include <vector>
-#include <list>
-#include "processManager.h"
 #include "processScanner.h"
 #include "criterion.h"
 #include "globalOptions.h"
 #include "fileData.h"
+#include "../LogCommon/Win32Exception.hpp"
+#include "../LogCommon/Process.hpp"
 
 namespace scanners {
 
     void processScanner::scan()
     {
         if (globalOptions::noSubDirectories)
+		{
             globalOptions::logicalTree->makeNonRecursive();
-        std::list<FileData> results;
-        processManager mgr;
-        std::vector<process> source(mgr.enumerate());
-        for (std::vector<process>::iterator it = source.begin(); it != source.end(); it++)
+		}
+
+		Instalog::SystemFacades::ProcessEnumerator processes;
+		for (auto& process : processes)
         {
             try 
             {
-                FileData theRecord(it->executablePath());
+                FileData theRecord(process.GetExecutablePath());
                 if (globalOptions::logicalTree->include(theRecord))
                 {
-                    it->kill();
+                    process.Terminate();
                 }
-            } catch (...) {};
+            }
+			catch (Instalog::SystemFacades::Win32Exception const&)
+			{}
         }
     }
-
 }

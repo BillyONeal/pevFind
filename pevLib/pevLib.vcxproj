@@ -167,7 +167,6 @@
     </ClCompile>
     <ClCompile Include="processScanner.cpp" />
     <ClCompile Include="procListers.cpp" />
-    <ClCompile Include="procManager.cpp" />
     <ClCompile Include="regex.cpp" />
     <ClCompile Include="regImport.cpp" />
     <ClCompile Include="registry.cpp" />
@@ -204,7 +203,6 @@
     <ClInclude Include="moveex.h" />
     <ClInclude Include="OPSTRUCT.h" />
     <ClInclude Include="pch.hpp" />
-    <ClInclude Include="processManager.h" />
     <ClInclude Include="processScanner.h" />
     <ClInclude Include="procListers.h" />
     <ClInclude Include="regex.h" />
@@ -229,8 +227,21 @@
     <ClInclude Include="zipIt.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LogCommon\LogCommon.vcxproj">
+      <Project>{2823e2c6-d995-4944-a45d-1feb3fdddae9}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
     <ProjectReference Include="..\thirdParty\cryptopp562\cryptlib.vcxproj">
       <Project>{3423ec9a-52e4-4a4d-9753-edebc38785ef}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
