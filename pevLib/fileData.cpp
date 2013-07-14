@@ -155,13 +155,13 @@ std::wstring FileData::getAttributesString() const
 }
 std::wstring FileData::getPEAttribsString() const
 {
-    if (!(bits & PEENUMERATED))
-        initPortableExecutable();
+    initPortableExecutable();
+	sigVerify();
     std::wstring result;
     result.reserve(6);
     appendAttributeCharacter(result, L'1', ISPE);
     appendAttributeCharacter(result, L'2', DEBUG);
-    appendAttributeCharacter(result, L'3', SIGPRESENT);
+    appendAttributeCharacter(result, L'3', SIGVALID);
     appendAttributeCharacter(result, L'4', DLL);
     if (peHeaderChecksumIsValid())
         result.append(1, L'5');
@@ -318,7 +318,7 @@ void FileData::initPortableExecutable() const
         }
 
         //Find headerSum
-        //Offset from the base address is 32 (64 from begining of the optional header)
+        //Offset from the base address is 32 (64 from beginning of the optional header)
         if (SetFilePointer(hFile.get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
             return;
         //Read headerSum
@@ -339,106 +339,164 @@ void FileData::initPortableExecutable() const
         //Read NumberOfRvaAndSizes
         if (!ReadFile(hFile.get(), &numberOfSections, sizeof(DWORD), &lengthRead, NULL))
             return;
-
-        //There can be no signature in the file if the number of sections is less than 5,
-        //because the certificate table is the 5th section.
-        if (numberOfSections < 5)
-            return;
-
-        //Check for certificates
-        //Look for "Certificate Table", 32 bytes from the RvaAndSizes
-        if (SetFilePointer(hFile.get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
-            return;
-
-        //The certificate table pointer is 8 bytes long -- it will be all zeros if the table is not present.
-        DWORD CertVirtualAddress, CertSize;
-        if (!ReadFile(hFile.get(), &CertVirtualAddress, sizeof(DWORD), &lengthRead, NULL))
-            return;
-        if (!ReadFile(hFile.get(), &CertSize, sizeof(DWORD), &lengthRead, NULL))
-            return;
-
-        //If the size of the certificate section is not 0, set the sigpresent flag.
-        if (CertSize)
-            bits |= SIGPRESENT;
     }
 
 }
+
 
 void FileData::sigVerify() const
 {
-    HANDLE hFile = getFileHandle();
-    if (hFile == INVALID_HANDLE_VALUE)
-        return;
-    WINTRUST_FILE_INFO FileData;
-    memset(&FileData, 0, sizeof(WINTRUST_FILE_INFO));
-    FileData.cbStruct = sizeof(WINTRUST_FILE_INFO);
-    FileData.hFile = hFile;
-    WINTRUST_DATA trustData;
-    memset(&trustData, 0, sizeof(WINTRUST_DATA));
-    trustData.cbStruct = sizeof(WINTRUST_DATA);
-    trustData.dwUIChoice = WTD_UI_NONE;
-    trustData.fdwRevocationChecks = WTD_REVOKE_NONE;
-    trustData.dwUnionChoice = WTD_CHOICE_FILE;
-    trustData.dwProvFlags = WTD_SAFER_FLAG;
-    trustData.pFile = &FileData;
-    //End of MSDN defaults
-    GUID policyGuid = WINTRUST_ACTION_GENERIC_VERIFY_V2;
-    LONG result = WinVerifyTrust(static_cast<HWND>(INVALID_HANDLE_VALUE),&policyGuid,&trustData);
-    switch(result)
-    {
-    case ERROR_SUCCESS:                //Verified sucessfully
-        bits |= SIGPRESENT;
-        bits |= SIGVALID;
-        break;
-    case CRYPT_E_SECURITY_SETTINGS: //Error with Crypto, but sig present
-        bits |= CRYPTSVCERROR;
-        break;
-    case TRUST_E_EXPLICIT_DISTRUST: //Sig invalid
-    case TRUST_E_SUBJECT_NOT_TRUSTED:
-        bits |= SIGPRESENT;
-        bits &= (~SIGVALID);
-        break;
-    default:
-        {
-            //Something else wrong -- likely windows file without authenticode.
-            trustData.dwUnionChoice = WTD_CHOICE_CATALOG;
-            WINTRUST_CATALOG_INFO catInfo;
-            trustData.pCatalog = &catInfo;
-            catInfo.cbStruct = sizeof(WINTRUST_CATALOG_INFO);
-            catInfo.pcwszMemberFilePath = fileName.c_str();
-            catInfo.hMemberFile = hFile;
-            HCATADMIN catalogHandler;
-            // Get a context to the system catalog database
-            CryptCATAdminAcquireContext(&catalogHandler,NULL,NULL);
-            DWORD hashLen = 0;
-            //Calculate the file's hash. Get length of required hash len.
-            CryptCATAdminCalcHashFromFileHandle(hFile,&hashLen,NULL,NULL);
-            //Allocate ram for and calculate hash.
-            std::vector<unsigned char> hash;
-            hash.resize(hashLen);
-            CryptCATAdminCalcHashFromFileHandle(hFile,&hashLen,&hash[0],NULL);
-            //Get the catalog to which that hash corresponds.
-            HCATINFO hCatInfo = CryptCATAdminEnumCatalogFromHash(catalogHandler,&hash[0],hashLen,NULL,NULL);
-            if (!hCatInfo)
-            {
-                //The hash is not in any catalog
-                bits &= (~SIGVALID);
-                CloseHandle(hFile);
-                CryptCATAdminReleaseContext(catalogHandler,NULL);
-                return;
-            } else
-            {
-                //Clean up our refrence to the context and catalog
-                CryptCATAdminReleaseCatalogContext(catalogHandler,hCatInfo,NULL);
-                CryptCATAdminReleaseContext(catalogHandler,NULL);
-                bits |= SIGVALID;
-                CloseHandle(hFile);
-                return;
-            }
-        }
-    }
-    CloseHandle(hFile);
+	//Author: AD, 2009
+	PVOID Context;
+	HANDLE FileHandle;
+	DWORD HashSize = 0;
+	PVOID CatalogContext;
+	CATALOG_INFO InfoStruct;
+	WINTRUST_DATA WintrustStructure;
+	WINTRUST_CATALOG_INFO WintrustCatalogStructure;
+	WINTRUST_FILE_INFO WintrustFileStructure;
+	BOOLEAN ReturnFlag = FALSE;
+	ULONG ReturnVal;
+	GUID ActionGuid = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+
+	//Zero our structures.
+	memset(&InfoStruct, 0, sizeof(CATALOG_INFO));
+	InfoStruct.cbStruct = sizeof(CATALOG_INFO);
+	memset(&WintrustCatalogStructure, 0, sizeof(WINTRUST_CATALOG_INFO));
+	WintrustCatalogStructure.cbStruct = sizeof(WINTRUST_CATALOG_INFO);
+	memset(&WintrustFileStructure, 0, sizeof(WINTRUST_FILE_INFO));
+	WintrustFileStructure.cbStruct = sizeof(WINTRUST_FILE_INFO);
+
+	//Get a context for signature verification.
+	if( !CryptCATAdminAcquireContext(&Context, NULL, 0) )
+	{
+		return;
+	}
+
+	//Open file.
+	FileHandle = this->getFileHandle(true);
+	if( INVALID_HANDLE_VALUE == FileHandle )
+	{
+		CryptCATAdminReleaseContext(Context, 0);
+		return;
+	}
+
+	//Get the size we need for our hash.
+	CryptCATAdminCalcHashFromFileHandle(FileHandle, &HashSize, NULL, 0);
+	if( HashSize == 0 )
+	{
+		//0-sized has means error!
+		CryptCATAdminReleaseContext(Context, 0);
+		CloseHandle(FileHandle);
+		return;
+	}
+
+	//Allocate memory.
+	std::unique_ptr<BYTE> Buffer(new BYTE[HashSize]);
+
+	//Actually calculate the hash
+	if( !CryptCATAdminCalcHashFromFileHandle(FileHandle, &HashSize, Buffer.get(), 0) )
+	{
+		CryptCATAdminReleaseContext(Context, 0);
+		CloseHandle(FileHandle);
+		return;
+	}
+
+	//Convert the hash to a string.
+	std::unique_ptr<wchar_t> MemberTag(new wchar_t[HashSize * 2 + 1]);
+	for( unsigned int i = 0; i < HashSize; i++ )
+	{
+		::swprintf_s(MemberTag.get() + (i * 2), 3, L"%02X", Buffer.get()[i]);
+	}
+
+	//Get catalog for our context.
+	CatalogContext = CryptCATAdminEnumCatalogFromHash(Context, Buffer.get(), HashSize, 0, NULL);
+	if ( CatalogContext )
+	{
+		//If we couldn't get information
+		if ( !CryptCATCatalogInfoFromContext(CatalogContext, &InfoStruct, 0) )
+		{
+			//Release the context and set the context to null so it gets picked up below.
+			CryptCATAdminReleaseCatalogContext(Context, CatalogContext, 0);
+			CatalogContext = NULL;
+		}
+	}
+
+	//If we have a valid context, we got our info.  
+	//Otherwise, we attempt to verify the internal signature.
+	if( CatalogContext )
+	{
+		//If we get here, we have catalog info!  Verify it.
+		WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
+		WintrustStructure.pPolicyCallbackData = 0;
+		WintrustStructure.pSIPClientData = 0;
+		WintrustStructure.dwUIChoice = WTD_UI_NONE;
+		WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
+		WintrustStructure.dwUnionChoice = WTD_CHOICE_CATALOG;
+		WintrustStructure.pCatalog = &WintrustCatalogStructure;
+		WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
+		WintrustStructure.hWVTStateData = NULL;
+		WintrustStructure.pwszURLReference = NULL;
+		WintrustStructure.dwProvFlags = 0;
+		WintrustStructure.dwUIContext = WTD_UICONTEXT_EXECUTE;
+
+		//Fill in catalog info structure.
+		WintrustCatalogStructure.cbStruct = sizeof(WINTRUST_CATALOG_INFO);
+		WintrustCatalogStructure.dwCatalogVersion = 0;
+		WintrustCatalogStructure.pcwszCatalogFilePath = InfoStruct.wszCatalogFile;
+		WintrustCatalogStructure.cbCalculatedFileHash = HashSize;
+		WintrustCatalogStructure.pbCalculatedFileHash = Buffer.get();
+		WintrustCatalogStructure.pcwszMemberTag = MemberTag.get();
+		WintrustCatalogStructure.pcwszMemberFilePath = this->fileName.c_str();
+		WintrustCatalogStructure.hMemberFile = NULL;
+	}
+	else
+	{
+		WintrustFileStructure.cbStruct = sizeof(WINTRUST_FILE_INFO);
+		WintrustFileStructure.pcwszFilePath = this->fileName.c_str();
+		WintrustFileStructure.hFile = NULL;
+		WintrustFileStructure.pgKnownSubject = NULL;
+
+		WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
+		WintrustStructure.dwUnionChoice = WTD_CHOICE_FILE;
+		WintrustStructure.pFile = &WintrustFileStructure;
+		WintrustStructure.dwUIChoice = WTD_UI_NONE;
+		WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
+		WintrustStructure.dwStateAction = WTD_STATEACTION_IGNORE;
+		WintrustStructure.dwProvFlags = WTD_SAFER_FLAG;
+		WintrustStructure.hWVTStateData = NULL;
+		WintrustStructure.pwszURLReference = NULL;
+	}
+
+	//Call our verification function.
+	ReturnVal = WinVerifyTrust(0, &ActionGuid, &WintrustStructure);
+
+	//Check return.
+	ReturnFlag = SUCCEEDED(ReturnVal);
+
+	//Free context.
+	if( CatalogContext )
+	{
+		CryptCATAdminReleaseCatalogContext(Context, CatalogContext, 0);
+	}
+
+	//If we successfully verified, we need to free.
+	if( ReturnFlag )
+	{
+		WintrustStructure.dwStateAction = WTD_STATEACTION_CLOSE;
+		WinVerifyTrust(0, &ActionGuid, &WintrustStructure);
+	}
+
+	//Free memory.
+	CloseHandle(FileHandle);
+	CryptCATAdminReleaseContext(Context, 0);
+
+	if (ReturnFlag)
+	{
+		bits |= SIGVALID;
+	}
 }
+
 #pragma warning (push)
 #pragma warning (disable: 4706)
 std::wstring FileData::MD5() const

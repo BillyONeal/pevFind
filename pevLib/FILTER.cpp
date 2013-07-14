@@ -241,14 +241,6 @@ unsigned __int32 peFilter::getPriorityClass() const
 {
     return PRIORITY_PE_DATA;
 }
-BOOL hasSig::include(FileData &file) const
-{
-    return file.hasAuthenticodeSignature();
-}
-std::wstring hasSig::debugTree() const
-{
-    return std::wstring(L"+ HASSIGNATURE");
-}
 BOOL isPEFile::include(FileData &file) const
 {
     return file.isPE();

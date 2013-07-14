@@ -197,11 +197,6 @@ struct peFilter : public criterion
 {
     unsigned __int32 getPriorityClass() const;
 };
-struct hasSig : public peFilter
-{
-    BOOL include(FileData &file) const;
-    std::wstring debugTree() const;
-};
 struct isPEFile : public peFilter
 {
     BOOL include(FileData &file) const;

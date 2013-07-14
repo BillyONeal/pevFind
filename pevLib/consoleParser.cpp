@@ -536,10 +536,6 @@ void consoleParser::parseTypeString(commandToken& token, std::vector<std::shared
         case L'g':
             results.push_back(std::shared_ptr<criterion>(new sigIsValid()));
             break;
-        case L'I':
-        case L'i':
-            results.push_back(std::shared_ptr<criterion>(new hasSig()));
-            break;
         case L'J':
         case L'j':
             results.push_back(std::shared_ptr<criterion>(new timestampValid()));

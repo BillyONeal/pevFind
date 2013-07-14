@@ -1,0 +1,15 @@
+Changes in 1.5.16:
+* Process listing and enumeration routines are replaced with those taken from
+  Instalog.
+* Verifying presence of a siguature is no longer supported. Signatures are
+  either valid or not valid. The "3" in the #p format string is replaced with
+  "signature valid" rather than "authenticode signature present", and the -ti
+  switch is removed.
+* Fixed a bug in signature checking. Previously, if a signature was found in
+  a catalog for a file, even if that signature was not trusted, the file was
+  reported signed. Now, files are only reported signed if there is a trusted
+  root certificate at the root of the signing chain.
+
+Changes in 1.5.15:
+ ~~ Start of this changelog ~~
+ 

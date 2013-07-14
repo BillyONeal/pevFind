@@ -49,7 +49,7 @@ pevFind is a combination of an enhanced vFind and other tools.
         123456 
         1      Is pe file
          2     Has debug info
-          3    Signed
+          3    Has valid signature
            4   DLL
             5  Checksum valid in pe header. Valid will be considered NULL for
                no checksum, or equal to the calculated checksum.
@@ -59,10 +59,7 @@ pevFind is a combination of an enhanced vFind and other tools.
     #s = size
     #t = types
     #u = unpadded size
-    #v = PE signature is valid. Prints 7 for valid or - for not. There can be
-        a valid signature even if the file even if the file contains no signature.
-        This is because when checking for validity pevFind will also look in
-        windows' catalogs for a matching hash for the file in question.
+    #v = PE signature is valid. Prints 7 for valid or - for not.
     #w = File is protected by windows file protection. 8 for protected, - for not.
     #x = Special Build
     #y = Header checksum in hex. Will be ten characters, 0xAAAAAAAA
