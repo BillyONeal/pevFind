@@ -3,8 +3,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
-// consoleParser.cpp -- Implements the class responsable for
-// processing pevFind's commandline. Implements the recursive
+// consoleParser.cpp -- Implements the class responsible for
+// processing pevFind's command line. Implements the recursive
 // descent parser.
 
 #include "pch.hpp"
@@ -32,7 +32,7 @@ std::shared_ptr<criterion> consoleParser::parseCmdLine(const std::wstring& comma
         curToken++;
     std::shared_ptr<criterion> result(andParse());
     if (curToken->type != END)
-        throw std::runtime_error("Commandline Syntax Error!!");
+        throw std::runtime_error("Command line Syntax Error!!");
     return result;
 }
 //Initial tokenizing function

@@ -495,6 +495,118 @@ void FileData::sigVerify() const
 	}
 }
 
+
+inline std::wstring GetHashErrorMessage(DWORD error)
+{
+	if (error == ERROR_LOCK_VIOLATION)
+	{
+		return std::wstring(L"!HASH: ERROR_LOCK_VIOLATION !!!!", 32);
+	}
+	else
+	{
+		wchar_t buff[33];
+		_snwprintf_s(buff, 32, L"!HASH: WIN32 ERROR 0x%08X !!", error);
+		return std::wstring(buff, 32);
+	}
+}
+
+template <typename hashType> 
+std::wstring FileData::getHash() const
+{
+	using std::swap;
+
+	OVERLAPPED overlappedIoBlock = {};
+	HANDLE file;
+	disable64.disableFS();
+	file = ::CreateFileW(getFileName().c_str(),GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED, nullptr);
+	DWORD error = GetLastError();
+	disable64.enableFS();
+	if (file == INVALID_HANDLE_VALUE)
+	{
+		return GetHashErrorMessage(error);
+	}
+
+	hashType hash;
+	typedef unsigned char byte;
+	auto const bytesToAttempt = 1024 * 4; //4k
+	byte backingBuffer[bytesToAttempt * 2];
+	byte* readingBuffer = backingBuffer;
+	byte* hashingBuffer = readingBuffer + bytesToAttempt;
+	DWORD lastBytesRead = 0;
+
+	for (;;)
+	{
+		// Move the spot we are reading forward
+		DWORD oldOffset = overlappedIoBlock.Offset;
+		overlappedIoBlock.Offset += lastBytesRead;
+		if (oldOffset > overlappedIoBlock.Offset)
+		{
+			++overlappedIoBlock.OffsetHigh;
+		}
+
+		// Fire off a new read call
+		if (::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock) == 0)
+		{
+			DWORD error = ::GetLastError();
+			if (error == ERROR_HANDLE_EOF)
+			{
+				if (lastBytesRead != 0)
+				{
+					// Hash what we just read
+					hash.Update(hashingBuffer, lastBytesRead);
+				}
+				break;
+			}
+			else if (error != ERROR_IO_PENDING)
+			{
+				CloseHandle(file);
+				return GetHashErrorMessage(error);
+			}
+		}
+
+		if (lastBytesRead != 0)
+		{
+			// Hash what we just read
+			hash.Update(hashingBuffer, lastBytesRead);
+		}
+
+		::WaitForSingleObject(file, INFINITE);
+		if (::GetOverlappedResult(file, &overlappedIoBlock, &lastBytesRead, true) == 0)
+		{
+			DWORD error = GetLastError();
+			if (error == ERROR_HANDLE_EOF)
+			{
+				break;
+			}
+			else if (error != 0)
+			{
+				CloseHandle(file);
+				return GetHashErrorMessage(error);
+			}
+		}
+
+		// Swap in the new buffer for reading
+		swap(readingBuffer, hashingBuffer);
+	}
+
+	CloseHandle(file);
+
+	std::unique_ptr<byte[]> rawHash(new byte[hash.DigestSize()]);
+	hash.Final(rawHash.get());
+
+	std::wstring result;
+	static const wchar_t constantHexArray[] = L"0123456789ABCDEF";
+	result.resize(hash.DigestSize() * 2);
+	DWORD len = hash.DigestSize();
+	for (unsigned short int idx = 0; idx < len; idx++)
+	{
+		result[(len*2-1)-2*idx] = constantHexArray[(rawHash[(len-1)-idx] & 0x0F)];
+		result[(len*2-1)-(2*idx+1)] = constantHexArray[(rawHash[(len-1)-idx] & 0xF0) >> 4];
+	}
+
+	return result;
+}
+
 #pragma warning (push)
 #pragma warning (disable: 4706)
 std::wstring FileData::MD5() const
@@ -617,9 +729,9 @@ WORD FileData::ChkSum(WORD oldChk, USHORT * ptr, DWORD len) const
     DWORD c = oldChk;
     while (len)
     {
-        int l = std::min<int>(len, 0x4000);
+        DWORD l = std::min(len, 0x4000ul);
         len -= l;
-        for (int j=0; j<l; ++j)
+        for (DWORD j=0; j<l; ++j)
         {
             c += *ptr++;
         }
@@ -644,7 +756,7 @@ DWORD FileData::GetPEChkSum(LPCTSTR filename) const
     SetFilePointer(hf, 0, 0, FILE_BEGIN);
 
     const int sz = 0x10000;
-    void * mem = malloc(sz);
+    BYTE mem[sz];
     DWORD dwCheck = 0;
 
     dwRead = 0;
@@ -656,10 +768,9 @@ DWORD FileData::GetPEChkSum(LPCTSTR filename) const
 
     if (dwRead & 1)
     {
-        dwCheck += ((BYTE*)mem)[dwRead-1];
+        dwCheck += mem[dwRead-1];
         dwCheck = (dwCheck>>16) + (dwCheck&0xffff);
     }
-    free(mem);
     CloseHandle(hf);
 
     DWORD yy = 0;
