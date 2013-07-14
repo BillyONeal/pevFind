@@ -9,6 +9,7 @@ Changes in 1.5.16:
   a catalog for a file, even if that signature was not trusted, the file was
   reported signed. Now, files are only reported signed if there is a trusted
   root certificate at the root of the signing chain.
+* Fixed a bug which caused hashing functions to fail on Windows XP.
 
 Changes in 1.5.15:
  ~~ Start of this changelog ~~
