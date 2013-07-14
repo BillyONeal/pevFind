@@ -213,7 +213,6 @@
     <ClInclude Include="reportComponents.hpp" />
     <ClInclude Include="rexport.h" />
     <ClInclude Include="serviceControl.h" />
-    <ClInclude Include="stlUtil.hpp" />
     <ClInclude Include="timeoutThread.h" />
     <ClInclude Include="times.h" />
     <ClInclude Include="unzip.h" />

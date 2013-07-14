@@ -122,11 +122,17 @@ namespace Instalog {
 		return &handle;
 	}
 
-	UniqueHandle::~UniqueHandle()
+	void UniqueHandle::Close()
 	{
 		if (IsOpen())
 		{
 			::CloseHandle(handle);
+			handle = 0;
 		}
+	}
+
+	UniqueHandle::~UniqueHandle()
+	{
+		Close();
 	}
 }

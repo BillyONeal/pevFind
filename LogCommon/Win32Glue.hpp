@@ -60,6 +60,7 @@ namespace Instalog {
 		bool IsOpen() const;
 		HANDLE Get();
 		HANDLE* Ptr();
+		void Close();
 		~UniqueHandle();
 	};
 

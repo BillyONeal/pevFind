@@ -235,8 +235,5 @@
     <ClInclude Include="reportComponents.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="stlUtil.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

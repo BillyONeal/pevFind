@@ -217,9 +217,9 @@ void FileData::initPortableExecutable() const
         return;
 
     //Get a handle to the file
-    std::shared_ptr<void> hFile(getFileHandle(), CloseHandle);
+    auto hFile = getFileHandle();
     //Report false if the file could not be obtained
-    if (hFile.get() == INVALID_HANDLE_VALUE)
+    if (hFile.Get() == INVALID_HANDLE_VALUE)
         return;
 
     //A common DWORD for remembering the length of returned file data.
@@ -227,26 +227,26 @@ void FileData::initPortableExecutable() const
 
     //Check for the MZ signature at the beginning of the PE file.
     BYTE mzCheck[2];
-    ReadFile(hFile.get(), mzCheck, 2, &lengthRead, NULL);
+    ReadFile(hFile.Get(), mzCheck, 2, &lengthRead, NULL);
     if (lengthRead != 2 || memcmp(mzCheck, "MZ", 2))
         return;
 
     bits |= ISMZ;
 
     //Seek to offset 0x3C,which contains the offset to the PE header
-    if (SetFilePointer(hFile.get(), 0x3c, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer(hFile.Get(), 0x3c, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
         return;
     //Get the offset
     LONG peOffset;
-    if (!ReadFile(hFile.get(), &peOffset, sizeof(LONG), &lengthRead, NULL))
+    if (!ReadFile(hFile.Get(), &peOffset, sizeof(LONG), &lengthRead, NULL))
         return;
     //Seek to the offset
-    if (SetFilePointer(hFile.get(), peOffset, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer(hFile.Get(), peOffset, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
         return;
 
     //Check for PE Signature
     BYTE peSig[4];
-    ReadFile(hFile.get(), peSig, 4, &lengthRead, NULL);
+    ReadFile(hFile.Get(), peSig, 4, &lengthRead, NULL);
     if (lengthRead != 4)
         return;
 
@@ -261,7 +261,7 @@ void FileData::initPortableExecutable() const
         //Get the IMAGE_FILE_HEADER
         IMAGE_FILE_HEADER fileHeader;
         memset(&fileHeader, 0, sizeof(IMAGE_FILE_HEADER));
-        if (!ReadFile(hFile.get(), &fileHeader, sizeof(IMAGE_FILE_HEADER), &lengthRead, NULL))
+        if (!ReadFile(hFile.Get(), &fileHeader, sizeof(IMAGE_FILE_HEADER), &lengthRead, NULL))
             return;
 
         //Extract PE Header timestamp
@@ -275,7 +275,7 @@ void FileData::initPortableExecutable() const
 
         //Read the magic number from the optional header
         BYTE optionalHeaderMagic[2];
-        if (!ReadFile(hFile.get(), optionalHeaderMagic, 2, &lengthRead, NULL))
+        if (!ReadFile(hFile.Get(), optionalHeaderMagic, 2, &lengthRead, NULL))
             return;
 
         //Check for valid magic
@@ -303,130 +303,163 @@ void FileData::initPortableExecutable() const
         if (isPEPlus)
         {
             //In PE32+, the offset for the base address is 24, and is eight bytes long
-            if (SetFilePointer(hFile.get(), 22, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+            if (SetFilePointer(hFile.Get(), 22, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
                 return;
-            if (!ReadFile(hFile.get(), &imageBaseAddress, 8, &lengthRead, NULL))
+			if (!ReadFile(hFile.Get(), &imageBaseAddress, 8, &lengthRead, NULL))
                 return;
             bits |= PEPLUS;
         } else
         {
             //In PE32, the offset for the base address is 28, and is four bytes long.
-            if (SetFilePointer(hFile.get(), 26, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+            if (SetFilePointer(hFile.Get(), 26, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
                 return;
-            if (!ReadFile(hFile.get(), &imageBaseAddress, 4, &lengthRead, NULL))
+            if (!ReadFile(hFile.Get(), &imageBaseAddress, 4, &lengthRead, NULL))
                 return;
         }
 
         //Find headerSum
         //Offset from the base address is 32 (64 from beginning of the optional header)
-        if (SetFilePointer(hFile.get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+        if (SetFilePointer(hFile.Get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
             return;
         //Read headerSum
-        if (!ReadFile(hFile.get(), &headerSum, sizeof(DWORD), &lengthRead, NULL))
-            return;
-
-        //Find number of PE data sections
-        DWORD numberOfSections;
-        if (isPEPlus)
-        {
-            if (SetFilePointer(hFile.get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
-                return;
-        } else
-        {
-            if (SetFilePointer(hFile.get(), 40, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
-                return;
-        }
-        //Read NumberOfRvaAndSizes
-        if (!ReadFile(hFile.get(), &numberOfSections, sizeof(DWORD), &lengthRead, NULL))
+        if (!ReadFile(hFile.Get(), &headerSum, sizeof(DWORD), &lengthRead, NULL))
             return;
     }
 
 }
 
+class CatalogAdminContext;
+
+class CatalogHandle : boost::noncopyable
+{
+	friend class CatalogAdminContext;
+	HCATINFO catalogHandle;
+	PVOID context;
+	CatalogHandle(PVOID context_, HCATINFO catalogHandle_)
+		: catalogHandle(catalogHandle_)
+		, context(context_)
+	{
+	}
+public:
+	CatalogHandle(CatalogHandle&& other)
+		: catalogHandle(other.catalogHandle)
+		, context(other.context)
+	{
+		other.context = nullptr;
+		other.catalogHandle = 0;
+	}
+	CATALOG_INFO GetInfo() const
+	{
+		CATALOG_INFO InfoStruct = { sizeof(CATALOG_INFO) };
+		if ( !CryptCATCatalogInfoFromContext(catalogHandle, &InfoStruct, 0) )
+		{
+			Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
+		}
+
+		return InfoStruct;
+	}
+	~CatalogHandle()
+	{
+		if (context != nullptr)
+		{
+			CryptCATAdminReleaseCatalogContext(context, catalogHandle, 0);
+		}
+	}
+};
+
+class CatalogAdminContext : boost::noncopyable
+{
+	PVOID context_;
+public:
+	CatalogAdminContext()
+		: context_(nullptr)
+	{
+		if( !CryptCATAdminAcquireContext(&context_, NULL, 0) )
+		{
+			Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
+		}
+	}
+	~CatalogAdminContext()
+	{
+		CryptCATAdminReleaseContext(context_, 0);
+	}
+	CatalogHandle EnumCatalogFromHash(BYTE* hashData, DWORD hashLength)
+	{
+		HCATINFO catInfo = CryptCATAdminEnumCatalogFromHash(context_, hashData, hashLength, 0, NULL);
+		if (catInfo == 0)
+		{
+			Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
+		}
+		else
+		{
+			return CatalogHandle(context_, catInfo);
+		}
+	}
+};
+
+static bool CallWinVerifyTrust(WINTRUST_DATA& wintrustStructure)
+{
+	//Call our verification function.
+	GUID actionGuid = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+	LONG returnVal = WinVerifyTrust(static_cast<HWND>(INVALID_HANDLE_VALUE), &actionGuid, &wintrustStructure); // nothrow (open)
+	wintrustStructure.dwStateAction = WTD_STATEACTION_CLOSE; // nothrow
+	WinVerifyTrust(0, &actionGuid, &wintrustStructure); // nothrow (close)
+	return returnVal == 0;
+}
 
 void FileData::sigVerify() const
 {
-	//Author: AD, 2009
-	PVOID Context;
-	HANDLE FileHandle;
-	DWORD HashSize = 0;
-	PVOID CatalogContext;
-	CATALOG_INFO InfoStruct;
-	WINTRUST_DATA WintrustStructure;
-	WINTRUST_CATALOG_INFO WintrustCatalogStructure;
-	WINTRUST_FILE_INFO WintrustFileStructure;
-	BOOLEAN ReturnFlag = FALSE;
-	ULONG ReturnVal;
-	GUID ActionGuid = WINTRUST_ACTION_GENERIC_VERIFY_V2;
-
-	//Zero our structures.
-	memset(&InfoStruct, 0, sizeof(CATALOG_INFO));
-	InfoStruct.cbStruct = sizeof(CATALOG_INFO);
-	memset(&WintrustCatalogStructure, 0, sizeof(WINTRUST_CATALOG_INFO));
-	WintrustCatalogStructure.cbStruct = sizeof(WINTRUST_CATALOG_INFO);
-	memset(&WintrustFileStructure, 0, sizeof(WINTRUST_FILE_INFO));
-	WintrustFileStructure.cbStruct = sizeof(WINTRUST_FILE_INFO);
-
-	//Get a context for signature verification.
-	if( !CryptCATAdminAcquireContext(&Context, NULL, 0) )
-	{
-		return;
-	}
-
+	WINTRUST_DATA WintrustStructure = { sizeof(WINTRUST_DATA) };
+	
 	//Open file.
-	FileHandle = this->getFileHandle(true);
-	if( INVALID_HANDLE_VALUE == FileHandle )
+	Instalog::UniqueHandle fileHandle = this->getFileHandle(true);
+	if( !fileHandle.IsOpen() )
 	{
-		CryptCATAdminReleaseContext(Context, 0);
 		return;
 	}
-
-	//Get the size we need for our hash.
-	CryptCATAdminCalcHashFromFileHandle(FileHandle, &HashSize, NULL, 0);
-	if( HashSize == 0 )
+	try
 	{
-		//0-sized has means error!
-		CryptCATAdminReleaseContext(Context, 0);
-		CloseHandle(FileHandle);
-		return;
-	}
+		//Get a context for signature verification.
+		CatalogAdminContext adminContext;
 
-	//Allocate memory.
-	std::unique_ptr<BYTE> Buffer(new BYTE[HashSize]);
-
-	//Actually calculate the hash
-	if( !CryptCATAdminCalcHashFromFileHandle(FileHandle, &HashSize, Buffer.get(), 0) )
-	{
-		CryptCATAdminReleaseContext(Context, 0);
-		CloseHandle(FileHandle);
-		return;
-	}
-
-	//Convert the hash to a string.
-	std::unique_ptr<wchar_t> MemberTag(new wchar_t[HashSize * 2 + 1]);
-	for( unsigned int i = 0; i < HashSize; i++ )
-	{
-		::swprintf_s(MemberTag.get() + (i * 2), 3, L"%02X", Buffer.get()[i]);
-	}
-
-	//Get catalog for our context.
-	CatalogContext = CryptCATAdminEnumCatalogFromHash(Context, Buffer.get(), HashSize, 0, NULL);
-	if ( CatalogContext )
-	{
-		//If we couldn't get information
-		if ( !CryptCATCatalogInfoFromContext(CatalogContext, &InfoStruct, 0) )
+		//Get the size we need for our hash.
+		DWORD hashSize = 0;
+		CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, NULL, 0);
+		if( hashSize == 0 )
 		{
-			//Release the context and set the context to null so it gets picked up below.
-			CryptCATAdminReleaseCatalogContext(Context, CatalogContext, 0);
-			CatalogContext = NULL;
+			//0-sized has means error!
+			return;
 		}
-	}
 
-	//If we have a valid context, we got our info.  
-	//Otherwise, we attempt to verify the internal signature.
-	if( CatalogContext )
-	{
-		//If we get here, we have catalog info!  Verify it.
+		//Allocate memory.
+		std::unique_ptr<BYTE> hash(new BYTE[hashSize]);
+		BYTE* hashPtr = hash.get();
+
+		//Actually calculate the hash
+		if( !CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, hash.get(), 0) )
+		{
+			return;
+		}
+
+		//Convert the hash to a string.
+		std::unique_ptr<wchar_t> hashString(new wchar_t[hashSize * 2 + 1]);
+		for( unsigned int i = 0; i < hashSize; i++ )
+		{
+			::swprintf_s(hashString.get() + (i * 2), 3, L"%02X", hashPtr[i]);
+		}
+
+		CatalogHandle catalog = adminContext.EnumCatalogFromHash(hash.get(), hashSize);
+		CATALOG_INFO info = catalog.GetInfo();
+
+		//Fill in catalog info structure.
+		WINTRUST_CATALOG_INFO WintrustCatalogStructure = { sizeof(WINTRUST_CATALOG_INFO) };
+		WintrustCatalogStructure.dwCatalogVersion = 0;
+		WintrustCatalogStructure.pcwszCatalogFilePath = info.wszCatalogFile;
+		WintrustCatalogStructure.cbCalculatedFileHash = hashSize;
+		WintrustCatalogStructure.pbCalculatedFileHash = hash.get();
+		WintrustCatalogStructure.pcwszMemberTag = hashString.get();
+		WintrustCatalogStructure.pcwszMemberFilePath = this->fileName.c_str();
+
 		WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
 		WintrustStructure.pPolicyCallbackData = 0;
 		WintrustStructure.pSIPClientData = 0;
@@ -435,26 +468,17 @@ void FileData::sigVerify() const
 		WintrustStructure.dwUnionChoice = WTD_CHOICE_CATALOG;
 		WintrustStructure.pCatalog = &WintrustCatalogStructure;
 		WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
-		WintrustStructure.hWVTStateData = NULL;
-		WintrustStructure.pwszURLReference = NULL;
-		WintrustStructure.dwProvFlags = 0;
 		WintrustStructure.dwUIContext = WTD_UICONTEXT_EXECUTE;
-
-		//Fill in catalog info structure.
-		WintrustCatalogStructure.cbStruct = sizeof(WINTRUST_CATALOG_INFO);
-		WintrustCatalogStructure.dwCatalogVersion = 0;
-		WintrustCatalogStructure.pcwszCatalogFilePath = InfoStruct.wszCatalogFile;
-		WintrustCatalogStructure.cbCalculatedFileHash = HashSize;
-		WintrustCatalogStructure.pbCalculatedFileHash = Buffer.get();
-		WintrustCatalogStructure.pcwszMemberTag = MemberTag.get();
-		WintrustCatalogStructure.pcwszMemberFilePath = this->fileName.c_str();
-		WintrustCatalogStructure.hMemberFile = NULL;
+		if (CallWinVerifyTrust(WintrustStructure))
+		{
+			bits |= SIGVALID;
+		}
 	}
-	else
+	catch (Instalog::SystemFacades::Win32Exception const&)
 	{
-		WintrustFileStructure.cbStruct = sizeof(WINTRUST_FILE_INFO);
+		WINTRUST_FILE_INFO WintrustFileStructure = { sizeof(WINTRUST_FILE_INFO) };
 		WintrustFileStructure.pcwszFilePath = this->fileName.c_str();
-		WintrustFileStructure.hFile = NULL;
+		WintrustFileStructure.hFile = fileHandle.Get();
 		WintrustFileStructure.pgKnownSubject = NULL;
 
 		WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
@@ -462,38 +486,12 @@ void FileData::sigVerify() const
 		WintrustStructure.pFile = &WintrustFileStructure;
 		WintrustStructure.dwUIChoice = WTD_UI_NONE;
 		WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
-		WintrustStructure.dwStateAction = WTD_STATEACTION_IGNORE;
+		WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
 		WintrustStructure.dwProvFlags = WTD_SAFER_FLAG;
-		WintrustStructure.hWVTStateData = NULL;
-		WintrustStructure.pwszURLReference = NULL;
-	}
-
-	//Call our verification function.
-	ReturnVal = WinVerifyTrust(0, &ActionGuid, &WintrustStructure);
-
-	//Check return.
-	ReturnFlag = SUCCEEDED(ReturnVal);
-
-	//Free context.
-	if( CatalogContext )
-	{
-		CryptCATAdminReleaseCatalogContext(Context, CatalogContext, 0);
-	}
-
-	//If we successfully verified, we need to free.
-	if( ReturnFlag )
-	{
-		WintrustStructure.dwStateAction = WTD_STATEACTION_CLOSE;
-		WinVerifyTrust(0, &ActionGuid, &WintrustStructure);
-	}
-
-	//Free memory.
-	CloseHandle(FileHandle);
-	CryptCATAdminReleaseContext(Context, 0);
-
-	if (ReturnFlag)
-	{
-		bits |= SIGVALID;
+		if (CallWinVerifyTrust(WintrustStructure))
+		{
+			bits |= SIGVALID;
+		}
 	}
 }
 
@@ -590,7 +588,7 @@ std::wstring FileData::getVersionInformationString(const std::wstring& requested
 }
 
 
-HANDLE FileData::getFileHandle(bool readOnly) const
+Instalog::UniqueHandle FileData::getFileHandle(bool readOnly) const
 {
     disable64.disableFS();
     HANDLE result = CreateFile(
@@ -603,7 +601,7 @@ HANDLE FileData::getFileHandle(bool readOnly) const
         NULL
     );
     disable64.enableFS();
-    return result;
+    return Instalog::UniqueHandle(result);
 }
 /************************************************************************************
  *
@@ -765,9 +763,9 @@ void FileData::resetPEHeaderCheckSum()
     if (isPE() && peHeaderChecksumIsValid() && getPEHeaderCheckSum() != 0) return;
 
     //Get a handle to the file
-    std::shared_ptr<void> hFile(getFileHandle(false), CloseHandle);
+    Instalog::UniqueHandle hFile(getFileHandle(false));
     //Report false if the file could not be obtained
-    if (hFile.get() == INVALID_HANDLE_VALUE)
+    if (!hFile.IsOpen())
         return;
 
     //A common DWORD for remembering the length of returned file data.
@@ -775,24 +773,24 @@ void FileData::resetPEHeaderCheckSum()
 
     //Check for the MZ signature at the beginning of the PE file.
     BYTE mzCheck[2];
-    ReadFile(hFile.get(), mzCheck, 2, &lengthRead, NULL);
+    ReadFile(hFile.Get(), mzCheck, 2, &lengthRead, NULL);
     if (lengthRead != 2 || memcmp(mzCheck, "MZ", 2))
         return;
 
     //Seek to offset 0x3C,which contains the offset to the PE header
-    if (SetFilePointer(hFile.get(), 0x3c, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer(hFile.Get(), 0x3c, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
         return;
     //Get the offset
     LONG peOffset;
-    if (!ReadFile(hFile.get(), &peOffset, sizeof(LONG), &lengthRead, NULL))
+    if (!ReadFile(hFile.Get(), &peOffset, sizeof(LONG), &lengthRead, NULL))
         return;
     //Seek to the offset
-    if (SetFilePointer(hFile.get(), peOffset, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer(hFile.Get(), peOffset, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER)
         return;
 
     //Check for PE Signature
     BYTE peSig[4];
-    ReadFile(hFile.get(), peSig, 4, &lengthRead, NULL);
+    ReadFile(hFile.Get(), peSig, 4, &lengthRead, NULL);
     if (lengthRead != 4)
         return;
 
@@ -801,12 +799,12 @@ void FileData::resetPEHeaderCheckSum()
     //Get the IMAGE_FILE_HEADER
     IMAGE_FILE_HEADER fileHeader;
     memset(&fileHeader, 0, sizeof(IMAGE_FILE_HEADER));
-    if (!ReadFile(hFile.get(), &fileHeader, sizeof(IMAGE_FILE_HEADER), &lengthRead, NULL))
+    if (!ReadFile(hFile.Get(), &fileHeader, sizeof(IMAGE_FILE_HEADER), &lengthRead, NULL))
         return;
 
     //Read the magic number from the optional header
     BYTE optionalHeaderMagic[2];
-    if (!ReadFile(hFile.get(), optionalHeaderMagic, 2, &lengthRead, NULL))
+    if (!ReadFile(hFile.Get(), optionalHeaderMagic, 2, &lengthRead, NULL))
         return;
 
     //Check for valid magic
@@ -831,28 +829,28 @@ void FileData::resetPEHeaderCheckSum()
     if (isPEPlus)
     {
         //In PE32+, the offset for the base address is 24, and is eight bytes long
-        if (SetFilePointer(hFile.get(), 22, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+        if (SetFilePointer(hFile.Get(), 22, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
             return;
-        if (!ReadFile(hFile.get(), &imageBaseAddress, 8, &lengthRead, NULL))
+        if (!ReadFile(hFile.Get(), &imageBaseAddress, 8, &lengthRead, NULL))
             return;
     } else
     {
         //In PE32, the offset for the base address is 28, and is four bytes long.
-        if (SetFilePointer(hFile.get(), 26, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+        if (SetFilePointer(hFile.Get(), 26, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
             return;
-        if (!ReadFile(hFile.get(), &imageBaseAddress, 4, &lengthRead, NULL))
+        if (!ReadFile(hFile.Get(), &imageBaseAddress, 4, &lengthRead, NULL))
             return;
     }
 
     //Find headerSum
-    //Offset from the base address is 32 (64 from begining of the optional header)
-    if (SetFilePointer(hFile.get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+    //Offset from the base address is 32 (64 from beginning of the optional header)
+    if (SetFilePointer(hFile.Get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
         return;
     
     DWORD realSum = getPECalculatedCheckSum();
         
     //Write new headerSum
-    if (!WriteFile(hFile.get(), &realSum, sizeof(DWORD), &lengthRead, NULL))
+    if (!WriteFile(hFile.Get(), &realSum, sizeof(DWORD), &lengthRead, NULL))
         return;
         
     //Well the sum is correct now ;)

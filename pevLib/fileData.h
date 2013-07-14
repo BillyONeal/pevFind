@@ -18,6 +18,7 @@
 #include <cryptopp562/md5.h>
 #include <cryptopp562/sha.h>
 #include "utility.h"
+#include "../LogCommon/Win32Glue.hpp"
 
 class FileData
 {
@@ -119,7 +120,7 @@ class FileData
     inline void setupWin32Attributes() const;
 public:
     //Returns the Win32 handle for the file
-    HANDLE getFileHandle(bool readOnly = true) const;
+    Instalog::UniqueHandle getFileHandle(bool readOnly = true) const;
     //Construct a fileData record using a Win32FindData structure and a search path.
     FileData(const WIN32_FIND_DATA &rawData, const std::wstring& root);
     //Construct a fileData record using a raw filename
