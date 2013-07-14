@@ -873,8 +873,8 @@ void FileData::write()
     globalOptions::totalSize += getSize();
     globalOptions::blocks += (getSize() + 511) / 512;
     std::wstring line;
-    TCHAR const *cursor = globalOptions::displaySpecification.c_str();
-    static TCHAR checksumTemp[11];
+    wchar_t const *cursor = globalOptions::displaySpecification.c_str();
+    wchar_t checksumTemp[11];
     while (*cursor)
     {
         if (*cursor == L'#')
@@ -1011,12 +1011,12 @@ void FileData::write()
                 break;
             case L'Y':
             case L'y':
-                wsprintf(checksumTemp,L"0x%0.8X",getPEHeaderCheckSum());
+                swprintf_s(checksumTemp,L"0x%0.8X",getPEHeaderCheckSum());
                 line.append(checksumTemp);
                 break;
             case L'Z':
             case L'z':
-                wsprintf(checksumTemp,L"0x%0.8X",getPECalculatedCheckSum());
+                swprintf_s(checksumTemp,L"0x%0.8X",getPECalculatedCheckSum());
                 line.append(checksumTemp);
                 break;
             case L'#':
