@@ -48,6 +48,7 @@
     <ClCompile Include="link.cpp" />
     <ClCompile Include="linkResolve.cpp" />
     <ClCompile Include="logger.cpp" />
+    <ClCompile Include="Logic.cpp" />
     <ClCompile Include="mainScanner.cpp" />
     <ClCompile Include="moveex.cpp" />
     <ClCompile Include="opstruct.cpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="link.h" />
     <ClInclude Include="linkResolve.h" />
     <ClInclude Include="logger.h" />
+    <ClInclude Include="Logic.hpp" />
     <ClInclude Include="mainScanner.h" />
     <ClInclude Include="moveex.h" />
     <ClInclude Include="OPSTRUCT.h" />

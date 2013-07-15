@@ -113,6 +113,9 @@
     <ClCompile Include="pch.cpp">
       <Filter>Header Files\Precompiled</Filter>
     </ClCompile>
+    <ClCompile Include="Logic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="clsidCompressor.h">
@@ -222,6 +225,9 @@
     </ClInclude>
     <ClInclude Include="Version.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Logic.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

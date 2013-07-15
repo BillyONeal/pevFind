@@ -1,0 +1,8 @@
+Get visit paths:
+1. Push in NOTs
+2. Start at leaves of tree, and combine at each step.
+   * Maintain two lists, the known visit set and the no visit set.
+   * Combine at ORs by unioning the known visit sets, and intersecting no visit sets.
+   * Combine at ANDs by intersecting known visit sets, and unioning no visit sets.
+   * The pattern "vfindregex" creates a visit set with the rooting path.
+   * The pattern "!vfindregex" creates a no visit set with the rooting path.

@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptlib", "thirdParty\cryp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LogCommon", "LogCommon\LogCommon.vcxproj", "{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pevTests", "pevTests\pevTests.vcxproj", "{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -57,6 +59,14 @@ Global
 		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Release|Win32.Build.0 = Release|Win32
 		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Release|x64.ActiveCfg = Release|x64
 		{2823E2C6-D995-4944-A45D-1FEB3FDDDAE9}.Release|x64.Build.0 = Release|x64
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Debug|Win32.Build.0 = Debug|Win32
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Debug|x64.ActiveCfg = Debug|x64
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Debug|x64.Build.0 = Debug|x64
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Release|Win32.ActiveCfg = Release|Win32
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Release|Win32.Build.0 = Release|Win32
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Release|x64.ActiveCfg = Release|x64
+		{9E140125-C3B9-4334-B6A4-9A3CF0F7CA48}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
