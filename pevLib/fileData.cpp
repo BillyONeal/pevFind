@@ -25,6 +25,7 @@
 #include "logger.h"
 #include "fileData.h"
 #include "globalOptions.h"
+#include "../LogCommon/OptimisticBuffer.hpp"
 
 //Constants
 const wchar_t constantHexArray[] = L"0123456789ABCDEF";
@@ -422,33 +423,36 @@ void FileData::sigVerify() const
 		//Get a context for signature verification.
 		CatalogAdminContext adminContext;
 
-		//Get the size we need for our hash.
-		DWORD hashSize = 0;
-		CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, NULL, 0);
-		if( hashSize == 0 )
-		{
-			//0-sized has means error!
-			return;
-		}
-
-		//Allocate memory.
-		std::unique_ptr<BYTE> hash(new BYTE[hashSize]);
-		BYTE* hashPtr = hash.get();
+		// Allocate memory. Guess that CryptCatAdminCalcHashFromFileHandle uses SHA-1, which
+		// is 20 bytes.
+		DWORD const hashGuess = 20;
+		DWORD hashSize = hashGuess;
+		Instalog::OptimisticBuffer<hashGuess> hash(hashSize);
 
 		//Actually calculate the hash
-		if( !CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, hash.get(), 0) )
+		if( !CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, hash.Get(), 0) )
 		{
-			return;
+            if (::GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+            {
+			    return;
+            }
+
+            assert(false && "SHA-1 guess wrong.");
+            hash.Resize(hashSize);
+            if( !CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, hash.Get(), 0) )
+            {
+                return;
+            }
 		}
 
 		//Convert the hash to a string.
 		std::unique_ptr<wchar_t> hashString(new wchar_t[hashSize * 2 + 1]);
 		for( unsigned int i = 0; i < hashSize; i++ )
 		{
-			::swprintf_s(hashString.get() + (i * 2), 3, L"%02X", hashPtr[i]);
+			::swprintf_s(hashString.get() + (i * 2), 3, L"%02X", hash[i]);
 		}
 
-		CatalogHandle catalog = adminContext.EnumCatalogFromHash(hash.get(), hashSize);
+		CatalogHandle catalog = adminContext.EnumCatalogFromHash(hash.Get(), hashSize);
 		CATALOG_INFO info = catalog.GetInfo();
 
 		//Fill in catalog info structure.
@@ -456,7 +460,7 @@ void FileData::sigVerify() const
 		WintrustCatalogStructure.dwCatalogVersion = 0;
 		WintrustCatalogStructure.pcwszCatalogFilePath = info.wszCatalogFile;
 		WintrustCatalogStructure.cbCalculatedFileHash = hashSize;
-		WintrustCatalogStructure.pbCalculatedFileHash = hash.get();
+		WintrustCatalogStructure.pbCalculatedFileHash = hash.Get();
 		WintrustCatalogStructure.pcwszMemberTag = hashString.get();
 		WintrustCatalogStructure.pcwszMemberFilePath = this->fileName.c_str();
 
