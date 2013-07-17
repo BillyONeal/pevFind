@@ -469,6 +469,7 @@ void FileData::sigVerify() const
 		WintrustStructure.pCatalog = &WintrustCatalogStructure;
 		WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
 		WintrustStructure.dwUIContext = WTD_UICONTEXT_EXECUTE;
+        WintrustStructure.dwProvFlags = WTD_CACHE_ONLY_URL_RETRIEVAL;
 		if (CallWinVerifyTrust(WintrustStructure))
 		{
 			bits |= SIGVALID;
@@ -487,7 +488,7 @@ void FileData::sigVerify() const
 		WintrustStructure.dwUIChoice = WTD_UI_NONE;
 		WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
 		WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
-		WintrustStructure.dwProvFlags = WTD_SAFER_FLAG;
+		WintrustStructure.dwProvFlags = WTD_SAFER_FLAG | WTD_CACHE_ONLY_URL_RETRIEVAL;
 		if (CallWinVerifyTrust(WintrustStructure))
 		{
 			bits |= SIGVALID;
