@@ -39,6 +39,7 @@ class FileData
         WIN32ENUMD =             0x00000800,
         // END Standard Win32 Attributes
         // Signature Attributes
+        SIGPRESENT =             0x00001000,
         SIGVALID =                 0x00002000,
         // Executable Attributes
         DLL =                     0x00004000,
@@ -172,6 +173,7 @@ public:
     inline bool isPEPlus() const;
     inline bool isStrongExecutable() const;
     inline bool peHeaderChecksumIsValid() const;
+    inline bool hasAuthenticodeSignature() const;
     inline bool isDLL() const;
     inline DWORD getPEHeaderCheckSum() const;
     inline DWORD getPECalculatedCheckSum() const;
@@ -372,6 +374,12 @@ inline bool FileData::hasValidDigitalSignature() const
     if (!(bits & SIGENUMERATED))
         sigVerify();
     return (bits & SIGVALID) != 0;
+}
+
+inline bool FileData::hasAuthenticodeSignature() const
+{
+    initPortableExecutable();
+    return (bits & SIGPRESENT) != 0;
 }
 
 inline bool FileData::peHeaderChecksumIsValid() const

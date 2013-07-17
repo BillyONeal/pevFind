@@ -157,12 +157,11 @@ std::wstring FileData::getAttributesString() const
 std::wstring FileData::getPEAttribsString() const
 {
     initPortableExecutable();
-	sigVerify();
     std::wstring result;
     result.reserve(6);
     appendAttributeCharacter(result, L'1', ISPE);
     appendAttributeCharacter(result, L'2', DEBUG);
-    appendAttributeCharacter(result, L'3', SIGVALID);
+    appendAttributeCharacter(result, L'3', SIGPRESENT);
     appendAttributeCharacter(result, L'4', DLL);
     if (peHeaderChecksumIsValid())
         result.append(1, L'5');
@@ -325,6 +324,42 @@ void FileData::initPortableExecutable() const
         //Read headerSum
         if (!ReadFile(hFile.Get(), &headerSum, sizeof(DWORD), &lengthRead, NULL))
             return;
+
+        //Find number of PE data sections
+        DWORD numberOfSections;
+        if (isPEPlus)
+        {
+            if (SetFilePointer(hFile.Get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+                return;
+        } else
+        {
+            if (SetFilePointer(hFile.Get(), 40, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+                return;
+        }
+        //Read NumberOfRvaAndSizes
+        if (!ReadFile(hFile.Get(), &numberOfSections, sizeof(DWORD), &lengthRead, NULL))
+            return;
+
+        //There can be no signature in the file if the number of sections is less than 5,
+        //because the certificate table is the 5th section.
+        if (numberOfSections < 5)
+            return;
+
+        //Check for certificates
+        //Look for "Certificate Table", 32 bytes from the RvaAndSizes
+        if (SetFilePointer(hFile.Get(), 32, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+            return;
+
+        //The certificate table pointer is 8 bytes long -- it will be all zeros if the table is not present.
+        DWORD CertVirtualAddress, CertSize;
+        if (!ReadFile(hFile.Get(), &CertVirtualAddress, sizeof(DWORD), &lengthRead, NULL))
+            return;
+        if (!ReadFile(hFile.Get(), &CertSize, sizeof(DWORD), &lengthRead, NULL))
+            return;
+
+        //If the size of the certificate section is not 0, set the sigpresent flag.
+        if (CertSize)
+            bits |= SIGPRESENT;
     }
 
 }
