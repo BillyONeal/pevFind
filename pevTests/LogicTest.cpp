@@ -204,6 +204,16 @@ namespace pevFind { namespace tests
             andChildren.push_back(std::move(orNode));
             andChildren.push_back(std::move(orNode2));
             auto result = MakeNegationNormal(MakeLogicalNot(MakeLogicalAnd(std::move(andChildren))));
+            auto stringized = MakeString(result.get());
+            std::wstring expected(
+                L"+ OR\n"
+                L" + AND\n"
+                L"  - NOT( A )\n"
+                L"  - B\n"
+                L" + AND\n"
+                L"  - NOT( C )\n"
+                L"  - D\n");
+            Assert::AreEqual(expected, stringized);
         }
 	};
 

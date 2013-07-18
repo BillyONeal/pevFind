@@ -340,4 +340,69 @@ namespace pevFind
     {
         return MakeNegationNormal(std::move(source), 0);
     }
+
+    inline bool IsLiteral(LogicalNode const* node)
+    {
+        auto currentType = node->GetType();
+        return currentType == LogicalNodeType::LEAF
+            || ((currentType == LogicalNodeType::NOT) && node->GetChildren()[0]->GetType() == LogicalNodeType::LEAF);
+    }
+
+    inline std::wstring GetLiteralName(LogicalNode const* node)
+    {
+        assert(IsLiteral(node));
+        auto currentType = node->GetType();
+        if (currentType == LogicalNodeType::LEAF)
+        {
+            return L"- " + node->GetName();
+        }
+        else
+        {
+            return L"- NOT( " + node->GetChildren()[0]->GetName() + L" )";
+        }
+    }
+
+    inline std::wstring MakeString(LogicalNode const* source)
+    {
+        std::wstring result;
+        struct Frame
+        {
+            LogicalNode const* node;
+            std::size_t currentChild;
+        };
+        std::stack<Frame, std::vector<Frame>> stack;
+        Frame first = {source, 0};
+        stack.push(first);
+        while (!stack.empty())
+        {
+            Frame current = stack.top();
+            stack.pop();
+            if (current.currentChild == 0)
+            {
+                result.append(stack.size(), L' ');
+                if (IsLiteral(current.node))
+                {
+                    result.append(GetLiteralName(current.node));
+                    result.push_back(L'\n');
+                    continue;
+                }
+                else
+                {
+                    result.append(L"+ ");
+                    result.append(current.node->GetName());
+                    result.push_back(L'\n');
+                }
+            }
+
+            if (current.node->GetChildren().size() > current.currentChild)
+            {
+                auto oldChild = current.currentChild++;
+                stack.push(current);
+                Frame next = { current.node->GetChildren()[oldChild].get(), 0 };
+                stack.push(next);
+            }
+        }
+
+        return result;
+    }
 }
