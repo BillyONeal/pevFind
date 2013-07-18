@@ -47,40 +47,82 @@ namespace pevFind
          */
         virtual std::unique_ptr<LogicalNode> Clone() const = 0;
 
-        virtual NodeVector const& GetChildren() const = 0;
-
-        NodeVector CloneChildren() const
-        {
-            auto const& children = this->GetChildren();
-            NodeVector result(children.size());
-            for (auto const& child : children)
-            {
-                result.emplace_back(child->Clone());
-            }
-
-            return result;
-        }
+        /**
+         * Gets the children of this node.
+         * @return The children of this node.
+         */
+        virtual NodeVector const& GetChildren() const throw() = 0;
 
         /**
          * Gets the logical type of this node.
          * @return The logical type of this node.
          */
-        virtual LogicalNodeType GetType() const = 0;
+        virtual LogicalNodeType GetType() const throw() = 0;
 
         /**
          * Destroys an instance of the LogicalNode class.
          */
-        virtual ~LogicalNode() {}
+        virtual ~LogicalNode() throw() {}
     };
 
-    std::unique_ptr<LogicalNode> MakeLogicalAnd(std::vector<std::unique_ptr<LogicalNode>> children);
-    std::unique_ptr<LogicalNode> MakeLogicalOr(std::vector<std::unique_ptr<LogicalNode>> children);
-    std::unique_ptr<LogicalNode> MakeLogicalNot(std::unique_ptr<LogicalNode> child);
-    std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target);
-    std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target);
+    /**
+     * Clone children of a LogicalNode.
+     * @param source Source from which children shall be cloned.
+     * @return A new vector containing clones of the supplied node's children.
+     */
+    inline std::vector<std::unique_ptr<LogicalNode>> CloneChildren(LogicalNode const* source)
+    {
+        auto const& children = source->GetChildren();
+        std::vector<std::unique_ptr<LogicalNode>> result;
+        result.reserve(children.size());
+        for (auto const& child : children)
+        {
+            result.emplace_back(child->Clone());
+        }
+
+        return result;
+    }
 
     /**
-     * Logical combination, such as an AND or an OR.
+     * Makes a logical AND node.
+     * @param children The children of the new AND node.
+     * @return A new logical AND node with the supplied children.
+     */
+    std::unique_ptr<LogicalNode> MakeLogicalAnd(std::vector<std::unique_ptr<LogicalNode>> children);
+
+    /**
+     * Makes a logical OR node.
+     * @param children The children of the new OR node.
+     * @return A new logical OR node with the supplied children.
+     */
+    std::unique_ptr<LogicalNode> MakeLogicalOr(std::vector<std::unique_ptr<LogicalNode>> children);
+
+    /**
+     * Makes a logical negation of the supplied node @a child.
+     * @param child The child of the new logical NOT.
+     * @return If @a child is a logical not node, returns that node's child. Otherwise, returns a new
+     *         logical not node whose child is @a child.
+     */
+    std::unique_ptr<LogicalNode> MakeLogicalNot(std::unique_ptr<LogicalNode> child);
+
+    /**
+     * Destroys a logical node and returns the first child of that node, without constructing any
+     * new nodes.
+     * @param target The logical node for which the child shall be retrieved.
+     * @return The first child of @a target.
+     */
+    std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target) throw();
+
+    /**
+     * Destroys a logical node and returns the children of that node, without constructing any new
+     * elements.
+     * @param target The logical node for which children shall be retrieved.
+     * @return The children of @a target.
+     */
+    std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target) throw();
+
+    /**
+     * Logical combination, such as an AND, OR, or NOT.
      * @sa LogicalNode
      */
     class LogicalCombination : public LogicalNode
@@ -90,8 +132,8 @@ namespace pevFind
         friend std::unique_ptr<LogicalNode> MakeLogicalAnd(std::vector<std::unique_ptr<LogicalNode>> children);
         friend std::unique_ptr<LogicalNode> MakeLogicalOr(std::vector<std::unique_ptr<LogicalNode>> children);
         friend std::unique_ptr<LogicalNode> MakeLogicalNot(std::unique_ptr<LogicalNode> child);
-        friend std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target);
-        friend std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target);
+        friend std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target) throw();
+        friend std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target) throw();
 
         /**
          * Initializes a new instance of the LogicalCombination class.
@@ -112,12 +154,12 @@ namespace pevFind
          * Gets the children of this LogicalCombination.
          * @return The children of this LogicalCombination.
          */
-        virtual std::vector<std::unique_ptr<LogicalNode>> const& GetChildren() const override
+        virtual std::vector<std::unique_ptr<LogicalNode>> const& GetChildren() const throw() override
         {
             return children;
         }
 
-                /**
+        /**
          * Gets the name of this node type.
          * @return The name of this node.
          */
@@ -146,7 +188,7 @@ namespace pevFind
          */
         virtual std::unique_ptr<LogicalNode> Clone() const override
         {
-            std::unique_ptr<LogicalNode> result(new LogicalCombination(this->CloneChildren(), type));
+            std::unique_ptr<LogicalNode> result(new LogicalCombination(CloneChildren(this), type));
             return result;
         }
 
@@ -154,7 +196,7 @@ namespace pevFind
          * Gets the logical type of this node.
          * @return The logical type of this node.
          */
-        virtual LogicalNodeType GetType() const override
+        virtual LogicalNodeType GetType() const throw() override
         {
             return type;
         }
@@ -190,19 +232,23 @@ namespace pevFind
         }
     }
 
-    inline std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target)
+    inline std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target) throw()
     {
         assert(target->GetType() != LogicalNodeType::LEAF);
         assert(target->GetChildren().size() >= 1u);
         return std::move(static_cast<LogicalCombination*>(target.get())->children[0]);
     }
 
-    inline std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target)
+    inline std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target) throw()
     {
         assert(target->GetType() != LogicalNodeType::LEAF);
         return std::move(static_cast<LogicalCombination*>(target.get())->children);
     }
 
+    /**
+     * Logical nodes which are not combinations.
+     * @sa LogicalNode
+     */
     class LogicalLeaf : public LogicalNode
     {
         static const NodeVector childrenVector;
@@ -211,17 +257,37 @@ namespace pevFind
          * Gets the logical type of this node.
          * @return The logical type of this node.
          */
-        virtual LogicalNodeType GetType() const override
+        virtual LogicalNodeType GetType() const throw() override
         {
             return LogicalNodeType::LEAF;
         }
 
-        virtual NodeVector const& GetChildren() const override
+        /**
+         * Gets the children of this node.
+         * @return The children. (Always an empty vector for LogicalLeaf instances)
+         */
+        virtual NodeVector const& GetChildren() const throw() override
         {
             return childrenVector;
         }
     };
 
+    struct NotCaller
+    {
+        std::unique_ptr<LogicalNode> operator()(std::unique_ptr<LogicalNode>&& input)
+        {
+            return MakeLogicalNot(std::move(input));
+        }
+    };
+
+    /**
+     * Applies the generalized DeMorgan's theorem to a Logical Node.
+     * @param source The source logical tree onto which DeMorgan's theorem is applied.
+     *               This parameter must be an AND or OR node, or a NOT followed by AND
+     *               or OR node. If this condition is not met the behavior is undefined.
+     * @return A new tree constructed from @a source which is equivalent but has DeMorgan's theorem
+     *         applied to it.
+     */
     inline std::unique_ptr<LogicalNode> ApplyDemorgan(std::unique_ptr<LogicalNode> source)
     {
         assert(source->GetType() != LogicalNodeType::LEAF);
@@ -241,7 +307,7 @@ namespace pevFind
             std::make_move_iterator(children.begin()),
             std::make_move_iterator(children.end()),
             children.begin(),
-            [](std::unique_ptr<LogicalNode>&& old) { return MakeLogicalNot(std::move(old)); });
+            NotCaller());
         
         std::unique_ptr<LogicalNode> result;
         if (sourceType == LogicalNodeType::AND)
@@ -282,7 +348,7 @@ namespace pevFind
     inline std::unique_ptr<LogicalNode> MakeNegationNormal(std::unique_ptr<LogicalNode> source, std::size_t notCrosses)
     {
         LogicalNodeType currentType = source->GetType();
-        bool noFlip = notCrosses % 2 == 0;
+        bool noFlip = (notCrosses % 2) == 0;
         if (currentType == LogicalNodeType::LEAF)
         {
             if (noFlip)
@@ -336,12 +402,17 @@ namespace pevFind
         }
     }
 
+    /**
+     * Makes the given logical tree into one which is equivalent but is in negation-normal form.
+     * @param source The tree to put into negation-normal form.
+     * @return A new tree which is equivalent to @source but is in negation-normal form.
+     */
     inline std::unique_ptr<LogicalNode> MakeNegationNormal(std::unique_ptr<LogicalNode> source)
     {
         return MakeNegationNormal(std::move(source), 0);
     }
 
-    inline bool IsLiteral(LogicalNode const* node)
+    inline bool IsLiteral(LogicalNode const* node) throw()
     {
         auto currentType = node->GetType();
         return currentType == LogicalNodeType::LEAF
@@ -362,6 +433,11 @@ namespace pevFind
         }
     }
 
+    /**
+     * Converts the supplied logical tree into a string.
+     * @param source The tree from which a string is constructed.
+     * @return A string representation of @a source.
+     */
     inline std::wstring MakeString(LogicalNode const* source)
     {
         std::wstring result;
