@@ -189,6 +189,22 @@ namespace pevFind { namespace tests
             Assert::AreEqual(LogicalNodeType::LEAF, andChildren[1]->GetType());
             Assert::AreEqual(static_cast<std::wstring>(L"B"), andChildren[1]->GetName());
         }
+
+        TEST_METHOD(NegationNormalize)
+        {
+            std::vector<std::unique_ptr<LogicalNode>> orChildren;
+            orChildren.push_back(MakeNamedLeaf(L"A"));
+            orChildren.push_back(MakeLogicalNot(MakeNamedLeaf(L"B")));
+            auto orNode = MakeLogicalOr(std::move(orChildren));
+            std::vector<std::unique_ptr<LogicalNode>> or2Children;
+            or2Children.push_back(MakeNamedLeaf(L"C"));
+            or2Children.push_back(MakeLogicalNot(MakeNamedLeaf(L"D")));
+            auto orNode2 = MakeLogicalOr(std::move(or2Children));
+            std::vector<std::unique_ptr<LogicalNode>> andChildren;
+            andChildren.push_back(std::move(orNode));
+            andChildren.push_back(std::move(orNode2));
+            auto result = MakeNegationNormal(MakeLogicalNot(MakeLogicalAnd(std::move(andChildren))));
+        }
 	};
 
 }} // namespace pevFind::tests

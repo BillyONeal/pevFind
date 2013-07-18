@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstdint>
 #include <vector>
+#include <stack>
 #include <iterator>
 #include <string>
 #include <boost/noncopyable.hpp>
@@ -260,5 +261,83 @@ namespace pevFind
         {
             return MakeLogicalNot(std::move(result));
         }
+    }
+
+    std::unique_ptr<LogicalNode> MakeNegationNormal(std::unique_ptr<LogicalNode> source, std::size_t notCrosses);
+
+    class MakeNegationNormalCaller
+    {
+        std::size_t notCrossCount;
+    public:
+        explicit MakeNegationNormalCaller(std::size_t notCrossCount_)
+            : notCrossCount(notCrossCount_)
+        {
+        }
+        std::unique_ptr<LogicalNode> operator()(std::unique_ptr<LogicalNode>&& node)
+        {
+            return MakeNegationNormal(std::move(node), notCrossCount);
+        }
+    };
+
+    inline std::unique_ptr<LogicalNode> MakeNegationNormal(std::unique_ptr<LogicalNode> source, std::size_t notCrosses)
+    {
+        LogicalNodeType currentType = source->GetType();
+        bool noFlip = notCrosses % 2 == 0;
+        if (currentType == LogicalNodeType::LEAF)
+        {
+            if (noFlip)
+            {
+                return std::move(source);
+            }
+            else
+            {
+                return MakeLogicalNot(std::move(source));
+            }
+        }
+        else if (currentType == LogicalNodeType::AND || currentType == LogicalNodeType::OR)
+        {
+            std::vector<std::unique_ptr<LogicalNode>> children(StealChildren(std::move(source)));
+            std::transform(
+                std::make_move_iterator(children.begin()),
+                std::make_move_iterator(children.end()),
+                children.begin(),
+                static_cast<MakeNegationNormalCaller>(notCrosses));
+
+            bool isAnd = currentType == LogicalNodeType::AND;
+            bool isOr = currentType == LogicalNodeType::OR;
+            if ((noFlip && isAnd) || (!noFlip && isOr))
+            {
+                return MakeLogicalAnd(std::move(children));
+            }
+            else
+            {
+                return MakeLogicalOr(std::move(children));
+            }
+        }
+        else
+        {
+            assert(currentType == LogicalNodeType::NOT);
+            LogicalNodeType childType = source->GetChildren()[0]->GetType();
+            if (childType == LogicalNodeType::LEAF)
+            {
+                if (noFlip)
+                {
+                    return std::move(source);
+                }
+                else
+                {
+                    return StealFirstChild(std::move(source));
+                }
+            }
+            else
+            {
+                return MakeNegationNormal(StealFirstChild(std::move(source)), notCrosses + 1);
+            }
+        }
+    }
+
+    inline std::unique_ptr<LogicalNode> MakeNegationNormal(std::unique_ptr<LogicalNode> source)
+    {
+        return MakeNegationNormal(std::move(source), 0);
     }
 }
