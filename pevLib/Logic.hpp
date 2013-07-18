@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstdint>
 #include <vector>
+#include <iterator>
 #include <string>
 #include <boost/noncopyable.hpp>
 
@@ -74,6 +75,8 @@ namespace pevFind
     std::unique_ptr<LogicalNode> MakeLogicalAnd(std::vector<std::unique_ptr<LogicalNode>> children);
     std::unique_ptr<LogicalNode> MakeLogicalOr(std::vector<std::unique_ptr<LogicalNode>> children);
     std::unique_ptr<LogicalNode> MakeLogicalNot(std::unique_ptr<LogicalNode> child);
+    std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target);
+    std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target);
 
     /**
      * Logical combination, such as an AND or an OR.
@@ -86,6 +89,8 @@ namespace pevFind
         friend std::unique_ptr<LogicalNode> MakeLogicalAnd(std::vector<std::unique_ptr<LogicalNode>> children);
         friend std::unique_ptr<LogicalNode> MakeLogicalOr(std::vector<std::unique_ptr<LogicalNode>> children);
         friend std::unique_ptr<LogicalNode> MakeLogicalNot(std::unique_ptr<LogicalNode> child);
+        friend std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target);
+        friend std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target);
 
         /**
          * Initializes a new instance of the LogicalCombination class.
@@ -168,10 +173,33 @@ namespace pevFind
 
     inline std::unique_ptr<LogicalNode> MakeLogicalNot(std::unique_ptr<LogicalNode> child)
     {
-        LogicalNode::NodeVector children;
-        children.emplace_back(std::move(child));
-        std::unique_ptr<LogicalNode> result(new LogicalCombination(std::move(children), LogicalNodeType::NOT));
-        return result;
+        if (child->GetType() == LogicalNodeType::NOT)
+        {
+            // If the child is a not, avoid double negatives by returning the child directly.
+            // Child (itself a not) is destroyed when this function returns.
+            return StealFirstChild(std::move(child));
+        }
+        else
+        {
+            // If the child is not a not, then create a new LogicalNot containing child.
+            LogicalNode::NodeVector children;
+            children.emplace_back(std::move(child));
+            std::unique_ptr<LogicalNode> result(new LogicalCombination(std::move(children), LogicalNodeType::NOT));
+            return result;
+        }
+    }
+
+    inline std::unique_ptr<LogicalNode> StealFirstChild(std::unique_ptr<LogicalNode> target)
+    {
+        assert(target->GetType() != LogicalNodeType::LEAF);
+        assert(target->GetChildren().size() >= 1u);
+        return std::move(static_cast<LogicalCombination*>(target.get())->children[0]);
+    }
+
+    inline std::vector<std::unique_ptr<LogicalNode>> StealChildren(std::unique_ptr<LogicalNode> target)
+    {
+        assert(target->GetType() != LogicalNodeType::LEAF);
+        return std::move(static_cast<LogicalCombination*>(target.get())->children);
     }
 
     class LogicalLeaf : public LogicalNode
@@ -192,4 +220,45 @@ namespace pevFind
             return childrenVector;
         }
     };
+
+    inline std::unique_ptr<LogicalNode> ApplyDemorgan(std::unique_ptr<LogicalNode> source)
+    {
+        assert(source->GetType() != LogicalNodeType::LEAF);
+        LogicalNodeType sourceType = source->GetType();
+        bool sourceNot = false;
+        if (sourceType == LogicalNodeType::NOT)
+        {
+            sourceNot = true;
+            source = StealFirstChild(std::move(source));
+            sourceType = source->GetType();
+        }
+
+        assert(sourceType == LogicalNodeType::AND || sourceType == LogicalNodeType::OR);
+        std::vector<std::unique_ptr<LogicalNode>> children(StealChildren(std::move(source)));
+        // Negate the children.
+        std::transform(
+            std::make_move_iterator(children.begin()),
+            std::make_move_iterator(children.end()),
+            children.begin(),
+            [](std::unique_ptr<LogicalNode>&& old) { return MakeLogicalNot(std::move(old)); });
+        
+        std::unique_ptr<LogicalNode> result;
+        if (sourceType == LogicalNodeType::AND)
+        {
+            result = MakeLogicalOr(std::move(children));
+        }
+        else
+        {
+            result = MakeLogicalAnd(std::move(children));
+        }
+
+        if (sourceNot)
+        {
+            return result;
+        }
+        else
+        {
+            return MakeLogicalNot(std::move(result));
+        }
+    }
 }

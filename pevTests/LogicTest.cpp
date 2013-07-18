@@ -55,6 +55,31 @@ namespace pevFind { namespace tests
             std::unique_ptr<LogicalNode> result(new DummyLeaf);
             return result;
         }
+
+        std::unique_ptr<LogicalNode> MakeNamedLeaf(std::wstring name);
+
+        class NamedLeaf : LogicalLeaf
+        {
+            friend std::unique_ptr<LogicalNode> MakeNamedLeaf(std::wstring name);
+            std::wstring name_;
+            NamedLeaf(std::wstring name) : name_(name) {}
+        public:
+            virtual std::wstring GetName() const override
+            {
+                return name_;
+            }
+
+            virtual std::unique_ptr<LogicalNode> Clone() const
+            {
+                return MakeNamedLeaf(name_);
+            }
+        };
+
+        std::unique_ptr<LogicalNode> MakeNamedLeaf(std::wstring name)
+        {
+            std::unique_ptr<LogicalNode> result(new NamedLeaf(std::move(name)));
+            return result;
+        }
     }
 
 	TEST_CLASS(LogicTest)
@@ -72,19 +97,97 @@ namespace pevFind { namespace tests
         TEST_METHOD(BasicConstructOr)
         {
             std::vector<std::unique_ptr<LogicalNode>> empty;
-            std::unique_ptr<LogicalNode> andNode = MakeLogicalOr(std::move(empty));
-            Assert::AreEqual(static_cast<std::wstring>(L"OR"), andNode->GetName());
-            Assert::AreEqual(LogicalNodeType::OR, andNode->GetType());
-            Assert::AreEqual(static_cast<std::size_t>(0), andNode->GetChildren().size());
+            std::unique_ptr<LogicalNode> orNode = MakeLogicalOr(std::move(empty));
+            Assert::AreEqual(static_cast<std::wstring>(L"OR"), orNode->GetName());
+            Assert::AreEqual(LogicalNodeType::OR, orNode->GetType());
+            Assert::AreEqual(static_cast<std::size_t>(0), orNode->GetChildren().size());
         }
 
         TEST_METHOD(BasicConstructNot)
         {
             std::unique_ptr<LogicalNode> dummy = MakeDummyLeaf();
-            std::unique_ptr<LogicalNode> andNode = MakeLogicalNot(std::move(dummy));
-            Assert::AreEqual(static_cast<std::wstring>(L"NOT"), andNode->GetName());
-            Assert::AreEqual(LogicalNodeType::NOT, andNode->GetType());
-            Assert::AreEqual(static_cast<std::size_t>(1), andNode->GetChildren().size());
+            std::unique_ptr<LogicalNode> notNode = MakeLogicalNot(std::move(dummy));
+            Assert::AreEqual(static_cast<std::wstring>(L"NOT"), notNode->GetName());
+            Assert::AreEqual(LogicalNodeType::NOT, notNode->GetType());
+            Assert::AreEqual(static_cast<std::size_t>(1), notNode->GetChildren().size());
+        }
+
+        TEST_METHOD(BasicConstructNotNot)
+        {
+            std::unique_ptr<LogicalNode> dummy = MakeDummyLeaf();
+            std::unique_ptr<LogicalNode> notNode = MakeLogicalNot(std::move(dummy));
+            std::unique_ptr<LogicalNode> notNotNode = MakeLogicalNot(std::move(notNode));
+            Assert::AreEqual(static_cast<std::wstring>(L"DUMMY"), notNotNode->GetName());
+            Assert::AreEqual(LogicalNodeType::LEAF, notNotNode->GetType());
+            Assert::AreEqual(static_cast<std::size_t>(0), notNotNode->GetChildren().size());
+        }
+
+        TEST_METHOD(BasicDemorganAnd)
+        {
+            std::vector<std::unique_ptr<LogicalNode>> andChildren;
+            andChildren.push_back(MakeNamedLeaf(L"A"));
+            andChildren.push_back(MakeLogicalNot(MakeNamedLeaf(L"B")));
+            auto andNode = MakeLogicalAnd(std::move(andChildren));
+            auto result = ApplyDemorgan(std::move(andNode));
+            Assert::AreEqual(LogicalNodeType::NOT, result->GetType());
+            auto expectedOr = StealFirstChild(std::move(result));
+            Assert::AreEqual(LogicalNodeType::OR, expectedOr->GetType());
+            std::vector<std::unique_ptr<LogicalNode>> orChildren(StealChildren(std::move(expectedOr)));
+            Assert::AreEqual(static_cast<std::size_t>(2), orChildren.size());
+            Assert::AreEqual(LogicalNodeType::NOT, orChildren[0]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"A"), orChildren[0]->GetChildren()[0]->GetName());
+            Assert::AreEqual(LogicalNodeType::LEAF, orChildren[1]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"B"), orChildren[1]->GetName());
+        }
+
+        TEST_METHOD(BasicDemorganOr)
+        {
+            std::vector<std::unique_ptr<LogicalNode>> orChildren;
+            orChildren.push_back(MakeNamedLeaf(L"A"));
+            orChildren.push_back(MakeLogicalNot(MakeNamedLeaf(L"B")));
+            auto orNode = MakeLogicalOr(std::move(orChildren));
+            auto result = ApplyDemorgan(std::move(orNode));
+            Assert::AreEqual(LogicalNodeType::NOT, result->GetType());
+            auto expectedAnd = StealFirstChild(std::move(result));
+            Assert::AreEqual(LogicalNodeType::AND, expectedAnd->GetType());
+            std::vector<std::unique_ptr<LogicalNode>> andChildren(StealChildren(std::move(expectedAnd)));
+            Assert::AreEqual(static_cast<std::size_t>(2), andChildren.size());
+            Assert::AreEqual(LogicalNodeType::NOT, andChildren[0]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"A"), andChildren[0]->GetChildren()[0]->GetName());
+            Assert::AreEqual(LogicalNodeType::LEAF, andChildren[1]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"B"), andChildren[1]->GetName());
+        }
+
+        TEST_METHOD(BasicDemorganNotAnd)
+        {
+            std::vector<std::unique_ptr<LogicalNode>> andChildren;
+            andChildren.push_back(MakeNamedLeaf(L"A"));
+            andChildren.push_back(MakeLogicalNot(MakeNamedLeaf(L"B")));
+            auto andNode = MakeLogicalAnd(std::move(andChildren));
+            auto expectedOr = ApplyDemorgan(MakeLogicalNot(std::move(andNode)));
+            Assert::AreEqual(LogicalNodeType::OR, expectedOr->GetType());
+            std::vector<std::unique_ptr<LogicalNode>> orChildren(StealChildren(std::move(expectedOr)));
+            Assert::AreEqual(static_cast<std::size_t>(2), orChildren.size());
+            Assert::AreEqual(LogicalNodeType::NOT, orChildren[0]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"A"), orChildren[0]->GetChildren()[0]->GetName());
+            Assert::AreEqual(LogicalNodeType::LEAF, orChildren[1]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"B"), orChildren[1]->GetName());
+        }
+
+        TEST_METHOD(BasicDemorganNotOr)
+        {
+            std::vector<std::unique_ptr<LogicalNode>> orChildren;
+            orChildren.push_back(MakeNamedLeaf(L"A"));
+            orChildren.push_back(MakeLogicalNot(MakeNamedLeaf(L"B")));
+            auto orNode = MakeLogicalOr(std::move(orChildren));
+            auto expectedAnd = ApplyDemorgan(MakeLogicalNot(std::move(orNode)));
+            Assert::AreEqual(LogicalNodeType::AND, expectedAnd->GetType());
+            std::vector<std::unique_ptr<LogicalNode>> andChildren(StealChildren(std::move(expectedAnd)));
+            Assert::AreEqual(static_cast<std::size_t>(2), andChildren.size());
+            Assert::AreEqual(LogicalNodeType::NOT, andChildren[0]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"A"), andChildren[0]->GetChildren()[0]->GetName());
+            Assert::AreEqual(LogicalNodeType::LEAF, andChildren[1]->GetType());
+            Assert::AreEqual(static_cast<std::wstring>(L"B"), andChildren[1]->GetName());
         }
 	};
 
