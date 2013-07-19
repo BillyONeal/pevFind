@@ -10,25 +10,25 @@
 #include <fstream>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include "utility.h"
-#include "Version.hpp"
+#include "../pevLib/utility.h"
+#include "../pevLib/Version.hpp"
 
 //Subprogram definitions
-#include "clsidCompressor.h"
-#include "procListers.h"
-#include "exec.h"
-#include "vFind.h"
-#include "link.h"
-#include "volumeEnumerate.h"
-#include "uZip.h"
-#include "times.h"
-#include "regImport.h"
-#include "rexport.h"
-#include "moveex.h"
-#include "serviceControl.h"
-#include "dosdev.h"
-#include "linkResolve.h"
-#include "wait.hpp"
+#include "../pevLib/clsidCompressor.h"
+#include "../pevLib/procListers.h"
+#include "../pevLib/exec.h"
+#include "../pevLib/vFind.h"
+#include "../pevLib/link.h"
+#include "../pevLib/volumeEnumerate.h"
+#include "../pevLib/uZip.h"
+#include "../pevLib/times.h"
+#include "../pevLib/regImport.h"
+#include "../pevLib/rexport.h"
+#include "../pevLib/moveex.h"
+#include "../pevLib/serviceControl.h"
+#include "../pevLib/dosdev.h"
+#include "../pevLib/linkResolve.h"
+#include "../pevLib/wait.hpp"
 
 int __cdecl wmain(int argc, wchar_t* argv[])
 {

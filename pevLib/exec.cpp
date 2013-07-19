@@ -260,8 +260,8 @@ int systemExecute(const std::wstring& commandLine)
 
 int execute(const std::wstring& commandLine, const commandlineProcessor& options)
 {
-    wchar_t * environment;
-    HANDLE userToken;
+    wchar_t * environment = nullptr;
+    HANDLE userToken = INVALID_HANDLE_VALUE;
 
     if (options.e)
     {
@@ -321,7 +321,7 @@ int execute(const std::wstring& commandLine, const commandlineProcessor& options
     return (int) exitCode;
 }
 
-int serviceExecute(const std::wstring& commandLine)
+int serviceExecute(const std::wstring&)
 {
     SERVICE_TABLE_ENTRY DispatchTable[] = 
     { 
@@ -337,7 +337,7 @@ int serviceExecute(const std::wstring& commandLine)
 
 } //namespace exec
 
-VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR *lpszArgv)
+VOID WINAPI SvcMain(DWORD, LPTSTR *)
 {
     using namespace exec;
     SERVICE_STATUS_HANDLE hStatus;
@@ -374,7 +374,7 @@ VOID WINAPI SvcMain(DWORD dwArgc, LPTSTR *lpszArgv)
 }
 
 
-VOID WINAPI SvcHandler(DWORD fdwControl)
+VOID WINAPI SvcHandler(DWORD)
 {
     return;
 }
