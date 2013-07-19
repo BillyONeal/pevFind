@@ -306,10 +306,10 @@ pevFind is a combination of an enhanced vFind and other tools.
                         XOR
                         Everything else
                         
-  Expression = andand AND andand
-  AndAnd = orand OR orand
-  OrAnd = xorand XOR xorand
-  XorAnd = (Anything Else)* or  { expression }  or NOT expression.
+  Expression = disjunct AND disjunct
+  Disjunct = conjunct OR conjunct
+  Xorunct = negation XOR negation
+  Negation = Expression* or  { expression } or NOT expression.
 
 pevFind will attempt to be smart about inserting quotes, space,
 and -s in the right places. (For example, pevfind -ltf vfindregex will work just
