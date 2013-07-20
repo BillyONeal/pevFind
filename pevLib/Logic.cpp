@@ -2,6 +2,8 @@
 #include "Logic.hpp"
 #include <cassert>
 #include <stack>
+#include <iterator>
+#include <cstdint>
 
 namespace
 {
