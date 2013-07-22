@@ -80,6 +80,7 @@
     <ClInclude Include="criterion.h" />
     <ClInclude Include="dosdev.h" />
     <ClInclude Include="exec.h" />
+    <ClInclude Include="ExpressionParser.hpp" />
     <ClInclude Include="fileData.h" />
     <ClInclude Include="filesScanner.h" />
     <ClInclude Include="FILTER.h" />

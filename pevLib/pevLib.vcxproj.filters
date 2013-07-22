@@ -229,5 +229,8 @@
     <ClInclude Include="Logic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ExpressionParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
