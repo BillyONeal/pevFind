@@ -40,6 +40,7 @@
     <ClCompile Include="consoleParser.cpp" />
     <ClCompile Include="dosdev.cpp" />
     <ClCompile Include="exec.cpp" />
+    <ClCompile Include="ExpressionParser.cpp" />
     <ClCompile Include="fileData.cpp" />
     <ClCompile Include="filesScanner.cpp" />
     <ClCompile Include="FILTER.cpp" />

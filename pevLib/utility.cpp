@@ -7,41 +7,50 @@
 
 #include "pch.hpp"
 #include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <stdexcept>
 #include <stdexcept>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <boost/lexical_cast.hpp>
+#include "../LogCommon/Win32Exception.hpp"
+#include "../LogCommon/Win32Glue.hpp"
 #include "utility.h"
+
+using Instalog::UniqueHandle;
 
 std::wstring loadFileAsString(const std::wstring &fileName)
 {
-    std::wstring fileString;
-    { // This scope ensures the vector is destroyed when we want
-        HANDLE fileHandle;
-        DWORD trash = 0;
-        fileHandle = CreateFile(fileName.c_str(),GENERIC_READ,FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
-        if (fileHandle == INVALID_HANDLE_VALUE)
-            throw std::runtime_error("Could not open file \"" + convertUnicode(fileName) + "\"");
-        BY_HANDLE_FILE_INFORMATION fileInfo;
-        GetFileInformationByHandle(fileHandle,&fileInfo);
-        if (!fileInfo.nFileSizeLow) return L""; //Empty file .. can't access zero length vectors below so making it empty.
-        std::vector<BYTE> fileData;
-        fileData.resize(fileInfo.nFileSizeLow);
-        ReadFile(fileHandle,&fileData[0],fileInfo.nFileSizeLow,&trash,NULL);
-        CloseHandle(fileHandle);
-        if (IsTextUnicode(&fileData[0],fileInfo.nFileSizeLow,NULL))
-        {
-            fileString.assign(reinterpret_cast<wchar_t *>(&fileData[0]),fileInfo.nFileSizeLow/sizeof(wchar_t));
-        } else
-        {
-            std::string narrowFileString(reinterpret_cast<char *>(&fileData[0]),fileInfo.nFileSizeLow);
-            fileString.assign(convertUnicode(narrowFileString));
-        }
+    DWORD trash = 0;
+    UniqueHandle fileHandle(CreateFileW(fileName.c_str(),GENERIC_READ,FILE_SHARE_DELETE|FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL));
+    if (!fileHandle.IsOpen())
+    {
+        Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
     }
-    return fileString;
+
+    BY_HANDLE_FILE_INFORMATION fileInfo;
+    GetFileInformationByHandle(fileHandle.Get(),&fileInfo);
+    if (fileInfo.nFileSizeHigh != 0)
+    {
+        throw std::bad_alloc();
+    }
+
+    if (!fileInfo.nFileSizeLow) return L""; //Empty file .. can't access zero length vectors below so making it empty.
+    std::vector<BYTE> fileData;
+    fileData.resize(fileInfo.nFileSizeLow);
+    ReadFile(fileHandle.Get(),fileData.data(),fileInfo.nFileSizeLow,&trash,NULL);
+    if (IsTextUnicode(fileData.data(),fileInfo.nFileSizeLow,NULL))
+    {
+        return std::wstring(reinterpret_cast<wchar_t *>(fileData.data()),fileInfo.nFileSizeLow/sizeof(wchar_t));
+    } else
+    {
+        std::string narrowFileString(reinterpret_cast<char *>(fileData.data()),fileInfo.nFileSizeLow);
+        return convertUnicode(narrowFileString);
+    }
 }
+
 std::vector<std::wstring> loadStringsFromFile(const std::wstring &fileName)
 {
     std::vector<std::wstring> files;
@@ -88,18 +97,28 @@ std::string convertUnicode(const std::wstring &uni)
     INT length;
     BOOL blank;
     length = WideCharToMultiByte(CP_ACP,WC_NO_BEST_FIT_CHARS,uni.c_str(),static_cast<int>(uni.length()),NULL,NULL,"?",&blank);
-    std::vector<char> resultRaw(length);
-    WideCharToMultiByte(CP_ACP,WC_NO_BEST_FIT_CHARS,uni.c_str(),static_cast<int>(uni.length()),&resultRaw[0],length,"?",&blank);
-    std::string result(resultRaw.begin(), resultRaw.end());
+    if (length == 0)
+    {
+        return std::string();
+    }
+
+    std::string result;
+    result.resize(length);
+    WideCharToMultiByte(CP_ACP,WC_NO_BEST_FIT_CHARS,uni.c_str(),static_cast<int>(uni.length()),&result[0],length,"?",&blank);
     return result;
 }
 std::wstring convertUnicode(const std::string &uni)
 {
     INT length;
     length = MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),static_cast<int>(uni.length()),NULL,NULL);
-    std::vector<wchar_t> resultRaw(length);
-    MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),static_cast<int>(uni.length()),&resultRaw[0],length);
-    std::wstring result(resultRaw.begin(), resultRaw.end());
+    if (length == 0)
+    {
+        return std::wstring();
+    }
+
+    std::wstring result;
+    result.resize(length);
+    MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),static_cast<int>(uni.length()),&result[0],length);
     return result;
 }
 std::wstring GetShortPathNameStr(std::wstring longPath)

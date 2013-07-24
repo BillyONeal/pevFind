@@ -53,8 +53,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TestSupport.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ExpressionParserTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -68,7 +70,14 @@
       <Project>{534d6a08-8fad-4f8e-8529-dee323a2ecdc}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="LoadLineResolverExample.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="AfterBuild" Inputs="LoadLineResolverExample.txt" Outputs="$(OutDir)TestData;$(OutDir)TestData\LoadLineResolverExample.txt">
+    <MakeDir Directories="$(OutDir)TestData" />
+    <Copy SourceFiles="LoadLineResolverExample.txt" DestinationFiles="$(OutDir)TestData\LoadLineResolverExample.txt" />
+  </Target>
 </Project>

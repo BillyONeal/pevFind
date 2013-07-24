@@ -3,6 +3,7 @@
 // See the included LICENSE.TXT file for more details.
 
 #pragma once
+#include <cstdint>
 #include <windows.h>
 #include <boost/noncopyable.hpp>
 #include "Win32Exception.hpp"
