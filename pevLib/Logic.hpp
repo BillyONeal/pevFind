@@ -160,7 +160,7 @@ namespace pevFind
         virtual ~LogicalNode() throw() {}
     };
 
-    class LogicalCombination : public LogicalNode
+    class LogicalCombination final : public LogicalNode
     {
         std::vector<std::unique_ptr<LogicalNode>> children;
         LogicalNodeType type;
