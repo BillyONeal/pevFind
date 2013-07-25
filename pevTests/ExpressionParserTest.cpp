@@ -14,7 +14,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace pevFind { namespace tests
 {
 
-    TEST_CLASS(LoadLineFileResolverTest)
+    TEST_CLASS(FileLoadLineResolverTest)
 	{
 	public:
         TEST_METHOD(LoadLineFileResolverSuccess)
@@ -34,6 +34,30 @@ namespace pevFind { namespace tests
             Assert::AreEqual(std::wstring(), result.GetLine());
             Assert::AreEqual(static_cast<std::wstring>(L"Failed opening \"Invalid path here :: \" with error The filename, directory name, or volume label syntax is incorrect.\r\n"),
                 result.GetError());
+        }
+    };
+
+    TEST_CLASS(PreconfiguredLoadLineResolverTest)
+    {
+    public:
+        TEST_METHOD(PreconfiguredLoadLineResolverSuccess)
+        {
+            PreconfiguredLoadLineResolver uut;
+            uut.Add(L"file name", L"output");
+            auto result = uut.LoadLineByName(L"file name");
+            Assert::IsTrue(result.Success());
+            Assert::AreEqual(std::wstring(L"output"), result.GetLine());
+            Assert::AreEqual(std::wstring(), result.GetError());
+        }
+
+        TEST_METHOD(PreconfiguredLoadLineResolverFailureNotConfigured)
+        {
+            PreconfiguredLoadLineResolver uut;
+            uut.Add(L"file name", L"output");
+            auto result = uut.LoadLineByName(L"file name nonexistent");
+            Assert::IsFalse(result.Success());
+            Assert::AreEqual(std::wstring(), result.GetLine());
+            Assert::AreEqual(std::wstring(L"Line was not configured."), result.GetError());
         }
     };
 
