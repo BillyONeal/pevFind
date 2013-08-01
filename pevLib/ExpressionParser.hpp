@@ -52,17 +52,15 @@ typedef std::uint32_t SourceLocation;
 
 class LoadedFile
 {
-    std::wstring input;
     std::wstring name;
     SourceLocation startLocation;
+    SourceLocation length;
 public:
-    LoadedFile(SourceLocation startLocation_, std::wstring input_, std::wstring name_) throw();
+    LoadedFile(SourceLocation startLocation_, SourceLocation length_, std::wstring name_) throw();
     LoadedFile(LoadedFile&& other) throw();
     LoadedFile& operator=(LoadedFile&& other) throw();
     SourceLocation GetStartLocation() const throw();
-    std::uint32_t size() const throw();
-    wchar_t operator[](std::size_t idx) const throw();
-    wchar_t const* data() const throw();
+    SourceLocation GetLength() const throw();
 };
 
 struct DecomposedSourceLocation
@@ -74,11 +72,12 @@ struct DecomposedSourceLocation
 class SourceManager
 {
     std::vector<LoadedFile> loadedFiles;
+    std::wstring backingBuffer;
 public:
-    LoadedFile const& GetBufferForLocation(SourceLocation loc) const throw();
-    DecomposedSourceLocation GetDecomposedLocation(SourceLocation loc) const throw();
-    void InstallFile(LoadedFile&& file);
-    std::wstring GetSpellingOfRange(SourceLocation first, SourceLocation last) const;
+    void Reset(std::wstring content, std::wstring name);
+    void InstallFile(SourceLocation insertionLocation, SourceLocation replaceLength, std::wstring content, std::wstring name);
+    wchar_t operator[](SourceLocation location) const throw();
+    wchar_t operator[](std::size_t location) const throw();
 };
 
 /**
