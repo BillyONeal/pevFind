@@ -135,6 +135,56 @@ public:
      * @return The logical string.
      */
     std::wstring const& GetLogicalString() const throw() { return backingBuffer; }
+
+     /**
+     * Generates a source listing for the whole logical command line.
+     * 
+     * A source listing is a listing of the location from which a given piece of text comes in the
+     * logical input. For instance, given the following:
+     * @code
+     *      pevFind.exe foo --loadline#example# bar
+     *      
+     *      example contains:
+     *      baz
+     *      Logical input is:
+     *      pevFind.exe foo baz bar
+     * @endcode
+     * the output would end up being:
+     * @code
+     *      |- Command Line-------|
+     *                      |2|
+     *      2: example
+     * @endcode
+     * 
+     * @return The source listing.
+     */
+    std::wstring GenerateSourceListing() const { return GenerateSourceListing(0, static_cast<SourceLocation>(backingBuffer.size())); }
+
+    /**
+     * Generates a source listing.
+     * 
+     * A source listing is a listing of the location from which a given piece of text comes in the
+     * logical input. For instance, given the following:
+     * @code
+     *      pevFind.exe foo --loadline#example# bar
+     *      
+     *      example contains:
+     *      baz
+     *      Logical input is:
+     *      pevFind.exe foo baz bar
+     * @endcode
+     * the output would end up being:
+     * @code
+     *      |- Command Line-------|
+     *                      |2|
+     *      2: example
+     * @endcode
+     * 
+     * @param startLocation The start of the range to list.
+     * @param endLocation   The end of the range to list.
+     * @return The source listing.
+     */
+    std::wstring GenerateSourceListing(SourceLocation startLocation, SourceLocation endLocation) const;
 };
 
 /**

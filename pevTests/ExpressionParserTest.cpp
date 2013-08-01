@@ -77,5 +77,112 @@ namespace pevFind { namespace tests
             std::wstring const expected(L"Example loaded tokens after");
             Assert::AreEqual(expected, uut.GetLogicalString());
         }
+
+        TEST_METHOD(SourceManagerTest_SourceListing)
+        {
+            SourceManager sm(L"one two three four", L"input");
+            std::wstring const expected(L"|1~input---------|");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingThreeDeep)
+        {
+            SourceManager sm(L"one two three four", L"input");
+            sm.InstallFile(2, 1,L"second level of input", L"input 2");
+            sm.InstallFile(3, 1,L"third level of input", L"input 3");
+            std::wstring const expected(L"|1~input--------------------------------------------------|\n"
+                                        L"  |2~input 2----------------------------|\n"
+                                        L"   |3~input 3---------|");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingTwoTrees)
+        {
+            SourceManager sm(L"one secondload thirdload four", L"input");
+            sm.InstallFile(4, 10, L"secondload", L"input2");
+            sm.InstallFile(15, 9, L"thirdload", L"in3");
+            std::wstring const expected(L"|1~input--------------------|\n"
+                                        L"    |2~input2| |3~in3--|");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingOffEdge)
+        {
+            SourceManager sm(L"one two three four", L"input");
+            sm.InstallFile(2, 1,L"second level of input", L"input 2");
+            sm.InstallFile(3, 1,L"third level of input", L"input 3");
+            std::wstring const expected(L"|1~input------------>\n"
+                                        L"  |2~input 2-------->\n"
+                                        L"   |3~input 3------->");
+            Assert::AreEqual(expected, sm.GenerateSourceListing(0, 21));
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingOffScreen)
+        {
+            SourceManager sm(L"one two three four", L"input");
+            sm.InstallFile(2, 1,L"second level of input", L"input 2");
+            sm.InstallFile(34, 1,L"third level of input", L"input 3");
+            std::wstring const expected(L"|1~input------------>\n"
+                                        L"  |2~input 2-------->\n");
+            Assert::AreEqual(expected, sm.GenerateSourceListing(0, 21));
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingNameTooLong)
+        {
+            SourceManager sm(L"one two three four", L"input");
+            sm.InstallFile(2, 1,L"second level of input", L"input 2");
+            sm.InstallFile(3, 1,L"third level of input", L"Insanely extremely ridiculusly long name goes here");
+            std::wstring const expected(L"|1~input--------------------------------------------------|\n"
+                                        L"  |2~input 2----------------------------|\n"
+                                        L"   |3~g name goes here|\n"
+                                        L"3:Insanely extremely ridiculusly long name goes here");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingEmptyFile)
+        {
+            SourceManager sm(L"input", L"input");
+            sm.InstallFile(2, 1, L"", L"loaded");
+            std::wstring const expected(L"|1~C|\n1:input");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingFileLength1)
+        {
+            SourceManager sm(L"input", L"input");
+            sm.InstallFile(2, 1, L"x", L"loaded");
+            std::wstring const expected(L"|1~C|\n  2\n1:input\n2:loaded");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingFileLength2)
+        {
+            SourceManager sm(L"input", L"input");
+            sm.InstallFile(2, 1, L"xx", L"loaded");
+            std::wstring const expected(L"|1~C|\n  2^\n1:input\n2:loaded");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingFileLength3)
+        {
+            SourceManager sm(L"input", L"input");
+            sm.InstallFile(2, 1, L"xxx", L"loaded");
+            std::wstring const expected(L"|1~C|\n  |2|\n1:input\n2:loaded");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_SourceListingFileLength4)
+        {
+            SourceManager sm(L"input and then some", L"input");
+            sm.InstallFile(2, 1, L"xxx", L"loaded");
+            std::wstring const expected(L"|1~Command Line---|\n  |2|\n2:loaded");
+            Assert::AreEqual(expected, sm.GenerateSourceListing());
+        }
+
+        TEST_METHOD(SourceManagerTest_ZeroInput)
+        {
+            SourceManager sm(L"");
+            Assert::AreEqual(std::wstring(), sm.GenerateSourceListing());
+        }
     };
 }}

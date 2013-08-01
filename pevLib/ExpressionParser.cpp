@@ -49,6 +49,11 @@ namespace pevFind
         return backingBuffer[location];
     }
 
+    std::wstring SourceManager::GenerateSourceListing(SourceLocation startLocation, SourceLocation endLocation) const
+    {
+        return std::wstring();
+    }
+
     LoadLineResult::LoadLineResult(std::wstring&& lineOrError_, bool success_)
         : lineOrError(std::move(lineOrError_))
         , success(success_)
