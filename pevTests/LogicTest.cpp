@@ -85,7 +85,7 @@ namespace pevFind { namespace tests
 	TEST_CLASS(LogicTest)
 	{
 	public:
-		TEST_METHOD(BasicConstructAnd)
+		TEST_METHOD(LogicTest_BasicConstructAnd)
 		{
             std::vector<std::unique_ptr<LogicalNode>> empty;
 			std::unique_ptr<LogicalNode> andNode = MakeLogicalAnd(std::move(empty));
@@ -94,7 +94,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::size_t>(0), andNode->GetChildren().size());
 		}
 
-        TEST_METHOD(BasicConstructOr)
+        TEST_METHOD(LogicTest_BasicConstructOr)
         {
             std::vector<std::unique_ptr<LogicalNode>> empty;
             std::unique_ptr<LogicalNode> orNode = MakeLogicalOr(std::move(empty));
@@ -103,7 +103,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::size_t>(0), orNode->GetChildren().size());
         }
 
-        TEST_METHOD(BasicConstructNot)
+        TEST_METHOD(LogicTest_BasicConstructNot)
         {
             std::unique_ptr<LogicalNode> dummy = MakeDummyLeaf();
             std::unique_ptr<LogicalNode> notNode = MakeLogicalNot(std::move(dummy));
@@ -112,7 +112,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::size_t>(1), notNode->GetChildren().size());
         }
 
-        TEST_METHOD(BasicConstructNotNot)
+        TEST_METHOD(LogicTest_BasicConstructNotNot)
         {
             std::unique_ptr<LogicalNode> dummy = MakeDummyLeaf();
             std::unique_ptr<LogicalNode> notNode = MakeLogicalNot(std::move(dummy));
@@ -122,7 +122,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::size_t>(0), notNotNode->GetChildren().size());
         }
 
-        TEST_METHOD(BasicDemorganAnd)
+        TEST_METHOD(LogicTest_BasicDemorganAnd)
         {
             std::vector<std::unique_ptr<LogicalNode>> andChildren;
             andChildren.push_back(MakeNamedLeaf(L"A"));
@@ -140,7 +140,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::wstring>(L"B"), orChildren[1]->GetName());
         }
 
-        TEST_METHOD(BasicDemorganOr)
+        TEST_METHOD(LogicTest_BasicDemorganOr)
         {
             std::vector<std::unique_ptr<LogicalNode>> orChildren;
             orChildren.push_back(MakeNamedLeaf(L"A"));
@@ -158,7 +158,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::wstring>(L"B"), andChildren[1]->GetName());
         }
 
-        TEST_METHOD(BasicDemorganNotAnd)
+        TEST_METHOD(LogicTest_BasicDemorganNotAnd)
         {
             std::vector<std::unique_ptr<LogicalNode>> andChildren;
             andChildren.push_back(MakeNamedLeaf(L"A"));
@@ -174,7 +174,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::wstring>(L"B"), orChildren[1]->GetName());
         }
 
-        TEST_METHOD(BasicDemorganNotOr)
+        TEST_METHOD(LogicTest_BasicDemorganNotOr)
         {
             std::vector<std::unique_ptr<LogicalNode>> orChildren;
             orChildren.push_back(MakeNamedLeaf(L"A"));
@@ -190,7 +190,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(static_cast<std::wstring>(L"B"), andChildren[1]->GetName());
         }
 
-        TEST_METHOD(NegationNormalize)
+        TEST_METHOD(LogicTest_NegationNormalize)
         {
             std::vector<std::unique_ptr<LogicalNode>> orChildren;
             orChildren.push_back(MakeNamedLeaf(L"A"));
@@ -216,7 +216,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(expected, stringized);
         }
 
-        TEST_METHOD(CloneTree)
+        TEST_METHOD(LogicTest_CloneTree)
         {
             std::vector<std::unique_ptr<LogicalNode>> orChildren;
             orChildren.push_back(MakeNamedLeaf(L"A"));

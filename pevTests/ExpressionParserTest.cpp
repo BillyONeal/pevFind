@@ -17,7 +17,7 @@ namespace pevFind { namespace tests
     TEST_CLASS(FileLoadLineResolverTest)
     {
     public:
-        TEST_METHOD(LoadLineFileResolverSuccess)
+        TEST_METHOD(FileLoadLineResolverTest_Success)
         {
             FileLoadLineResolver uut;
             auto result = uut.LoadLineByName(GetTestDllFilePath(L"LoadLineResolverExample.txt"));
@@ -26,7 +26,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(std::wstring(), result.GetError());
         }
 
-        TEST_METHOD(LoadLineFileResolverFailureInvalidPath)
+        TEST_METHOD(FileLoadLineResolverTest_FailureInvalidPath)
         {
             FileLoadLineResolver uut;
             auto result = uut.LoadLineByName(L"Invalid path here :: ");
@@ -40,7 +40,7 @@ namespace pevFind { namespace tests
     TEST_CLASS(PreconfiguredLoadLineResolverTest)
     {
     public:
-        TEST_METHOD(PreconfiguredLoadLineResolverSuccess)
+        TEST_METHOD(PreconfiguredLoadLineResolverTest_Success)
         {
             PreconfiguredLoadLineResolver uut;
             uut.Add(L"file name", L"output");
@@ -50,7 +50,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(std::wstring(), result.GetError());
         }
 
-        TEST_METHOD(PreconfiguredLoadLineResolverFailureNotConfigured)
+        TEST_METHOD(PreconfiguredLoadLineResolverTest_FailureNotConfigured)
         {
             PreconfiguredLoadLineResolver uut;
             uut.Add(L"file name", L"output");
@@ -64,13 +64,13 @@ namespace pevFind { namespace tests
     TEST_CLASS(SourceManagerTest)
     {
     public:
-        TEST_METHOD(Basic)
+        TEST_METHOD(SourceManagerTest_Basic)
         {
             SourceManager uut(L"Example");
             Assert::AreEqual(L'x', uut[1]);
         }
 
-        TEST_METHOD(WithReplacement)
+        TEST_METHOD(SourceManagerTest_WithReplacement)
         {
             SourceManager uut(L"Example --loadline#abc.txt# after");
             uut.InstallFile(8, 19, L"loaded tokens", L"abc.txt");
