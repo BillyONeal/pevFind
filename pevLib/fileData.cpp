@@ -1055,11 +1055,7 @@ void FileData::write()
                 line.push_back(isPEPlus() ? L'7' : L'-');
                 break;
             case L'8':
-                {
-                    std::wstring shortPath;
-                    getShortPathName(getFileName(),shortPath);
-                    line.append(shortPath);
-                }
+                line.append(GetShortPathNameStr(getFileName()));
                 break;
             case L'a':
             case L'A':

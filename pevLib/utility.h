@@ -102,8 +102,7 @@ std::vector<std::wstring> loadStringsFromFile(const std::wstring &fileName);
 
 std::string convertUnicode(const std::wstring &uni);
 std::wstring convertUnicode(const std::string &uni);
-std::wstring& GetFullPathName(std::wstring &inputPath);
-void getShortPathName(const std::wstring& longPath, std::wstring& shortPath);
+std::wstring GetShortPathNameStr(std::wstring longPath);
 
 std::wstring& expandEnvironmentString(std::wstring& toExpand);
 

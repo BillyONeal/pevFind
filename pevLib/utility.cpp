@@ -102,29 +102,31 @@ std::wstring convertUnicode(const std::string &uni)
     std::wstring result(resultRaw.begin(), resultRaw.end());
     return result;
 }
-//This is a std::string wrapper for the win32 api version.
-std::wstring& GetFullPathName(std::wstring &inputPath)
+std::wstring GetShortPathNameStr(std::wstring longPath)
 {
-    DWORD neededLength = GetFullPathName(inputPath.c_str(), NULL, NULL, NULL);
-    std::vector<wchar_t> resultRaw(neededLength);
-    GetFullPathName(inputPath.c_str(), neededLength, &resultRaw[0], NULL);
-    inputPath.assign(&resultRaw[0], neededLength - 1);
-    return inputPath;
-}
-void getShortPathName(const std::wstring& longPath, std::wstring& shortPath)
-{
-    DWORD bufferlen = GetShortPathName(longPath.c_str(),NULL,NULL);
+    bool relative = ::PathIsRelativeW(longPath.c_str()) != 0;
+    if (!relative)
+    {
+        longPath.insert(0, L"\\\\?\\");
+    }
+
+    DWORD bufferlen = GetShortPathNameW(longPath.c_str(), nullptr, 0);
     if (bufferlen == 0)
     {
         DWORD err = GetLastError();
         std::wstringstream ss;
         ss << L"ERROR(0x" << std::setw(8) << std::setfill(L'0') << std::hex << err << L")";
-        shortPath = ss.str();
-        return;
+        return ss.str();
     }
-    std::vector<wchar_t> buffer(bufferlen);
-    GetShortPathName(longPath.c_str(),&buffer[0],bufferlen);
-    shortPath.assign(&buffer[0]);
+
+    std::wstring result(bufferlen, L'\0');
+    GetShortPathNameW(longPath.c_str(),&result[0],bufferlen);
+    if (!relative)
+    {
+        result.erase(0, 4);
+    }
+
+    return result;
 }
 std::wstring& expandEnvironmentString(std::wstring& toExpand)
 {
