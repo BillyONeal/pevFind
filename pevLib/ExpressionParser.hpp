@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <cstdint>
+#include <memory>
 #include <ostream>
 #include "Logic.hpp"
 
@@ -51,39 +52,33 @@ typedef std::uint32_t SourceLocation;
 
 class LoadedFile
 {
-    SourceLocation startLocation;
-    std::uint32_t length;
     std::wstring input;
     std::wstring name;
+    SourceLocation startLocation;
 public:
-    LoadedFile(SourceLocation startLocation_, std::uint32_t length_, std::wstring input_, std::wstring name_) throw()
-        : startLocation(startLocation_)
-        , length(length_)
-        , input(std::move(input_))
-        , name(std::move(name_))
-    { }
-    LoadedFile(LoadedFile&& other) throw()
-        : startLocation(other.startLocation)
-        , length(other.length)
-        , input(std::move(other.input))
-        , name(std::move(other.name))
-    {
-    }
-    LoadedFile& operator=(LoadedFile&& other) throw()
-    {
-        startLocation = other.startLocation;
-        length = other.length;
-        input = std::move(other.input);
-        name = std::move(other.name);
-    }
-    SourceLocation GetStartLocation() const throw() { return startLocation; }
-    std::uint32_t GetLength() const throw() { return length; }
+    LoadedFile(SourceLocation startLocation_, std::wstring input_, std::wstring name_) throw();
+    LoadedFile(LoadedFile&& other) throw();
+    LoadedFile& operator=(LoadedFile&& other) throw();
+    SourceLocation GetStartLocation() const throw();
+    std::uint32_t size() const throw();
+    wchar_t operator[](std::size_t idx) const throw();
+    wchar_t const* data() const throw();
 };
 
-class SourceMananger
+struct DecomposedSourceLocation
+{
+    LoadedFile const* file;
+    SourceLocation relativeLocation;
+};
+
+class SourceManager
 {
     std::vector<LoadedFile> loadedFiles;
 public:
+    LoadedFile const& GetBufferForLocation(SourceLocation loc) const throw();
+    DecomposedSourceLocation GetDecomposedLocation(SourceLocation loc) const throw();
+    void InstallFile(LoadedFile&& file);
+    std::wstring GetSpellingOfRange(SourceLocation first, SourceLocation last) const;
 };
 
 /**
@@ -113,20 +108,30 @@ public:
      * Gets the line that was loaded.
      * @return The line if load was successful, or the empty string if the load was unsuccessful.
      */
-    std::wstring const& GetLine() const;
+    std::wstring const& GetLine() const throw();
+
+    /**
+     * Steals the line that was loaded.
+     * 
+     * Preconditions: Success()
+     * After this member function returns, this LoadLineResult is in an undefined state.
+     * 
+     * @return The loaded line.
+     */
+    std::wstring&& StealLine() throw();
 
     /**
      * Determines whether the load succeeded.
      * 
      * @return true if the line was loaded successfully; otherwise, false.
      */
-    bool Success() const;
+    bool Success() const throw();
 
     /**
      * Gets the error string on error.
      * @return The error string if the load was successful, or the empty string if the load was successful.
      */
-    std::wstring const& GetError() const;
+    std::wstring const& GetError() const throw();
 };
 
 /**
@@ -141,7 +146,7 @@ struct ILoadLineResolver
      * @return The result of the load attempt.
      */
     virtual LoadLineResult LoadLineByName(std::wstring const& name) const = 0;
-    virtual ~ILoadLineResolver();
+    virtual ~ILoadLineResolver() throw();
 };
 
 /**
@@ -171,7 +176,7 @@ public:
      * @param [in,out] name  The name to register.
      * @param [in,out] value The value of the line to associate.
      */
-    void Add(std::wstring&& name, std::wstring&& value);
+    void Add(wchar_t const* name, wchar_t const* value);
 
     /**
      * Loads the given named object as a command line.
@@ -179,16 +184,6 @@ public:
      * @return The result of the load attempt.
      */
     virtual LoadLineResult LoadLineByName(std::wstring const& name) const override;
-};
-
-class LexicalAnalyzer
-{
-public:
-    LexicalAnalyzer(std::unique_ptr<ILoadLineResolver> resolver);
-    bool ParseCommandLine(std::wstring commandLineToParse);
-    std::vector<Token> const& GetTokenStream() const;
-private:
-    std::vector<Token> tokenStream;
 };
 
 }

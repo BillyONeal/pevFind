@@ -7,76 +7,59 @@
 #include "ExpressionParser.hpp"
 #include "../LogCommon/Win32Exception.hpp"
 #include "utility.h"
+#include <cassert>
 
 static std::wstring emptyString;
 
 namespace pevFind
 {
-    Token::Token(TokenType type_, std::wstring::const_iterator sourceBegin_, std::wstring::const_iterator sourceEnd_, std::wstring::const_iterator containingBegin_, std::wstring::const_iterator containingEnd_)
-        : type(type_)
-        , sourceBegin(sourceBegin_)
-        , sourceEnd(sourceEnd_)
-        , containingBegin(containingBegin_)
-        , containingEnd(containingEnd_)
-        , node(nullptr)
+    LoadedFile::LoadedFile(SourceLocation startLocation_, std::wstring input_, std::wstring name_) throw()
+        : startLocation(startLocation_)
+        , input(std::move(input_))
+        , name(std::move(name_))
+    { }
+    LoadedFile::LoadedFile(LoadedFile&& other) throw()
+        : startLocation(other.startLocation)
+        , input(std::move(other.input))
+        , name(std::move(other.name))
     {
     }
-
-    Token::Token(std::unique_ptr<LogicalNode> node_, std::wstring::const_iterator sourceBegin_, std::wstring::const_iterator sourceEnd_, std::wstring::const_iterator containingBegin_, std::wstring::const_iterator containingEnd_)
-        : type(TokenType::Condition)
-        , sourceBegin(sourceBegin_)
-        , sourceEnd(sourceEnd_)
-        , containingBegin(containingBegin_)
-        , containingEnd(containingEnd_)
-        , node(std::move(node_))
+    LoadedFile& LoadedFile::operator=(LoadedFile&& other) throw()
     {
-    }
-
-    Token::Token(Token&& other)
-        : type(other.type)
-        , sourceBegin(other.sourceBegin)
-        , sourceEnd(other.sourceEnd)
-        , containingBegin(other.containingBegin)
-        , containingEnd(other.containingEnd)
-        , node(std::move(other.node))
-    {
-    }
-
-    Token& Token::operator=(Token&& other)
-    {
-        this->type = other.type;
-        this->sourceBegin = other.sourceEnd;
-        this->sourceEnd = other.sourceEnd;
-        this->containingBegin = other.containingBegin;
-        this->containingEnd = other.containingEnd;
-        this->node = std::move(other.node);
-
+        startLocation = other.startLocation;
+        input = std::move(other.input);
+        name = std::move(other.name);
         return *this;
     }
+    SourceLocation LoadedFile::GetStartLocation() const throw() { return startLocation; }
+    std::uint32_t LoadedFile::size() const throw() { return static_cast<std::uint32_t>(input.size()); }
+    wchar_t LoadedFile::operator[](std::size_t idx) const throw() { return input[idx]; }
+    wchar_t const* LoadedFile::data() const throw() { return input.data(); }
 
-    TokenType Token::GetType() const
+    LoadedFile const& SourceManager::GetBufferForLocation(SourceLocation) const throw()
     {
-        return this->type;
+        return loadedFiles[0];
     }
 
-    std::wstring::const_iterator Token::cbegin() const
+    DecomposedSourceLocation SourceManager::GetDecomposedLocation(SourceLocation loc) const throw()
     {
-        return this->sourceBegin;
+        DecomposedSourceLocation result = { &loadedFiles[0], loc };
+        return std::move(result);
     }
 
-    std::wstring::const_iterator Token::cend() const
+    void SourceManager::InstallFile(LoadedFile&& file)
     {
-        return this->sourceEnd;
+        loadedFiles.emplace_back(std::move(file));
     }
 
-    std::wstring::const_iterator Token::argument_cbegin() const
+    std::wstring SourceManager::GetSpellingOfRange(SourceLocation first, SourceLocation last) const
     {
-        return this->containingBegin;
-    }
-
-    std::wstring::const_iterator Token::argument_cend() const
-    {
-        return this->containingEnd;
+        assert(last > first);
+        auto const len = last - first;
+        std::wstring result(len, L'\0');
+        DecomposedSourceLocation resultBuffer = GetDecomposedLocation(first);
+        std::copy_n(resultBuffer.file->data() + resultBuffer.relativeLocation, len, result.begin());
+        return result;
     }
 
     LoadLineResult::LoadLineResult(std::wstring&& lineOrError_, bool success_)
@@ -95,7 +78,7 @@ namespace pevFind
         return LoadLineResult(std::move(error), false);
     }
 
-    std::wstring const& LoadLineResult::GetLine() const
+    std::wstring const& LoadLineResult::GetLine() const throw()
     {
         if (success)
         {
@@ -105,6 +88,12 @@ namespace pevFind
         {
             return emptyString;
         }
+    }
+
+    std::wstring&& LoadLineResult::StealLine() throw()
+    {
+        assert(Success());
+        return std::move(lineOrError);
     }
 
     bool LoadLineResult::Success() const
@@ -112,7 +101,7 @@ namespace pevFind
         return success;
     }
 
-    std::wstring const& LoadLineResult::GetError() const
+    std::wstring const& LoadLineResult::GetError() const throw()
     {
         if (success)
         {
@@ -124,7 +113,7 @@ namespace pevFind
         }
     }
 
-    ILoadLineResolver::~ILoadLineResolver()
+    ILoadLineResolver::~ILoadLineResolver() throw()
     {
     }
 
@@ -144,9 +133,9 @@ namespace pevFind
         }
     }
 
-    void PreconfiguredLoadLineResolver::Add(std::wstring&& name, std::wstring&& value)
+    void PreconfiguredLoadLineResolver::Add(wchar_t const* name, wchar_t const* value)
     {
-        lines.insert(std::make_pair(std::move(name), std::move(value)));
+        lines.insert(std::make_pair(name, value));
     }
 
     LoadLineResult PreconfiguredLoadLineResolver::LoadLineByName(std::wstring const& name) const
