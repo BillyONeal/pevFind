@@ -50,34 +50,91 @@ enum class TokenType
  */
 typedef std::uint32_t SourceLocation;
 
+/**
+ * Loaded file record.
+ */
 class LoadedFile
 {
     std::wstring name;
     SourceLocation startLocation;
     SourceLocation length;
 public:
+
+    /**
+     * Initializes a new instance of the LoadedFile class.
+     * @param startLocation_ The location where this file locally starts.
+     * @param length_        The length of this file's content.
+     * @param name_          The name of this file.
+     */
     LoadedFile(SourceLocation startLocation_, SourceLocation length_, std::wstring name_) throw();
+
+    /**
+     * Move constructor.
+     * @param [in,out] other The instance to move.
+     */
     LoadedFile(LoadedFile&& other) throw();
+
+    /**
+     * Move assignment operator.
+     * @param [in,out] other The instance to move.
+     * @return A shallow copy of this instance.
+     */
     LoadedFile& operator=(LoadedFile&& other) throw();
+
+    /**
+     * Gets the location where this file locally starts.
+     * @return The location where this file locally starts.
+     */
     SourceLocation GetStartLocation() const throw();
+
+    /**
+     * Gets the length of this file.
+     * @return The length of this file.
+     */
     SourceLocation GetLength() const throw();
 };
 
-struct DecomposedSourceLocation
-{
-    LoadedFile const* file;
-    SourceLocation relativeLocation;
-};
-
+/**
+ * Manages the logical input stream. Allows logical replacement of the input stream (for
+ * implementing --loadline)
+ */
 class SourceManager
 {
     std::vector<LoadedFile> loadedFiles;
     std::wstring backingBuffer;
 public:
-    void Reset(std::wstring content, std::wstring name);
-    void InstallFile(SourceLocation insertionLocation, SourceLocation replaceLength, std::wstring content, std::wstring name);
+
+    /**
+     * Initializes a new instance of the SourceManager class.
+     * @param startContent The starting content; typically the input command line.
+     * @param startName    (Optional) The name of the starting content. Defaults to L"Command Line"
+     */
+    SourceManager(std::wstring startContent, std::wstring startName = L"Command Line");
+
+    /**
+     * Logically installs a file and replaces a portion of the input.
+     * @param insertionLocation The insertion location which the inserted content replaces.
+     * @param replaceLength     The length of the insertion location which is replaced.
+     * @param content           The content placed in the replaced region.
+     * @param name              The name of the content.
+     */
+    void InstallFile(SourceLocation insertionLocation, SourceLocation replaceLength, std::wstring const& content, std::wstring name);
+
+    /**
+     * Array indexer operator.
+     * @param location The location to retrieve.
+     * @return The value at the logical index provided.
+     */
     wchar_t operator[](SourceLocation location) const throw();
-    wchar_t operator[](std::size_t location) const throw();
+
+    /**
+     * Gets the logical string.
+     * 
+     * This member function is intended for debugging and testing purposes only.
+     * 
+     * @return The logical string.
+     */
+    std::wstring const& GetLogicalString() const throw() { return backingBuffer; }
 };
 
 /**

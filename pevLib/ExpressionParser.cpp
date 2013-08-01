@@ -13,53 +13,40 @@ static std::wstring emptyString;
 
 namespace pevFind
 {
-    LoadedFile::LoadedFile(SourceLocation startLocation_, std::wstring input_, std::wstring name_) throw()
+    LoadedFile::LoadedFile(SourceLocation startLocation_, SourceLocation length_, std::wstring name_) throw()
         : startLocation(startLocation_)
-        , input(std::move(input_))
+        , length(length_)
         , name(std::move(name_))
     { }
     LoadedFile::LoadedFile(LoadedFile&& other) throw()
         : startLocation(other.startLocation)
-        , input(std::move(other.input))
+        , length(other.length)
         , name(std::move(other.name))
     {
     }
     LoadedFile& LoadedFile::operator=(LoadedFile&& other) throw()
     {
         startLocation = other.startLocation;
-        input = std::move(other.input);
+        length = other.length;
         name = std::move(other.name);
         return *this;
     }
     SourceLocation LoadedFile::GetStartLocation() const throw() { return startLocation; }
-    std::uint32_t LoadedFile::size() const throw() { return static_cast<std::uint32_t>(input.size()); }
-    wchar_t LoadedFile::operator[](std::size_t idx) const throw() { return input[idx]; }
-    wchar_t const* LoadedFile::data() const throw() { return input.data(); }
+    std::uint32_t LoadedFile::GetLength() const throw() { return length; }
 
-    LoadedFile const& SourceManager::GetBufferForLocation(SourceLocation) const throw()
+    SourceManager::SourceManager(std::wstring startContent, std::wstring startName)
+        : backingBuffer(std::move(startContent))
     {
-        return loadedFiles[0];
     }
 
-    DecomposedSourceLocation SourceManager::GetDecomposedLocation(SourceLocation loc) const throw()
+    void SourceManager::InstallFile(SourceLocation insertionLocation, SourceLocation replaceLength, std::wstring const& content, std::wstring name)
     {
-        DecomposedSourceLocation result = { &loadedFiles[0], loc };
-        return std::move(result);
+        backingBuffer.replace(insertionLocation, replaceLength, content);
     }
 
-    void SourceManager::InstallFile(LoadedFile&& file)
+    wchar_t SourceManager::operator[](SourceLocation location) const throw()
     {
-        loadedFiles.emplace_back(std::move(file));
-    }
-
-    std::wstring SourceManager::GetSpellingOfRange(SourceLocation first, SourceLocation last) const
-    {
-        assert(last > first);
-        auto const len = last - first;
-        std::wstring result(len, L'\0');
-        DecomposedSourceLocation resultBuffer = GetDecomposedLocation(first);
-        std::copy_n(resultBuffer.file->data() + resultBuffer.relativeLocation, len, result.begin());
-        return result;
+        return backingBuffer[location];
     }
 
     LoadLineResult::LoadLineResult(std::wstring&& lineOrError_, bool success_)

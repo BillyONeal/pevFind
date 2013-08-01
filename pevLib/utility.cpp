@@ -121,6 +121,8 @@ std::wstring convertUnicode(const std::string &uni)
     MultiByteToWideChar(CP_ACP,MB_COMPOSITE,uni.c_str(),static_cast<int>(uni.length()),&result[0],length);
     return result;
 }
+
+#pragma comment(lib, "shlwapi")
 std::wstring GetShortPathNameStr(std::wstring longPath)
 {
     bool relative = ::PathIsRelativeW(longPath.c_str()) != 0;

@@ -15,8 +15,8 @@ namespace pevFind { namespace tests
 {
 
     TEST_CLASS(FileLoadLineResolverTest)
-	{
-	public:
+    {
+    public:
         TEST_METHOD(LoadLineFileResolverSuccess)
         {
             FileLoadLineResolver uut;
@@ -66,15 +66,16 @@ namespace pevFind { namespace tests
     public:
         TEST_METHOD(Basic)
         {
-            SourceManager uut;
-            LoadedFile file(0, L"example", L"Command Line");
-            uut.InstallFile(std::move(file));
-            Assert::AreEqual(7u, uut.GetBufferForLocation(3).size());
-            auto const decomposed = uut.GetDecomposedLocation(3);
-            Assert::AreEqual(3u, decomposed.relativeLocation);
-            Assert::AreEqual(7u, decomposed.file->size());
-            auto const result = uut.GetSpellingOfRange(2, 5);
-            Assert::AreEqual(std::wstring(L"amp"), result);
+            SourceManager uut(L"Example");
+            Assert::AreEqual(L'x', uut[1]);
+        }
+
+        TEST_METHOD(WithReplacement)
+        {
+            SourceManager uut(L"Example --loadline#abc.txt# after");
+            uut.InstallFile(8, 19, L"loaded tokens", L"abc.txt");
+            std::wstring const expected(L"Example loaded tokens after");
+            Assert::AreEqual(expected, uut.GetLogicalString());
         }
     };
 }}
