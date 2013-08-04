@@ -86,7 +86,7 @@ std::wstring::const_iterator findEndOfCommandline(std::wstring::const_iterator i
             }
             break;
         case 4:
-            state = 2;
+            state = 1;
             break;
         default:
             throw std::logic_error("Bill's got a bad bug!");
@@ -167,6 +167,7 @@ std::wstring::const_iterator commandlineProcessor::process(std::wstring::const_i
             case L'/':
             case L'-':
                 state = 1;
+                break;
             case L'\n':
             case L'\t':
             case L' ':
@@ -189,6 +190,7 @@ std::wstring::const_iterator commandlineProcessor::process(std::wstring::const_i
             case L'w':
                 w = true;
                 break;
+            case L'I':
             case L'i':
                 i = true;
             case L'\n':
