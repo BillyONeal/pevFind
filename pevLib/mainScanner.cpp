@@ -92,7 +92,7 @@ namespace scanners
                 //add it to the list of directories to search
                 if (!globalOptions::noSubDirectories)
                 {
-                    if (currentFile.isDirectory())
+                    if (currentFile.isDirectory() && !currentFile.isReparsePoint())
                     {    
                         if (globalOptions::logicalTree->directoryCheck(currentFile.getFileName()))
                         {
