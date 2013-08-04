@@ -726,13 +726,20 @@ std::wstring FileData::getVersionInformationString(const std::wstring& requested
             << versionTranslations[idx].wCodePage;
         versionQuery << L'\\' << requestedResourceType;
         std::wstring versionQueryString(versionQuery.str());
-        VerQueryValue(&versionInformationBlock[0],versionQueryString.c_str(),(LPVOID *)&retString,&retStringLength);
+        VerQueryValue(versionInformationBlock.data(),versionQueryString.c_str(),(LPVOID *)&retString,&retStringLength);
         if (retStringLength)
         {
             if (!result.empty())
             {
                 result.append(L" / ");
             }
+
+            // Preserve embedded nulls, but remove trailing nulls.
+            while (retStringLength != 0 && retString[retStringLength - 1] == L'\0')
+            {
+                --retStringLength;
+            }
+
             result.append(retString, retStringLength);
         }
     }

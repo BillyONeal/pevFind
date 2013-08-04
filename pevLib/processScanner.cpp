@@ -23,7 +23,7 @@ namespace scanners {
 		}
 
 		Instalog::SystemFacades::ProcessEnumerator processes;
-		for (auto& process : processes)
+		for (auto process : processes)
         {
             try 
             {
