@@ -90,8 +90,8 @@ namespace pevFind { namespace tests
             SourceManager sm(L"one two three four", L"input");
             sm.InstallFile(2, 1,L"second level of input", L"input 2");
             sm.InstallFile(3, 1,L"third level of input", L"input 3");
-            std::wstring const expected(L"|1~input--------------------------------------------------|\n"
-                                        L"  |2~input 2----------------------------|\n"
+            std::wstring const expected(L"|1~input------------------------------------------------|\n"
+                                        L"  |2~input 2-----------------------------|\n"
                                         L"   |3~input 3---------|");
             Assert::AreEqual(expected, sm.GenerateSourceListing());
         }
@@ -111,10 +111,10 @@ namespace pevFind { namespace tests
             SourceManager sm(L"one two three four", L"input");
             sm.InstallFile(2, 1,L"second level of input", L"input 2");
             sm.InstallFile(3, 1,L"third level of input", L"input 3");
-            std::wstring const expected(L"|1~input------------>\n"
-                                        L"  |2~input 2-------->\n"
-                                        L"   |3~input 3------->");
-            Assert::AreEqual(expected, sm.GenerateSourceListing(0, 21));
+            std::wstring const expected(L"|1~input----------->\n"
+                                        L"  |2~input 2------->\n"
+                                        L"   |3~input 3------>");
+            Assert::AreEqual(expected, sm.GenerateSourceListing(0, 20));
         }
 
         TEST_METHOD(SourceManagerTest_SourceListingOffScreen)
@@ -122,20 +122,20 @@ namespace pevFind { namespace tests
             SourceManager sm(L"one two three four", L"input");
             sm.InstallFile(2, 1,L"second level of input", L"input 2");
             sm.InstallFile(34, 1,L"third level of input", L"input 3");
-            std::wstring const expected(L"|1~input------------>\n"
-                                        L"  |2~input 2-------->\n");
-            Assert::AreEqual(expected, sm.GenerateSourceListing(0, 21));
+            std::wstring const expected(L"|1~input----------->\n"
+                                        L"  |2~input 2------->");
+            Assert::AreEqual(expected, sm.GenerateSourceListing(0, 20));
         }
 
         TEST_METHOD(SourceManagerTest_SourceListingNameTooLong)
         {
             SourceManager sm(L"one two three four", L"input");
-            sm.InstallFile(2, 1,L"second level of input", L"input 2");
-            sm.InstallFile(3, 1,L"third level of input", L"Insanely extremely ridiculusly long name goes here");
-            std::wstring const expected(L"|1~input--------------------------------------------------|\n"
-                                        L"  |2~input 2----------------------------|\n"
+            sm.InstallFile(2, 1, L"second level of input", L"input 2");
+            sm.InstallFile(3, 1, L"third level of input", L"Insanely extremely ridiculusly long name goes here");
+            std::wstring const expected(L"|1~input------------------------------------------------|\n"
+                                        L"  |2~input 2-----------------------------|\n"
                                         L"   |3~g name goes here|\n"
-                                        L"3:Insanely extremely ridiculusly long name goes here");
+                                        L"3: Insanely extremely ridiculusly long name goes here");
             Assert::AreEqual(expected, sm.GenerateSourceListing());
         }
 
@@ -143,7 +143,7 @@ namespace pevFind { namespace tests
         {
             SourceManager sm(L"input", L"input");
             sm.InstallFile(2, 1, L"", L"loaded");
-            std::wstring const expected(L"|1~C|\n1:input");
+            std::wstring const expected(L"|1~t|\n1: input");
             Assert::AreEqual(expected, sm.GenerateSourceListing());
         }
 
@@ -151,7 +151,7 @@ namespace pevFind { namespace tests
         {
             SourceManager sm(L"input", L"input");
             sm.InstallFile(2, 1, L"x", L"loaded");
-            std::wstring const expected(L"|1~C|\n  2\n1:input\n2:loaded");
+            std::wstring const expected(L"|1~t|\n  2\n1: input\n2: loaded");
             Assert::AreEqual(expected, sm.GenerateSourceListing());
         }
 
@@ -159,7 +159,7 @@ namespace pevFind { namespace tests
         {
             SourceManager sm(L"input", L"input");
             sm.InstallFile(2, 1, L"xx", L"loaded");
-            std::wstring const expected(L"|1~C|\n  2^\n1:input\n2:loaded");
+            std::wstring const expected(L"|1~ut|\n  2^\n1: input\n2: loaded");
             Assert::AreEqual(expected, sm.GenerateSourceListing());
         }
 
@@ -167,7 +167,7 @@ namespace pevFind { namespace tests
         {
             SourceManager sm(L"input", L"input");
             sm.InstallFile(2, 1, L"xxx", L"loaded");
-            std::wstring const expected(L"|1~C|\n  |2|\n1:input\n2:loaded");
+            std::wstring const expected(L"|1~put|\n  |2|\n1: input\n2: loaded");
             Assert::AreEqual(expected, sm.GenerateSourceListing());
         }
 
@@ -175,7 +175,7 @@ namespace pevFind { namespace tests
         {
             SourceManager sm(L"input and then some", L"input");
             sm.InstallFile(2, 1, L"xxx", L"loaded");
-            std::wstring const expected(L"|1~Command Line---|\n  |2|\n2:loaded");
+            std::wstring const expected(L"|1~input------------|\n  |2|\n2: loaded");
             Assert::AreEqual(expected, sm.GenerateSourceListing());
         }
 

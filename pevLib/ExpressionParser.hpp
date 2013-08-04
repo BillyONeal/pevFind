@@ -92,6 +92,24 @@ public:
      * @return The length of this file.
      */
     SourceLocation GetLength() const throw();
+
+    /**
+     * Gets logical end of this file. Equivalent to GetStartLocation() + GetLength().
+     * @return The logical end of this file.
+     */
+    SourceLocation GetLogicalEnd() const throw() { return GetStartLocation() + GetLength(); }
+
+    /**
+     * Gets the name of this file.
+     * @return The name of this file.
+     */
+    std::wstring const& GetName() const throw() { return name; }
+
+    /**
+     * Adds the given amount of length to this LoadedFile.
+     * @return .
+     */
+    void AddLength(std::int32_t addedLength) throw();
 };
 
 /**
