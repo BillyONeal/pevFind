@@ -1,3 +1,11 @@
+Changes in 1.5.17:
+* Fixed "Remove embedded nulls from the end of version info strings."
+  https://github.com/BillyONeal/pevFind/issues/20
+* EXEC /s seems to be broken
+  https://github.com/BillyONeal/pevFind/issues/16
+* Reparse Points cause Infinite Loop
+  https://github.com/BillyONeal/pevFind/issues/11
+
 Changes in 1.5.16:
 * Process listing and enumeration routines are replaced with those taken from
   Instalog.
