@@ -220,8 +220,5 @@
     <ClInclude Include="pch.hpp">
       <Filter>Header Files\Precompiled</Filter>
     </ClInclude>
-    <ClInclude Include="Version.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

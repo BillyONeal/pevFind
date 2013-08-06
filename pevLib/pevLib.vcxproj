@@ -104,7 +104,6 @@
     <ClInclude Include="unzip.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="uZip.h" />
-    <ClInclude Include="Version.hpp" />
     <ClInclude Include="vFind.h" />
     <ClInclude Include="volumeEnumerate.h" />
     <ClInclude Include="wait.hpp" />

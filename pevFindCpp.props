@@ -21,9 +21,7 @@
     <OutDir>$(SolutionDir)Build\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(OutDir)Intermediate\$(ProjectName)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Platform)'=='x64'">
-    <TargetName>$(ProjectName)_x64</TargetName>
-  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)\pevFindVersion.props" />
   <ItemDefinitionGroup>
     <ClCompile>
       <SDLCheck>true</SDLCheck>
