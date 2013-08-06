@@ -184,5 +184,35 @@ namespace pevFind { namespace tests
             SourceManager sm(L"");
             Assert::AreEqual(std::wstring(), sm.GenerateSourceListing());
         }
+
+        TEST_METHOD(SourceManagerTest_CharacterIsAt)
+        {
+            SourceManager sm(L"input");
+            Assert::IsTrue(sm.CharacterIsAt(0));
+            Assert::IsTrue(sm.CharacterIsAt(4));
+            Assert::IsFalse(sm.CharacterIsAt(5));
+        }
+    };
+
+    TEST_CLASS(LexicalAnalyzerTest)
+    {
+    public:
+        TEST_METHOD(LexicalAnalyzerTest_GetTokenStartAfter)
+        {
+            SourceManager sm(L"1st 2nd\t3rd\n4th\r5th");
+            SourceLocation currentLoc = 0;
+            for (auto idx = 0; idx < 4; ++idx)
+            {
+                auto newLoc = GetTokenStartAfter(sm, currentLoc + 3);
+                Assert::AreEqual(currentLoc + 4, newLoc);
+                currentLoc = newLoc;
+            }
+
+            auto const expectedEnd = currentLoc + 3;
+            Assert::AreEqual(expectedEnd, GetTokenStartAfter(sm, expectedEnd));
+            Assert::IsFalse(sm.CharacterIsAt(expectedEnd));
+
+            Assert::AreEqual(1729u, GetTokenStartAfter(sm, 1729));
+        }
     };
 }}

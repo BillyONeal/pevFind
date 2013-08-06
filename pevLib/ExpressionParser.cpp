@@ -324,4 +324,29 @@ namespace pevFind
             return LoadLineResult::FromLineValue(namePosition->second);
         }
     }
+
+    static bool IsWhitespace(wchar_t ch)
+    {
+        return ch == L' ' || ch == L'\t' || ch == L'\n' || ch == L'\r';
+    }
+
+    SourceLocation GetTokenStartAfter(SourceManager const& sm, SourceLocation startAt)
+    {
+        for(;;)
+        {
+            if (!sm.CharacterIsAt(startAt))
+            {
+                break;
+            }
+
+            if (!IsWhitespace(sm[startAt]))
+            {
+                break;
+            }
+
+            ++startAt;
+        }
+
+        return startAt;
+    }
 }

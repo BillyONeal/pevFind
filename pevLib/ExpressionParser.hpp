@@ -203,6 +203,13 @@ public:
      * @return The source listing.
      */
     std::wstring GenerateSourceListing(SourceLocation startLocation, SourceLocation endLocation) const;
+
+    /**
+     * Test if a character exists at a given location.
+     * @param location The location to test.
+     * @return true if there is a character there; otherwise, false.
+     */
+    bool CharacterIsAt(SourceLocation location) const { return location < backingBuffer.size(); }
 };
 
 /**
@@ -309,5 +316,7 @@ public:
      */
     virtual LoadLineResult LoadLineByName(std::wstring const& name) const override;
 };
+
+SourceLocation GetTokenStartAfter(SourceManager const& sm, SourceLocation startAt);
 
 }
