@@ -11,7 +11,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include "../pevLib/utility.h"
-#include "../pevLib/Version.hpp"
 
 //Subprogram definitions
 #include "../pevLib/clsidCompressor.h"
@@ -81,6 +80,8 @@ int __cdecl wmain(int argc, wchar_t* argv[])
     }
     catch (std::exception& except)
     {
+#define STRINGIZE_LITERAL(x) #x
+#define STRINGIZE(x) STRINGIZE_LITERAL(x)
         std::cerr << 
         "                         _____ _           _ \n"
         "        _ __   _____   _|  ___(_)_ __   __| |\n"
@@ -88,7 +89,7 @@ int __cdecl wmain(int argc, wchar_t* argv[])
         "       | |_) |  __/\\ V /|  _| | | | | | (_| |\n"
         "       | .__/ \\___| \\_/ |_|   |_|_| |_|\\__,_|\n"
         "       |_|    by Billy Robert O'Neal III\n"
-        "                      Version " PEVFIND_VERSION "\n"
+        "                      Version " STRINGIZE(PEVFIND_VERSION) "\n"
         "  Distributed under the Boost Software License, Version 1.0.\n"
         "         http://www.boost.org/LICENSE_1_0.txt\n"
         "pevFind contains some code from Info-ZIP, used with permission.\n"

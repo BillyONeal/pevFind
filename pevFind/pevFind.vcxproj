@@ -27,6 +27,12 @@
     <ConfigurationType>Application</ConfigurationType>
   </PropertyGroup>
   <Import Project="$(SolutionDir)pevFindCpp.props" />
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <DropFileName>pevFind_$(PevFindVersion).exe</DropFileName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <DropFileName>pevFind_$(PevFindVersion)_x64.exe</DropFileName>
+  </PropertyGroup>  
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -55,4 +61,8 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="AfterBuild" Condition="'$(Configuration)'!='Debug'">
+    <MakeDir Directories="$(OutDir)..\..\Drop" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(OutDir)..\..\Drop\$(DropFileName)" />
+  </Target>
 </Project>

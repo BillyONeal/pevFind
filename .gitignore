@@ -16,4 +16,4 @@ UpgradeLog.XML
 thirdParty/cryptopp562/adhoc.cpp
 *.vsp
 TestResults/*
-*.ipch
+Drop
