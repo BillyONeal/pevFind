@@ -8,6 +8,7 @@
 #include "../LogCommon/Win32Exception.hpp"
 #include "utility.h"
 #include <stdexcept>
+#include <algorithm>
 #include <cassert>
 
 static std::wstring emptyString;
@@ -328,6 +329,207 @@ namespace pevFind
     static bool IsWhitespace(wchar_t ch)
     {
         return ch == L' ' || ch == L'\t' || ch == L'\n' || ch == L'\r';
+    }
+
+    static wchar_t const* CaseInsensitiveConstantEmptyString = L"";
+    wchar_t* CaseInsensitiveConstant::GetLowerCaseBegin() const throw() { return buffer.get(); }
+    wchar_t* CaseInsensitiveConstant::GetLowerCaseEnd() const throw() { return buffer.get() + size_; }
+    wchar_t* CaseInsensitiveConstant::GetUpperCaseBegin() const throw() { return buffer.get() + size_ + 1u; }
+    wchar_t* CaseInsensitiveConstant::GetUpperCaseEnd() const throw() { return GetUpperCaseBegin() + size_; }
+
+    CaseInsensitiveConstant::CaseInsensitiveConstant()
+        : buffer()
+        , size_(0)
+    {
+    }
+
+    CaseInsensitiveConstant::CaseInsensitiveConstant(wchar_t const* value)
+    {
+        this->assign(value);
+    }
+
+    CaseInsensitiveConstant::CaseInsensitiveConstant(wchar_t const* value, SourceLocation valueSize)
+    {
+        this->assign(value, valueSize);
+    }
+    
+    CaseInsensitiveConstant::CaseInsensitiveConstant(CaseInsensitiveConstant const& toCopy)
+    {
+        this->assign(toCopy);
+    }
+
+    CaseInsensitiveConstant::CaseInsensitiveConstant(CaseInsensitiveConstant&& toMove) throw()
+    {
+        this->assign(std::move(toMove));
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::assign(wchar_t const* value)
+    {
+        auto const length = std::wcslen(value);
+        if (length > std::numeric_limits<SourceLocation>::max())
+        {
+            throw std::out_of_range("Case constant length limit exceeded.");
+        }
+
+        return this->assign(value, static_cast<SourceLocation>(length));
+    }
+
+    static inline SourceLocation GetBufferLength(SourceLocation desiredSize)
+    {
+        SourceLocation result = desiredSize * 2 + 2;
+        if (result < desiredSize)
+        {
+            throw std::out_of_range("Case constant length limit exceeded.");
+        }
+
+        return result;
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::assign(wchar_t const* value, SourceLocation valueSize)
+    {
+        if (valueSize == 0)
+        {
+            return *this;
+        }
+
+        if (valueSize > static_cast<SourceLocation>(std::numeric_limits<int>::max()))
+        {
+            throw std::out_of_range("Signed integer overflow.");
+        }
+
+        int const asInt = static_cast<int>(valueSize);
+        this->size_ = valueSize;
+        auto const bufferLength = GetBufferLength(valueSize);
+        this->buffer.reset(new wchar_t[bufferLength]);
+        ::LCMapStringW(LOCALE_INVARIANT, LCMAP_LOWERCASE, value, asInt, this->GetLowerCaseBegin(), asInt);
+        *(this->GetLowerCaseEnd()) = L'\0';
+        ::LCMapStringW(LOCALE_INVARIANT, LCMAP_UPPERCASE, value, asInt, this->GetUpperCaseBegin(), asInt);
+        *(this->GetUpperCaseEnd()) = L'\0';
+
+        return *this;
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::assign(CaseInsensitiveConstant const& toCopy)
+    {
+        this->size_ = toCopy.size_;
+        auto const bufferLength = GetBufferLength(toCopy.size_);
+        std::unique_ptr<wchar_t[]> newBuffer(new wchar_t[bufferLength]);
+        std::copy_n(toCopy.buffer.get(), bufferLength, newBuffer.get());
+        this->buffer = std::move(newBuffer);
+        return *this;
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::assign(CaseInsensitiveConstant&& toMove) throw()
+    {
+        auto const newSize = toMove.size_; // self assignment
+        toMove.size_ = 0;
+        this->size_ = newSize;
+        this->buffer = std::move(toMove.buffer);
+        return *this;
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::operator=(wchar_t const* value)
+    {
+        return this->assign(value);
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::operator=(CaseInsensitiveConstant const& toCopy)
+    {
+        return this->assign(toCopy);
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::operator=(CaseInsensitiveConstant&& toMove) throw()
+    {
+        return this->assign(std::move(toMove));
+    }
+
+    SourceLocation CaseInsensitiveConstant::size() const throw()
+    {
+        return this->size_;
+    }
+
+    wchar_t const* CaseInsensitiveConstant::lower_cstr() const throw()
+    {
+        if (this->size_ == 0)
+        {
+            return CaseInsensitiveConstantEmptyString;
+        }
+        else
+        {
+            return this->GetLowerCaseBegin();
+        }
+    }
+
+    wchar_t const* CaseInsensitiveConstant::upper_cstr() const throw()
+    {
+        if (this->size_ == 0)
+        {
+            return CaseInsensitiveConstantEmptyString;
+        }
+        else
+        {
+            return this->GetUpperCaseBegin();
+        }
+    }
+
+    wchar_t const* CaseInsensitiveConstant::lcbegin() const throw()
+    {
+        if (this->size_ == 0)
+        {
+            return CaseInsensitiveConstantEmptyString;
+        }
+        else
+        {
+            return this->GetLowerCaseBegin();
+        }
+    }
+
+    wchar_t const* CaseInsensitiveConstant::lcend() const throw()
+    {
+        if (this->size_ == 0)
+        {
+            return CaseInsensitiveConstantEmptyString;
+        }
+        else
+        {
+            return this->GetLowerCaseEnd();
+        }
+    }
+
+    wchar_t const* CaseInsensitiveConstant::ucbegin() const throw()
+    {
+        if (this->size_ == 0)
+        {
+            return CaseInsensitiveConstantEmptyString;
+        }
+        else
+        {
+            return this->GetUpperCaseBegin();
+        }
+    }
+
+    wchar_t const* CaseInsensitiveConstant::ucend() const throw()
+    {
+        if (this->size_ == 0)
+        {
+            return CaseInsensitiveConstantEmptyString;
+        }
+        else
+        {
+            return this->GetUpperCaseEnd();
+        }
+    }
+
+    void CaseInsensitiveConstant::swap(CaseInsensitiveConstant& other) throw()
+    {
+        using std::swap;
+        swap(this->size_, other.size_);
+        swap(this->buffer, other.buffer);
+    }
+
+    void swap(CaseInsensitiveConstant& lhs, CaseInsensitiveConstant& rhs) throw()
+    {
+        lhs.swap(rhs);
     }
 
     SourceLocation GetTokenStartAfter(SourceManager const& sm, SourceLocation startAt)

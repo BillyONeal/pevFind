@@ -215,4 +215,154 @@ namespace pevFind { namespace tests
             Assert::AreEqual(1729u, GetTokenStartAfter(sm, 1729));
         }
     };
+
+    TEST_CLASS(CaseInsensitiveConstantTest)
+    {
+    public:
+        TEST_METHOD(CaseInsensitiveConstantTest_Empty)
+        {
+            CaseInsensitiveConstant empty;
+            Assert::AreEqual(0u, empty.size());
+            Assert::AreEqual<std::wstring>(L"", empty.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"", empty.upper_cstr());
+            Assert::AreEqual<void const*>(empty.lcbegin(), empty.lcend());
+            Assert::AreEqual<void const*>(empty.ucbegin(), empty.ucend());
+        }
+
+        TEST_METHOD(CaseInsensitiveConstantTest_Basic)
+        {
+            CaseInsensitiveConstant basic(L"Case String");
+            Assert::AreEqual(11u, basic.size());
+            Assert::AreEqual<std::wstring>(L"case string", basic.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"CASE STRING", basic.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"case string", std::wstring(basic.lcbegin(), basic.lcend()));
+            Assert::AreEqual<std::wstring>(L"CASE STRING", std::wstring(basic.ucbegin(), basic.ucend()));
+        }
+
+        TEST_METHOD(CaseInsensitiveConstantTest_AssignmentOperator)
+        {
+            CaseInsensitiveConstant hello(L"Hello !"), world(L"World");
+            hello = world;
+            Assert::AreEqual(5u, hello.size());
+            Assert::AreEqual<std::wstring>(L"world", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"WORLD", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"world", std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(L"WORLD", std::wstring(hello.ucbegin(), hello.ucend()));
+            Assert::AreEqual(5u, world.size());
+            Assert::AreEqual<std::wstring>(L"world", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"WORLD", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"world", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"WORLD", std::wstring(world.ucbegin(), world.ucend()));
+            hello = std::move(world);
+            Assert::AreEqual(5u, hello.size());
+            Assert::AreEqual<std::wstring>(L"world", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"WORLD", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"world", std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(L"WORLD", std::wstring(hello.ucbegin(), hello.ucend()));
+            Assert::AreEqual(0u, world.size());
+            Assert::AreEqual<std::wstring>(L"", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"", std::wstring(world.ucbegin(), world.ucend()));
+            world = L"tEsT";
+            Assert::AreEqual(4u, world.size());
+            Assert::AreEqual<std::wstring>(L"test", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"TEST", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"test", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"TEST", std::wstring(world.ucbegin(), world.ucend()));
+            world = world;
+            Assert::AreEqual(4u, world.size());
+            Assert::AreEqual<std::wstring>(L"test", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"TEST", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"test", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"TEST", std::wstring(world.ucbegin(), world.ucend()));
+            world = std::move(world);
+            Assert::AreEqual(4u, world.size());
+            Assert::AreEqual<std::wstring>(L"test", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"TEST", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"test", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"TEST", std::wstring(world.ucbegin(), world.ucend()));
+        }
+
+
+        TEST_METHOD(CaseInsensitiveConstantTest_AssignmentMemberFunction)
+        {
+            CaseInsensitiveConstant hello(L"Hello !"), world(L"World");
+            hello.assign(world);
+            Assert::AreEqual(5u, hello.size());
+            Assert::AreEqual<std::wstring>(L"world", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"WORLD", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"world", std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(L"WORLD", std::wstring(hello.ucbegin(), hello.ucend()));
+            Assert::AreEqual(5u, world.size());
+            Assert::AreEqual<std::wstring>(L"world", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"WORLD", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"world", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"WORLD", std::wstring(world.ucbegin(), world.ucend()));
+            hello.assign(std::move(world));
+            Assert::AreEqual(5u, hello.size());
+            Assert::AreEqual<std::wstring>(L"world", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"WORLD", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"world", std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(L"WORLD", std::wstring(hello.ucbegin(), hello.ucend()));
+            Assert::AreEqual(0u, world.size());
+            Assert::AreEqual<std::wstring>(L"", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"", std::wstring(world.ucbegin(), world.ucend()));
+            world.assign(L"tEsT");
+            Assert::AreEqual(4u, world.size());
+            Assert::AreEqual<std::wstring>(L"test", world.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"TEST", world.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"test", std::wstring(world.lcbegin(), world.lcend()));
+            Assert::AreEqual<std::wstring>(L"TEST", std::wstring(world.ucbegin(), world.ucend()));
+            hello.assign(L"he\0lo", 4);
+            Assert::AreEqual(4u, hello.size());
+            std::wstring lower(L"he\0l", 4);
+            std::wstring upper(L"HE\0L", 4);
+            Assert::AreEqual<std::wstring>(L"he", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"HE", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(lower, std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(upper, std::wstring(hello.ucbegin(), hello.ucend()));
+            hello.assign(hello);
+            Assert::AreEqual(4u, hello.size());
+            Assert::AreEqual<std::wstring>(L"he", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"HE", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(lower, std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(upper, std::wstring(hello.ucbegin(), hello.ucend()));
+            hello.assign(std::move(hello));
+            Assert::AreEqual(4u, hello.size());
+            Assert::AreEqual<std::wstring>(L"he", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"HE", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(lower, std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(upper, std::wstring(hello.ucbegin(), hello.ucend()));
+        }
+
+        TEST_METHOD(CaseInsensitiveConstantTest_LengthString)
+        {
+            CaseInsensitiveConstant hello(L"he\0lo", 4);
+            Assert::AreEqual(4u, hello.size());
+            std::wstring lower(L"he\0l", 4);
+            std::wstring upper(L"HE\0L", 4);
+            Assert::AreEqual<std::wstring>(L"he", hello.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"HE", hello.upper_cstr());
+            Assert::AreEqual<std::wstring>(lower, std::wstring(hello.lcbegin(), hello.lcend()));
+            Assert::AreEqual<std::wstring>(upper, std::wstring(hello.ucbegin(), hello.ucend()));
+        }
+
+        TEST_METHOD(CaseInsensitiveConstantTest_Swap)
+        {
+            using std::swap;
+            CaseInsensitiveConstant hello(L"Hello"), world(L"World");
+            hello.swap(world);
+            Assert::AreEqual(L"world", hello.lower_cstr());
+            Assert::AreEqual(L"hello", world.lower_cstr());
+
+            swap(world, hello);
+            Assert::AreEqual(L"hello", hello.lower_cstr());
+            Assert::AreEqual(L"world", world.lower_cstr());
+            CaseInsensitiveConstant().swap(hello);
+            Assert::AreEqual(0u, hello.size());
+        }
+    };
 }}

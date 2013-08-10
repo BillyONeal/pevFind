@@ -317,6 +317,157 @@ public:
     virtual LoadLineResult LoadLineByName(std::wstring const& name) const override;
 };
 
+/**
+ * Case insensitive character constant.
+ */
+class CaseInsensitiveConstant
+{
+    std::unique_ptr<wchar_t[]> buffer;
+    SourceLocation size_;
+    wchar_t* GetLowerCaseBegin() const throw();
+    wchar_t* GetLowerCaseEnd() const throw();
+    wchar_t* GetUpperCaseBegin() const throw();
+    wchar_t* GetUpperCaseEnd() const throw();
+public:
+    typedef wchar_t const* const_iterator;
+
+    /**
+     * Initializes a new instance of the CaseInsensitiveConstant class containing the empty string.
+     */
+    CaseInsensitiveConstant();
+
+    /**
+     * Initializes a new instance of the CaseInsensitiveConstant class containing the specified
+     * null terminated string.
+     * @param value The null terminated string to which this instance is set.
+     */
+    explicit CaseInsensitiveConstant(wchar_t const* value);
+
+    /**
+     * Initializes a new instance of the CaseInsensitiveConstant class using the indicated length specified string.
+     * @param value The value to which this instance is set.
+     * @param valueSize The number of characters in @a value, excluding the terminating null character (if any)
+     */
+    CaseInsensitiveConstant(wchar_t const* value, SourceLocation valueSize);
+
+    /**
+     * Initializes a new copy of the CaseInsensitiveConstant class.
+     * @param toCopy to copy.
+     */
+    CaseInsensitiveConstant(CaseInsensitiveConstant const& toCopy);
+
+    /**
+     * Move initializes the CaseInsensitiveConstant class.
+     * @param toMove to move.
+     */
+    CaseInsensitiveConstant(CaseInsensitiveConstant&& toMove) throw();
+
+    /**
+     * Sets this instance to the given null terminated string.
+     * @param value The null terminated string to which this instance is set.
+     * @return *this
+     */
+    CaseInsensitiveConstant& assign(wchar_t const* value);
+
+    /**
+     * Sets this instance to the given length specified string.
+     * @param value The value to which this instance will be set.
+     * @param valueSize The number of characters in @a value, excluding the terminating null character (if any)
+     * @return *this
+     */
+    CaseInsensitiveConstant& assign(wchar_t const* value, SourceLocation valueSize);
+
+    /**
+     * Sets this instance to a copy of the instance indicated.
+     * @param toCopy The CaseInsensitiveConstant to copy.
+     * @return *this
+     */
+    CaseInsensitiveConstant& assign(CaseInsensitiveConstant const& toCopy);
+
+    /**
+     * Sets this instance to the instance indicated.
+     * @param toCopy The CaseInsensitiveConstant to move.
+     * @return *this
+     */
+    CaseInsensitiveConstant& assign(CaseInsensitiveConstant&& toMove) throw();
+
+    /**
+     * Assignment operator for null terminated strings.
+     * @param value The null terminated string to which this instance is assigned.
+     * @return *this
+     */
+    CaseInsensitiveConstant& operator=(wchar_t const* value);
+
+    /**
+     * Copy assignment operator.
+     * @param toCopy The instance to which this instance's state is set.
+     * @return *this
+     */
+    CaseInsensitiveConstant& operator=(CaseInsensitiveConstant const& toCopy);
+
+    /**
+     * Move assignment operator.
+     * @param toMove The instance to move.
+     * @return *this
+     */
+    CaseInsensitiveConstant& operator=(CaseInsensitiveConstant&& toMove) throw();
+
+    /**
+     * Gets the size of this instance, in characters.
+     * @return The size of this instance, in characters.
+     */
+    SourceLocation size() const throw();
+
+    /**
+     * Gets the lower case version of this instance as a null terminated string.
+     * @return The lower case version of this instance as a null terminated string.
+     */
+    wchar_t const* lower_cstr() const throw();
+
+    /**
+     * Gets the upper case version of this instance as a null terminated string.
+     * @return The upper case version of this instance as a null terminated string.
+     */
+    wchar_t const* upper_cstr() const throw();
+
+    /**
+     * Gets the begin iterator for the lower case view of this instance.
+     * @return The begin iterator for the lower case view of this instance.
+     */
+    wchar_t const* lcbegin() const throw();
+
+    /**
+     * Gets the end iterator for the lower case view of this instance.
+     * @return The end iterator for the lower case view of this instance.
+     */
+    wchar_t const* lcend() const throw();
+
+    /**
+     * Gets the begin iterator for the upper case view of this instance.
+     * @return The begin iterator for the upper case view of this instance.
+     */
+    wchar_t const* ucbegin() const throw();
+
+    /**
+     * Gets the end iterator for the upper case view of this instance.
+     * @return The end iterator for the upper case view of this instance.
+     */
+    wchar_t const* ucend() const throw();
+
+    /**
+     * Swaps this instance with the instance given.
+     * @param other The instance with which this instance is swapped.
+     */
+    void swap(CaseInsensitiveConstant& other) throw();
+};
+
+/**
+ * Swaps a pair of CaseInsensitiveConstant instances.
+ * @param lhs The left hand side.
+ * @param rhs The right hand side.
+ */
+void swap(CaseInsensitiveConstant& lhs, CaseInsensitiveConstant& rhs) throw();
+
 SourceLocation GetTokenStartAfter(SourceManager const& sm, SourceLocation startAt);
 
 }
