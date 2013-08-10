@@ -364,5 +364,33 @@ namespace pevFind { namespace tests
             CaseInsensitiveConstant().swap(hello);
             Assert::AreEqual(0u, hello.size());
         }
+
+        TEST_METHOD(CaseInsensitiveConstantTest_StdString)
+        {
+            std::wstring example(L"Example");
+            CaseInsensitiveConstant uut(example);
+            Assert::AreEqual(7u, uut.size());
+            Assert::AreEqual<std::wstring>(L"example", uut.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"EXAMPLE", uut.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"example", std::wstring(uut.lcbegin(), uut.lcend()));
+            Assert::AreEqual<std::wstring>(L"EXAMPLE", std::wstring(uut.ucbegin(), uut.ucend()));
+
+            CaseInsensitiveConstant uut2;
+            uut2 = example;
+            Assert::AreEqual(7u, uut2.size());
+            Assert::AreEqual<std::wstring>(L"example", uut2.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"EXAMPLE", uut2.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"example", std::wstring(uut2.lcbegin(), uut2.lcend()));
+            Assert::AreEqual<std::wstring>(L"EXAMPLE", std::wstring(uut2.ucbegin(), uut2.ucend()));
+
+
+            CaseInsensitiveConstant uut3;
+            uut3.assign(example);
+            Assert::AreEqual(7u, uut3.size());
+            Assert::AreEqual<std::wstring>(L"example", uut3.lower_cstr());
+            Assert::AreEqual<std::wstring>(L"EXAMPLE", uut3.upper_cstr());
+            Assert::AreEqual<std::wstring>(L"example", std::wstring(uut3.lcbegin(), uut3.lcend()));
+            Assert::AreEqual<std::wstring>(L"EXAMPLE", std::wstring(uut3.ucbegin(), uut3.ucend()));
+        }
     };
 }}

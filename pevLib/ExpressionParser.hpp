@@ -344,6 +344,13 @@ public:
     explicit CaseInsensitiveConstant(wchar_t const* value);
 
     /**
+     * Initializes a new instance of the CaseInsensitiveConstant class containing the specified
+     * standard string.
+     * @param value The standard string to which this instance is set.
+     */
+    explicit CaseInsensitiveConstant(std::wstring const& value);
+
+    /**
      * Initializes a new instance of the CaseInsensitiveConstant class using the indicated length specified string.
      * @param value The value to which this instance is set.
      * @param valueSize The number of characters in @a value, excluding the terminating null character (if any)
@@ -368,6 +375,13 @@ public:
      * @return *this
      */
     CaseInsensitiveConstant& assign(wchar_t const* value);
+
+    /**
+     * Sets this instance to the given standard string.
+     * @param value The string to which this instance is set.
+     * @return *this
+     */
+    CaseInsensitiveConstant& assign(std::wstring const& value);
 
     /**
      * Sets this instance to the given length specified string.
@@ -397,6 +411,13 @@ public:
      * @return *this
      */
     CaseInsensitiveConstant& operator=(wchar_t const* value);
+
+    /**
+     * Assignment operator for strings.
+     * @param value The standard string to which this instance is assigned.
+     * @return *this
+     */
+    CaseInsensitiveConstant& operator=(std::wstring const& value);
 
     /**
      * Copy assignment operator.

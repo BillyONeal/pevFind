@@ -348,6 +348,11 @@ namespace pevFind
         this->assign(value);
     }
 
+    CaseInsensitiveConstant::CaseInsensitiveConstant(std::wstring const& value)
+    {
+        this->assign(value);
+    }
+
     CaseInsensitiveConstant::CaseInsensitiveConstant(wchar_t const* value, SourceLocation valueSize)
     {
         this->assign(value, valueSize);
@@ -372,6 +377,17 @@ namespace pevFind
         }
 
         return this->assign(value, static_cast<SourceLocation>(length));
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::assign(std::wstring const& value)
+    {
+        auto const strSize = value.size();
+        if (strSize > std::numeric_limits<SourceLocation>::max())
+        {
+            throw std::out_of_range("Maximum string input for CaseInsensitiveConstant exceeded.");
+        }
+
+        return this->assign(value.data(), static_cast<SourceLocation>(strSize));
     }
 
     static inline SourceLocation GetBufferLength(SourceLocation desiredSize)
@@ -429,6 +445,11 @@ namespace pevFind
     }
 
     CaseInsensitiveConstant& CaseInsensitiveConstant::operator=(wchar_t const* value)
+    {
+        return this->assign(value);
+    }
+
+    CaseInsensitiveConstant& CaseInsensitiveConstant::operator=(std::wstring const& value)
     {
         return this->assign(value);
     }
