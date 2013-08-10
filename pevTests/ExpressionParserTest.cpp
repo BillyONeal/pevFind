@@ -192,6 +192,37 @@ namespace pevFind { namespace tests
             Assert::IsTrue(sm.CharacterIsAt(4));
             Assert::IsFalse(sm.CharacterIsAt(5));
         }
+
+        TEST_METHOD(SourceManager_LiteralConstantAt)
+        {
+            SourceManager sm(L"string with { s inside");
+            Assert::IsFalse(sm.ConstantAt(4, L"{"));
+            Assert::IsTrue(sm.ConstantAt(12, L"{"));
+            Assert::IsFalse(sm.ConstantAt(40, L"{"));
+            SourceManager sm2(L"");
+            Assert::IsTrue(sm2.ConstantAt(0, L""));
+            Assert::IsFalse(sm2.ConstantAt(2, L""));
+        }
+
+        TEST_METHOD(SourceManager_InsensitiveConstantAt)
+        {
+            SourceManager sm(L"and AND aNd AnD { anD a }ND and");
+            std::set<SourceLocation> trueLocs;
+            trueLocs.insert(0);
+            trueLocs.insert(4);
+            trueLocs.insert(8);
+            trueLocs.insert(12);
+            trueLocs.insert(18);
+            trueLocs.insert(28);
+
+            CaseInsensitiveConstant and(L"and");
+            for (SourceLocation idx = 0; idx < 100; ++idx)
+            {
+                bool expected = trueLocs.find(idx) != trueLocs.end();
+                bool actual = sm.ConstantAt(idx, and);
+                Assert::AreEqual(expected, actual);
+            }
+        }
     };
 
     TEST_CLASS(LexicalAnalyzerTest)
@@ -382,7 +413,6 @@ namespace pevFind { namespace tests
             Assert::AreEqual<std::wstring>(L"EXAMPLE", uut2.upper_cstr());
             Assert::AreEqual<std::wstring>(L"example", std::wstring(uut2.lcbegin(), uut2.lcend()));
             Assert::AreEqual<std::wstring>(L"EXAMPLE", std::wstring(uut2.ucbegin(), uut2.ucend()));
-
 
             CaseInsensitiveConstant uut3;
             uut3.assign(example);
