@@ -550,6 +550,14 @@ public:
     virtual LoadLineResult LoadLineByName(std::wstring const& name) const override;
 };
 
+enum class ArgumentType
+{
+    Uninitialized,
+    Literal,
+    Quoted,
+    Dashed
+};
+
 class LexicalAnalyzer : boost::noncopyable
 {
     std::unique_ptr<ILoadLineResolver> loadLineResolver;
@@ -560,7 +568,7 @@ class LexicalAnalyzer : boost::noncopyable
     SourceLocation argumentEnd;
     SourceLocation parameterStart;
     SourceLocation parameterEnd;
-    bool argumentDashes;
+    ArgumentType argumentType;
 public:
     LexicalAnalyzer(std::unique_ptr<ILoadLineResolver> loadLineResolver_, std::wstring inputString);
     std::wstring GetLexicalTokenRaw() const;

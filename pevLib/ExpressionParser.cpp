@@ -16,10 +16,10 @@ namespace
     enum class LexicalAnalyzerState
     {
         Initial,
-        InitialQuoted,
-        FindEndUnquoted,
         FindEndQuoted,
+        FindEndLiteral,
         SkipDashes,
+        InDashArgument,
         Complete
     };
 }
@@ -640,7 +640,7 @@ namespace pevFind
         , argumentEnd(0)
         , parameterStart(0)
         , parameterEnd(0)
-        , argumentDashes(false)
+        , argumentType(ArgumentType::Uninitialized)
     {
     }
 
@@ -661,7 +661,7 @@ namespace pevFind
 
     bool LexicalAnalyzer::IsDashedArgument() const throw()
     {
-        return argumentDashes;
+        return argumentType == ArgumentType::Dashed;
     }
 
     bool LexicalAnalyzer::NextLexicalToken()
@@ -669,30 +669,33 @@ namespace pevFind
         auto const size = this->sm.size();
         LexicalAnalyzerState state = LexicalAnalyzerState::Initial;
         this->lexicalStart = this->sm.FindNextPredicateMatchAfter(this->lexicalEnd, std::not1(IsWhitespace()));
-        this->argumentDashes = false;
+        this->argumentType = ArgumentType::Uninitialized;
         auto current = this->lexicalStart;
-        for (; current < size; ++current)
+        for (; current < size && state != LexicalAnalyzerState::Complete; ++current)
         {
             wchar_t const currentCharacter = this->sm[current];
-            if (state == LexicalAnalyzerState::Initial)
+            switch (state)
             {
+            case LexicalAnalyzerState::Initial:
                 if (currentCharacter == L'"')
                 {
-                    state = LexicalAnalyzerState::InitialQuoted;
+                    this->argumentType = ArgumentType::Quoted;
+                    this->argumentStart = std::min(current + 1, size);
+                    state = LexicalAnalyzerState::FindEndQuoted;
                 }
                 else if (currentCharacter == L'-')
                 {
+                    this->argumentType = ArgumentType::Dashed;
                     state = LexicalAnalyzerState::SkipDashes;
-                    this->argumentDashes = true;
                 }
                 else
                 {
-                    state = LexicalAnalyzerState::FindEndUnquoted;
+                    this->argumentType = ArgumentType::Literal;
+                    state = LexicalAnalyzerState::FindEndLiteral;
                     this->argumentStart = current;
                 }
-            }
-            else if (state == LexicalAnalyzerState::SkipDashes)
-            {
+                break;
+            case LexicalAnalyzerState::SkipDashes:
                 if (IsWhitespace()(currentCharacter))
                 {
                     this->lexicalEnd = current;
@@ -701,37 +704,14 @@ namespace pevFind
                     this->parameterStart = current;
                     this->parameterEnd = current;
                     state = LexicalAnalyzerState::Complete;
-                    break;
                 }
                 else if (currentCharacter != L'-')
                 {
                     this->argumentStart = current;
-                    state = LexicalAnalyzerState::FindEndUnquoted;
+                    state = LexicalAnalyzerState::InDashArgument;
                 }
-            }
-            else if (state == LexicalAnalyzerState::InitialQuoted)
-            {
-                if (currentCharacter == L'-')
-                {
-                    this->argumentDashes = true;
-                }
-                else if (currentCharacter == L'"')
-                {
-                    this->argumentStart = current;
-                    this->argumentEnd = current;
-                    this->lexicalEnd = std::min(size, current + 1);
-                    this->parameterStart = this->lexicalEnd;
-                    this->parameterEnd = this->lexicalEnd;
-                    state = LexicalAnalyzerState::Complete;
-                }
-                else if (currentCharacter != L'-')
-                {
-                    state = LexicalAnalyzerState::FindEndQuoted;
-                    this->argumentStart = current;
-                }
-            }
-            else if (state == LexicalAnalyzerState::FindEndUnquoted)
-            {
+                break;
+            case LexicalAnalyzerState::FindEndLiteral:
                 if (IsWhitespace()(currentCharacter))
                 {
                     this->lexicalEnd = current;
@@ -739,11 +719,9 @@ namespace pevFind
                     this->parameterStart = current;
                     this->parameterEnd = current;
                     state = LexicalAnalyzerState::Complete;
-                    break;
                 }
-            }
-            else if (state == LexicalAnalyzerState::FindEndQuoted)
-            {
+                break;
+            case LexicalAnalyzerState::FindEndQuoted:
                 if (currentCharacter == L'"')
                 {
                     this->argumentEnd = current;
@@ -752,25 +730,38 @@ namespace pevFind
                     this->parameterEnd = this->lexicalEnd;
                     state = LexicalAnalyzerState::Complete;
                 }
+                break;
+            case LexicalAnalyzerState::InDashArgument:
+                if (IsWhitespace()(currentCharacter))
+                {
+                    this->lexicalEnd = current;
+                    this->argumentEnd = current;
+                    this->parameterStart = current;
+                    this->parameterEnd = current;
+                    state = LexicalAnalyzerState::Complete;
+                }
+                break;
+            case LexicalAnalyzerState::Complete:
+                // Should never be hit.
+                break;
             }
         }
 
-        if (state == LexicalAnalyzerState::Initial || state == LexicalAnalyzerState::SkipDashes)
+        switch (state)
         {
-            this->lexicalEnd = current;
+        case LexicalAnalyzerState::Initial:
+        case LexicalAnalyzerState::SkipDashes:
             this->argumentStart = current;
-            this->argumentEnd = current;
-            this->parameterStart = current;
-            this->parameterEnd = current;
-            state = LexicalAnalyzerState::Complete;
-        }
-        else if (state == LexicalAnalyzerState::FindEndUnquoted)
-        {
+        case LexicalAnalyzerState::FindEndLiteral:
+        case LexicalAnalyzerState::InDashArgument:
             this->lexicalEnd = current;
             this->argumentEnd = current;
             this->parameterStart = current;
             this->parameterEnd = current;
-            state = LexicalAnalyzerState::Complete;
+            break;
+        case LexicalAnalyzerState::FindEndQuoted:
+            // Error
+            break;
         }
 
         return (this->lexicalEnd - this->lexicalStart) != 0;

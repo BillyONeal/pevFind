@@ -283,9 +283,10 @@ namespace pevFind { namespace tests
 
         TEST_METHOD(LexicalAnalyzerTest_QuotedArgument)
         {
-            LexicalAnalyzer uut(std::move(resolver), L"  \"argument spaced out\" \"--arg space\"");
+            LexicalAnalyzer uut(std::move(resolver), L"  \"argument spaced out\" --arg literal");
             DoAssertLexical(uut, L"\"argument spaced out\"", L"argument spaced out", L"", false);
-            DoAssertLexical(uut, L"\"--arg space\"", L"arg space", L"", true);
+            DoAssertLexical(uut, L"--arg", L"arg", L"", true);
+            DoAssertLexical(uut, L"literal", L"literal", L"", false);
             DoAssertLexicalEnd(uut);
         }
 
@@ -305,7 +306,7 @@ namespace pevFind { namespace tests
         TEST_METHOD(LexicalAnalyzerTest_JustDashes)
         {
             LexicalAnalyzer uut(std::move(resolver), L"  \"----\" -- ----");
-            DoAssertLexical(uut, L"\"----\"", L"", L"", true);
+            DoAssertLexical(uut, L"\"----\"", L"----", L"", false);
             DoAssertLexical(uut, L"--", L"", L"", true);
             DoAssertLexical(uut, L"----", L"", L"", true);
             DoAssertLexicalEnd(uut);
