@@ -566,6 +566,7 @@ public:
     std::wstring GetLexicalTokenRaw() const;
     std::wstring GetLexicalTokenArgument() const;
     std::wstring GetLexicalTokenParameter() const;
+    bool IsDashedArgument() const throw();
     bool NextLexicalToken();
 };
 

@@ -247,12 +247,13 @@ namespace pevFind { namespace tests
 
     TEST_CLASS(LexicalAnalyzerTest)
     {
-        void DoAssertLexical(LexicalAnalyzer& lexer, std::wstring const& raw, std::wstring const& arg, std::wstring const& parameter) const
+        void DoAssertLexical(LexicalAnalyzer& lexer, std::wstring const& raw, std::wstring const& arg, std::wstring const& parameter, bool dashed) const
         {
             Assert::IsTrue(lexer.NextLexicalToken());
             Assert::AreEqual(raw, lexer.GetLexicalTokenRaw());
             Assert::AreEqual(arg, lexer.GetLexicalTokenArgument());
             Assert::AreEqual(parameter, lexer.GetLexicalTokenParameter());
+            Assert::AreEqual(dashed, lexer.IsDashedArgument());
         }
 
         void DoAssertLexicalEnd(LexicalAnalyzer& lexer)
@@ -262,6 +263,7 @@ namespace pevFind { namespace tests
             Assert::AreEqual(empty, lexer.GetLexicalTokenRaw());
             Assert::AreEqual(empty, lexer.GetLexicalTokenArgument());
             Assert::AreEqual(empty, lexer.GetLexicalTokenParameter());
+            Assert::IsFalse(lexer.IsDashedArgument());
         }
 
         std::unique_ptr<ILoadLineResolver> resolver;
@@ -274,16 +276,52 @@ namespace pevFind { namespace tests
         TEST_METHOD(LexicalAnalyzerTest_BasicLexicalTokenWalk)
         {
             LexicalAnalyzer uut(std::move(resolver), L"  argument --arg");
-            DoAssertLexical(uut, L"argument", L"argument", L"");
-            DoAssertLexical(uut, L"--arg", L"arg", L"");
+            DoAssertLexical(uut, L"argument", L"argument", L"", false);
+            DoAssertLexical(uut, L"--arg", L"arg", L"", true);
             DoAssertLexicalEnd(uut);
         }
 
         TEST_METHOD(LexicalAnalyzerTest_QuotedArgument)
         {
             LexicalAnalyzer uut(std::move(resolver), L"  \"argument spaced out\" \"--arg space\"");
-            DoAssertLexical(uut, L"\"argument spaced out\"", L"argument spaced out", L"");
-            DoAssertLexical(uut, L"\"--arg space\"", L"arg space", L"");
+            DoAssertLexical(uut, L"\"argument spaced out\"", L"argument spaced out", L"", false);
+            DoAssertLexical(uut, L"\"--arg space\"", L"arg space", L"", true);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_Empty)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"");
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_EmptyQuotes)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"\"\"");
+            DoAssertLexical(uut, L"\"\"", L"", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_JustDashes)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"  \"----\" -- ----");
+            DoAssertLexical(uut, L"\"----\"", L"", L"", true);
+            DoAssertLexical(uut, L"--", L"", L"", true);
+            DoAssertLexical(uut, L"----", L"", L"", true);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_Full)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"argument");
+            DoAssertLexical(uut, L"argument", L"argument", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_FullDash)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument");
+            DoAssertLexical(uut, L"--argument", L"argument", L"", true);
             DoAssertLexicalEnd(uut);
         }
     };

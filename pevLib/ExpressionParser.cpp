@@ -659,11 +659,17 @@ namespace pevFind
         return this->sm.StringForRange(this->parameterStart, this->parameterEnd);
     }
 
+    bool LexicalAnalyzer::IsDashedArgument() const throw()
+    {
+        return argumentDashes;
+    }
+
     bool LexicalAnalyzer::NextLexicalToken()
     {
         auto const size = this->sm.size();
         LexicalAnalyzerState state = LexicalAnalyzerState::Initial;
         this->lexicalStart = this->sm.FindNextPredicateMatchAfter(this->lexicalEnd, std::not1(IsWhitespace()));
+        this->argumentDashes = false;
         auto current = this->lexicalStart;
         for (; current < size; ++current)
         {
@@ -683,7 +689,6 @@ namespace pevFind
                 {
                     state = LexicalAnalyzerState::FindEndUnquoted;
                     this->argumentStart = current;
-                    this->argumentDashes = false;
                 }
             }
             else if (state == LexicalAnalyzerState::SkipDashes)
@@ -706,10 +711,9 @@ namespace pevFind
             }
             else if (state == LexicalAnalyzerState::InitialQuoted)
             {
-                if (currentCharacter != L'-')
+                if (currentCharacter == L'-')
                 {
-                    state = LexicalAnalyzerState::FindEndQuoted;
-                    this->argumentStart = current;
+                    this->argumentDashes = true;
                 }
                 else if (currentCharacter == L'"')
                 {
@@ -719,6 +723,11 @@ namespace pevFind
                     this->parameterStart = this->lexicalEnd;
                     this->parameterEnd = this->lexicalEnd;
                     state = LexicalAnalyzerState::Complete;
+                }
+                else if (currentCharacter != L'-')
+                {
+                    state = LexicalAnalyzerState::FindEndQuoted;
+                    this->argumentStart = current;
                 }
             }
             else if (state == LexicalAnalyzerState::FindEndUnquoted)
@@ -746,7 +755,7 @@ namespace pevFind
             }
         }
 
-        if (state == LexicalAnalyzerState::Initial)
+        if (state == LexicalAnalyzerState::Initial || state == LexicalAnalyzerState::SkipDashes)
         {
             this->lexicalEnd = current;
             this->argumentStart = current;
