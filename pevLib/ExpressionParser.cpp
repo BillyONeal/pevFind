@@ -11,6 +11,19 @@
 #include <algorithm>
 #include <cassert>
 
+namespace
+{
+    enum class LexicalAnalyzerState
+    {
+        Initial,
+        InitialQuoted,
+        FindEndUnquoted,
+        FindEndQuoted,
+        SkipDashes,
+        Complete
+    };
+}
+
 static std::wstring emptyString;
 
 namespace pevFind
@@ -322,7 +335,7 @@ namespace pevFind
 
     wchar_t SourceManager::operator[](SourceLocation location) const throw()
     {
-        return backingBuffer[location];
+        return backingBuffer.c_str()[location];
     }
 
     std::wstring SourceManager::GenerateSourceListing(SourceLocation startLocation, SourceLocation endLocation) const
@@ -498,19 +511,23 @@ namespace pevFind
         auto lowerIt = caseInsensitiveValue.lcbegin();
         auto upperIt = caseInsensitiveValue.ucbegin();
 
-        for (; location < maxLocation; ++location)
+        for (; location < maxLocation; ++location, ++lowerIt, ++upperIt)
         {
             wchar_t const currentCharacter = backingBuffer[location];
             if (currentCharacter != *lowerIt && currentCharacter != *upperIt)
             {
                 return false;
             }
-
-            ++lowerIt;
-            ++upperIt;
         }
 
         return true;
+    }
+
+    std::wstring SourceManager::StringForRange(SourceLocation begin, SourceLocation end) const
+    {
+        assert(begin <= end);
+        auto iterator = this->backingBuffer.cbegin();
+        return std::wstring(iterator + begin, iterator + end);
     }
 
     LoadLineResult::LoadLineResult(std::wstring&& lineOrError_, bool success_)
@@ -602,29 +619,151 @@ namespace pevFind
         }
     }
 
-    static bool IsWhitespace(wchar_t ch)
+    static const std::wstring quote(L"\"");
+    static const std::wstring hash(L"#");
+    static const std::wstring dash(L"-");
+
+    struct IsWhitespace : public std::unary_function<wchar_t, bool>
     {
-        return ch == L' ' || ch == L'\t' || ch == L'\n' || ch == L'\r';
+        bool operator()(wchar_t ch) const throw()
+        {
+            return ch == L' ' || ch == L'\t' || ch == L'\n' || ch == L'\r';
+        }
+    };
+
+    LexicalAnalyzer::LexicalAnalyzer(std::unique_ptr<ILoadLineResolver> loadLineResolver_, std::wstring inputString)
+        : loadLineResolver(std::move(loadLineResolver_))
+        , sm(inputString, L"input")
+        , lexicalStart(0)
+        , lexicalEnd(0)
+        , argumentStart(0)
+        , argumentEnd(0)
+        , parameterStart(0)
+        , parameterEnd(0)
+        , argumentDashes(false)
+    {
     }
 
-
-    SourceLocation GetTokenStartAfter(SourceManager const& sm, SourceLocation startAt)
+    std::wstring LexicalAnalyzer::GetLexicalTokenRaw() const
     {
-        for(;;)
+        return this->sm.StringForRange(this->lexicalStart, this->lexicalEnd);
+    }
+
+    std::wstring LexicalAnalyzer::GetLexicalTokenArgument() const
+    {
+        return this->sm.StringForRange(this->argumentStart, this->argumentEnd);
+    }
+
+    std::wstring LexicalAnalyzer::GetLexicalTokenParameter() const
+    {
+        return this->sm.StringForRange(this->parameterStart, this->parameterEnd);
+    }
+
+    bool LexicalAnalyzer::NextLexicalToken()
+    {
+        auto const size = this->sm.size();
+        LexicalAnalyzerState state = LexicalAnalyzerState::Initial;
+        this->lexicalStart = this->sm.FindNextPredicateMatchAfter(this->lexicalEnd, std::not1(IsWhitespace()));
+        auto current = this->lexicalStart;
+        for (; current < size; ++current)
         {
-            if (!sm.CharacterIsAt(startAt))
+            wchar_t const currentCharacter = this->sm[current];
+            if (state == LexicalAnalyzerState::Initial)
             {
-                break;
+                if (currentCharacter == L'"')
+                {
+                    state = LexicalAnalyzerState::InitialQuoted;
+                }
+                else if (currentCharacter == L'-')
+                {
+                    state = LexicalAnalyzerState::SkipDashes;
+                    this->argumentDashes = true;
+                }
+                else
+                {
+                    state = LexicalAnalyzerState::FindEndUnquoted;
+                    this->argumentStart = current;
+                    this->argumentDashes = false;
+                }
             }
-
-            if (!IsWhitespace(sm[startAt]))
+            else if (state == LexicalAnalyzerState::SkipDashes)
             {
-                break;
+                if (IsWhitespace()(currentCharacter))
+                {
+                    this->lexicalEnd = current;
+                    this->argumentStart = current;
+                    this->argumentEnd = current;
+                    this->parameterStart = current;
+                    this->parameterEnd = current;
+                    state = LexicalAnalyzerState::Complete;
+                    break;
+                }
+                else if (currentCharacter != L'-')
+                {
+                    this->argumentStart = current;
+                    state = LexicalAnalyzerState::FindEndUnquoted;
+                }
             }
-
-            ++startAt;
+            else if (state == LexicalAnalyzerState::InitialQuoted)
+            {
+                if (currentCharacter != L'-')
+                {
+                    state = LexicalAnalyzerState::FindEndQuoted;
+                    this->argumentStart = current;
+                }
+                else if (currentCharacter == L'"')
+                {
+                    this->argumentStart = current;
+                    this->argumentEnd = current;
+                    this->lexicalEnd = std::min(size, current + 1);
+                    this->parameterStart = this->lexicalEnd;
+                    this->parameterEnd = this->lexicalEnd;
+                    state = LexicalAnalyzerState::Complete;
+                }
+            }
+            else if (state == LexicalAnalyzerState::FindEndUnquoted)
+            {
+                if (IsWhitespace()(currentCharacter))
+                {
+                    this->lexicalEnd = current;
+                    this->argumentEnd = current;
+                    this->parameterStart = current;
+                    this->parameterEnd = current;
+                    state = LexicalAnalyzerState::Complete;
+                    break;
+                }
+            }
+            else if (state == LexicalAnalyzerState::FindEndQuoted)
+            {
+                if (currentCharacter == L'"')
+                {
+                    this->argumentEnd = current;
+                    this->lexicalEnd = std::min(size, current + 1);
+                    this->parameterStart = this->lexicalEnd;
+                    this->parameterEnd = this->lexicalEnd;
+                    state = LexicalAnalyzerState::Complete;
+                }
+            }
         }
 
-        return startAt;
+        if (state == LexicalAnalyzerState::Initial)
+        {
+            this->lexicalEnd = current;
+            this->argumentStart = current;
+            this->argumentEnd = current;
+            this->parameterStart = current;
+            this->parameterEnd = current;
+            state = LexicalAnalyzerState::Complete;
+        }
+        else if (state == LexicalAnalyzerState::FindEndUnquoted)
+        {
+            this->lexicalEnd = current;
+            this->argumentEnd = current;
+            this->parameterStart = current;
+            this->parameterEnd = current;
+            state = LexicalAnalyzerState::Complete;
+        }
+
+        return (this->lexicalEnd - this->lexicalStart) != 0;
     }
 }

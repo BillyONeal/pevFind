@@ -33,4 +33,9 @@ namespace pevFind { namespace tests
     {
         return GetTestDllDir().append(file);
     }
+
+    inline std::wstring Str(wchar_t const* val)
+    {
+        return val;
+    }
 } }

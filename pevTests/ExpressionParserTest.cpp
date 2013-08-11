@@ -185,14 +185,6 @@ namespace pevFind { namespace tests
             Assert::AreEqual(std::wstring(), sm.GenerateSourceListing());
         }
 
-        TEST_METHOD(SourceManagerTest_CharacterIsAt)
-        {
-            SourceManager sm(L"input");
-            Assert::IsTrue(sm.CharacterIsAt(0));
-            Assert::IsTrue(sm.CharacterIsAt(4));
-            Assert::IsFalse(sm.CharacterIsAt(5));
-        }
-
         TEST_METHOD(SourceManager_LiteralConstantAt)
         {
             SourceManager sm(L"string with { s inside");
@@ -223,27 +215,76 @@ namespace pevFind { namespace tests
                 Assert::AreEqual(expected, actual);
             }
         }
+
+        TEST_METHOD(SourceManagerTest_FindSuccess)
+        {
+            SourceManager sm(L" end quote \" ");
+            auto const result = sm.FindNextCharacterAfter(1, L'"');
+            Assert::AreEqual(11u, result);
+        }
+
+        TEST_METHOD(SourceManagerTest_FindFailure)
+        {
+            SourceManager sm(L" won't find me ");
+            auto const result = sm.FindNextCharacterAfter(2, L'"');
+            Assert::AreEqual(sm.size(), result);
+        }
+
+        TEST_METHOD(SourceManagerTest_FindEmpty)
+        {
+            SourceManager sm(L"");
+            auto const result = sm.FindNextCharacterAfter(0, L'"');
+            Assert::AreEqual(0u, result);
+        }
+
+        TEST_METHOD(SourceManagerTest_FindEmptyExceedSize)
+        {
+            SourceManager sm(L"");
+            auto const result = sm.FindNextCharacterAfter(100, L'"');
+            Assert::AreEqual(0u, result);
+        }
     };
 
     TEST_CLASS(LexicalAnalyzerTest)
     {
-    public:
-        TEST_METHOD(LexicalAnalyzerTest_GetTokenStartAfter)
+        void DoAssertLexical(LexicalAnalyzer& lexer, std::wstring const& raw, std::wstring const& arg, std::wstring const& parameter) const
         {
-            SourceManager sm(L"1st 2nd\t3rd\n4th\r5th");
-            SourceLocation currentLoc = 0;
-            for (auto idx = 0; idx < 4; ++idx)
-            {
-                auto newLoc = GetTokenStartAfter(sm, currentLoc + 3);
-                Assert::AreEqual(currentLoc + 4, newLoc);
-                currentLoc = newLoc;
-            }
+            Assert::IsTrue(lexer.NextLexicalToken());
+            Assert::AreEqual(raw, lexer.GetLexicalTokenRaw());
+            Assert::AreEqual(arg, lexer.GetLexicalTokenArgument());
+            Assert::AreEqual(parameter, lexer.GetLexicalTokenParameter());
+        }
 
-            auto const expectedEnd = currentLoc + 3;
-            Assert::AreEqual(expectedEnd, GetTokenStartAfter(sm, expectedEnd));
-            Assert::IsFalse(sm.CharacterIsAt(expectedEnd));
+        void DoAssertLexicalEnd(LexicalAnalyzer& lexer)
+        {
+            std::wstring empty;
+            Assert::IsFalse(lexer.NextLexicalToken());
+            Assert::AreEqual(empty, lexer.GetLexicalTokenRaw());
+            Assert::AreEqual(empty, lexer.GetLexicalTokenArgument());
+            Assert::AreEqual(empty, lexer.GetLexicalTokenParameter());
+        }
 
-            Assert::AreEqual(1729u, GetTokenStartAfter(sm, 1729));
+        std::unique_ptr<ILoadLineResolver> resolver;
+    public:
+        TEST_METHOD_INITIALIZE(MethodSetUp)
+        {
+            resolver.reset(new PreconfiguredLoadLineResolver);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_BasicLexicalTokenWalk)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"  argument --arg");
+            DoAssertLexical(uut, L"argument", L"argument", L"");
+            DoAssertLexical(uut, L"--arg", L"arg", L"");
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_QuotedArgument)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"  \"argument spaced out\" \"--arg space\"");
+            DoAssertLexical(uut, L"\"argument spaced out\"", L"argument spaced out", L"");
+            DoAssertLexical(uut, L"\"--arg space\"", L"arg space", L"");
+            DoAssertLexicalEnd(uut);
         }
     };
 
@@ -423,4 +464,5 @@ namespace pevFind { namespace tests
             Assert::AreEqual<std::wstring>(L"EXAMPLE", std::wstring(uut3.ucbegin(), uut3.ucend()));
         }
     };
+
 }}

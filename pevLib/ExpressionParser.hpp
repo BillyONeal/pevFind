@@ -326,6 +326,12 @@ public:
      */
     std::wstring const& GetLogicalString() const throw() { return backingBuffer; }
 
+    /**
+     * Gets the number of characters in the logical buffer.
+     * @return The number of characters in the logical buffer.
+     */
+    SourceLocation size() const throw() { return static_cast<SourceLocation>(backingBuffer.size()); }
+
      /**
      * Generates a source listing for the whole logical command line.
      * 
@@ -377,13 +383,6 @@ public:
     std::wstring GenerateSourceListing(SourceLocation startLocation, SourceLocation endLocation) const;
 
     /**
-     * Test if a character exists at a given location.
-     * @param location The location to test.
-     * @return true if there is a character there; otherwise, false.
-     */
-    bool CharacterIsAt(SourceLocation location) const { return location < backingBuffer.size(); }
-
-    /**
      * Queries if the given constant at the given location.
      * @param location The location to start searching for the constant.
      * @param literalValue A string constant to check for.
@@ -401,6 +400,49 @@ public:
      *  stream.
      */
     bool ConstantAt(SourceLocation location, CaseInsensitiveConstant const& caseInsensitiveValue) const throw();
+
+    /**
+     * Searches for the next predicate match after the given index.
+     * @tparam typename Functor Type of the functor.
+     * @param startAt The search start location.
+     * @param predicate The predicate to match.
+     * @return The location of the first match of @a predicate found after @a startAt, or size()
+     *  if no character matched.
+     */
+    template <typename Functor>
+    SourceLocation FindNextPredicateMatchAfter(SourceLocation startAt, Functor predicate) const throw()
+    {
+        auto const maxLocation = static_cast<SourceLocation>(this->backingBuffer.size());
+        startAt = std::min(maxLocation, startAt);
+        for (; startAt < maxLocation; ++startAt)
+        {
+            if (predicate(this->backingBuffer[startAt]))
+            {
+                break;
+            }
+        }
+
+        return startAt;
+    }
+
+    /**
+     * Searches for the next instance of a character after the given SourceLocation.
+     * @param startAt The search start location.
+     * @param characterToSearchFor The character to search for.
+     * @return The location of the found character, or size() if it was not found.
+     */
+    SourceLocation FindNextCharacterAfter(SourceLocation startAt, wchar_t characterToSearchFor) const throw()
+    {
+        return FindNextPredicateMatchAfter(startAt, [=](wchar_t candidate) { return candidate == characterToSearchFor; });
+    }
+
+    /**
+     * Generates a string for the logical range [begin, end)
+     * @param begin The begin index of the string to generate.
+     * @param end The end index of the string to generate.
+     * @return A string comprising the characters in the range [begin, end)
+     */
+    std::wstring StringForRange(SourceLocation begin, SourceLocation end) const;
 };
 
 /**
@@ -508,6 +550,23 @@ public:
     virtual LoadLineResult LoadLineByName(std::wstring const& name) const override;
 };
 
-SourceLocation GetTokenStartAfter(SourceManager const& sm, SourceLocation startAt);
+class LexicalAnalyzer : boost::noncopyable
+{
+    std::unique_ptr<ILoadLineResolver> loadLineResolver;
+    SourceManager sm;
+    SourceLocation lexicalStart;
+    SourceLocation lexicalEnd;
+    SourceLocation argumentStart;
+    SourceLocation argumentEnd;
+    SourceLocation parameterStart;
+    SourceLocation parameterEnd;
+    bool argumentDashes;
+public:
+    LexicalAnalyzer(std::unique_ptr<ILoadLineResolver> loadLineResolver_, std::wstring inputString);
+    std::wstring GetLexicalTokenRaw() const;
+    std::wstring GetLexicalTokenArgument() const;
+    std::wstring GetLexicalTokenParameter() const;
+    bool NextLexicalToken();
+};
 
 }
