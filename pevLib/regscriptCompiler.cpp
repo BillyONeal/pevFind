@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <ostream>
-#include <sstream>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <boost/algorithm/string/predicate.hpp>

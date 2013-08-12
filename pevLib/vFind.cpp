@@ -6,8 +6,6 @@
 // vFind.cpp -- Implements the main entry point for pevFind.
 
 #include "pch.hpp"
-#include <iostream>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include "timeoutThread.h"
@@ -27,55 +25,52 @@ int main()
     globalOptions::logicalTree = parseInstance.parseCmdLine(GetCommandLine());
     if (globalOptions::debug)
     {
-        std::wcout << L"# DEBUGGING OUTPUT #\n";
-        std::wcout << L"Format:\n" << globalOptions::displaySpecification << L"\n\n";
+        std::puts("# DEBUGGING OUTPUT #");
+        std::wprintf(L"Format:\n%s\n\n", globalOptions::displaySpecification.c_str());
         if (globalOptions::debug)
-            std::wcout << L"Display debugging output\n";
+            std::puts("Display debugging output");
         if (globalOptions::fullPath)
-            std::wcout << L"Displaying the full path\n";
+            std::puts("Displaying the full path");
         if (globalOptions::summary)
-            std::wcout << L"Displaying summary before termination\n";
+            std::puts("Displaying summary before termination");
         if (globalOptions::noSubDirectories)
-            std::wcout << L"Do not recurse into subdirectories\n";
-        std::wcout << L"Encoding: ";
+            std::puts("Do not recurse into subdirectories");
+        std::printf("Encoding: ");
         switch(globalOptions::encoding)
         {
         case globalOptions::ENCODING_TYPE_ACP:
-            std::wcout << L"ACP";
+            std::puts("ACP");
             break;
         case globalOptions::ENCODING_TYPE_OEM:
-            std::wcout << L"OEM";
+            std::puts("OEM");
             break;
         case globalOptions::ENCODING_TYPE_UTF8:
-            std::wcout << L"UTF-8";
+            std::puts("UTF-8");
             break;
         case globalOptions::ENCODING_TYPE_UTF16:
-            std::wcout << L"UTF-16";
+            std::puts("UTF-16");
             break;
         }
-        std::wcout << L"\n";
-        std::wcout << L"Limiting to " << boost::lexical_cast<std::wstring>(globalOptions::lineLimit) << L" lines\n";
+        std::printf("Limiting to %u lines\n", globalOptions::lineLimit);
         if (globalOptions::timeout)
-            std::wcout << L"Limiting to " << boost::lexical_cast<std::wstring>(globalOptions::timeout) << L" ms of execution time\n";
-        std::wcout << L"\nInternal processing tree:\n";
-        std::wcout << globalOptions::logicalTree->debugTree();
+            std::printf("Limiting to %u ms of execution time\n", globalOptions::timeout);
+        std::fputws(L"\nInternal processing tree:\n", stdout);
+        std::wstring debugTreeResult(globalOptions::logicalTree->debugTree());
+        std::fputws(debugTreeResult.c_str(), stdout);
     }
     if (globalOptions::regularExpressions.empty())
     {
-        #ifndef NDEBUG
-        std::cerr << "Search operations must specify at least one regex.";
-        #endif
+        std::fprintf(stderr, "Search operations must specify at least one regex.");
         return 3;
     }
     globalOptions::logicalTree->reorderTree();
     if (globalOptions::debug)
     {
-        std::wcout << L"\nInternal processing tree after reordering:\n";
-        std::wcout << globalOptions::logicalTree->debugTree();
-        std::wcout << L"\n# END DEBUGGING OUTPUT #\n\n";
+        std::wstring debugTree(globalOptions::logicalTree->debugTree());
+        std::wprintf(L"\nInternal processing tree after reordering:\n%s\n# END DEBUGGING OUTPUT #\n\n", debugTree.c_str());
         system("pause");
     }
-    //If a timeout is set, start the watchthread to terminate this one if need be.
+    //If a timeout is set, start the watch thread to terminate this one if need be.
     if (globalOptions::timeout)
         CreateThread(NULL,50,&timeoutThread,reinterpret_cast<LPVOID>(globalOptions::timeout),NULL,NULL);
     if (!globalOptions::fileList.empty())

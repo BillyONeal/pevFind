@@ -1,7 +1,6 @@
 #ifndef REGSCRIPTCOMPILER_H_INCLUDED
 #define REGSCRIPTCOMPILER_H_INCLUDED
 
-#include <sstream>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <boost/range.hpp>

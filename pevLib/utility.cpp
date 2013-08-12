@@ -6,13 +6,11 @@
 // utility.cpp -- Provides a bunch of utility functions and classes.
 
 #include "pch.hpp"
-#include <iomanip>
 #include <string>
 #include <vector>
 #include <stdexcept>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <boost/lexical_cast.hpp>
 #include "utility.h"
 
 std::wstring loadFileAsString(const std::wstring &fileName)
@@ -236,42 +234,18 @@ const FILETIME operator+(const long long &lhs, const FILETIME &rhs)
 std::wstring getDateAsString(const FILETIME &date)
 {
     // YYYY-MM-DD HH:MM:SS
-    std::wstring retVar;
+    wchar_t result[20];
     SYSTEMTIME st;
     FileTimeToSystemTime(&date,&st);
-    // YYYY
-    retVar.append(boost::lexical_cast<std::wstring >(st.wYear));
-    retVar.append(L"-");
-    // MM
-    if (st.wMonth < 10)
-        retVar.append(L"0");
-    retVar.append(boost::lexical_cast<std::wstring >(st.wMonth));
-    retVar.append(L"-");
-    // DD
-    if (st.wDay < 10)
-        retVar.append(L"0");
-    retVar.append(boost::lexical_cast<std::wstring >(st.wDay));
-    retVar.append(L" ");
-    // HH
-    if (st.wHour < 10)
-        retVar.append(L"0");
-    retVar.append(boost::lexical_cast<std::wstring >(st.wHour));
-    retVar.append(L":");
-    // MM
-    if (st.wMinute < 10)
-        retVar.append(L"0");
-    retVar.append(boost::lexical_cast<std::wstring >(st.wMinute));
-    retVar.append(L":");
-    // SS
-    if (st.wSecond < 10)
-        retVar.append(L"0");
-    retVar.append(boost::lexical_cast<std::wstring >(st.wSecond));
-    return retVar;
+    int printLen = swprintf_s(result, L"%04d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+    return std::wstring(result, std::max(0, printLen));
 }
 
 const std::wstring getSizeString(unsigned __int64 toConvert)
 {
-    std::wstring res = boost::lexical_cast<std::wstring,__int64> (toConvert);
+    wchar_t buff[21];
+    int result = swprintf_s(buff, L"%I64u", toConvert);
+    std::wstring res(buff, std::max(result, 0));
     for (size_t idx = 1; idx < res.length(); idx++)
     {
         if (!((res.length() - idx) % 3))

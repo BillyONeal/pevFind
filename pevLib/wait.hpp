@@ -4,15 +4,15 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 //
 #pragma once
-#include <iostream>
-#include <sstream>
+#include <cstddef>
+#include <cstdio>
 #include "Windows.h"
 
 namespace wait
 {
     inline void PrintErrorMessage()
     {
-        std::cout << "Usage: pevFind WAIT [Number Of Milliseconds]";
+        std::puts("Usage: pevFind WAIT [Number Of Milliseconds]");
     }
 
     inline int main(int argc, wchar_t **args)
@@ -22,14 +22,14 @@ namespace wait
             PrintErrorMessage();
             return -1;
         }
-        std::size_t milliseconds = 0;
-        std::wistringstream numberConverter(args[1]);
-        if (!(numberConverter >> milliseconds))
+        DWORD milliseconds = 0;
+        int scanResult = swscanf_s(args[1], L"%i", &milliseconds);
+        if (scanResult == 0)
         {
             PrintErrorMessage();
             return -1;
         }
-        ::Sleep(static_cast<DWORD>(milliseconds));
+        ::Sleep(milliseconds);
         return 0;
     }
 }

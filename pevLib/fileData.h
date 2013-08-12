@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <iostream>
-#include <iomanip>
 #include <cstdint>
 #include <strsafe.h>
 #pragma warning(push)

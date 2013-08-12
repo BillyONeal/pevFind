@@ -169,7 +169,7 @@ std::wstring registryValue::displayHex(const std::vector<char> &dataBlock, DWORD
 {
     const wchar_t hexChars[] = L"0123456789ABCDEF";
     wchar_t buffer[20];
-    swprintf_s(buffer, 20, L"hex(%I32d): ", buffer);
+    swprintf_s(buffer, 20, L"hex(%I32d): ", type);
     std::wstring result(buffer);
     std::vector<char>::const_iterator it = dataBlock.begin();
     result.push_back(hexChars[(*it & 0xF0) >> 4]);
@@ -230,7 +230,6 @@ std::wstring registryValue::asString()
             wchar_t toDisplay[20];
             DWORD * ptr = reinterpret_cast<DWORD *>(&data[0]);
             DWORD value = *ptr;
-            DWORD valueFlipped = value << 24;
             value = _byteswap_ulong(value);
             swprintf_s(toDisplay, 20, L"%ld", value);
             return toDisplay;

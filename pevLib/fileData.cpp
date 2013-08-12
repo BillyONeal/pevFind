@@ -6,11 +6,9 @@
 // fileData.cpp -- Implements functions for the fileData record type.
 
 #include "pch.hpp"
-#include <sstream>
-#include <iomanip>
-#include <iostream>
 #include <algorithm>
 #include <cstring>
+#include <cstdio>
 #include <windows.h>
 #include <shlwapi.h>
 #include <Wincrypt.h>
@@ -20,7 +18,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
-#include <boost/lexical_cast.hpp>
 #include "utility.h"
 #include "logger.h"
 #include "fileData.h"
@@ -305,7 +302,7 @@ void FileData::initPortableExecutable() const
             //In PE32+, the offset for the base address is 24, and is eight bytes long
             if (SetFilePointer(hFile.Get(), 22, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
                 return;
-			if (!ReadFile(hFile.Get(), &imageBaseAddress, 8, &lengthRead, NULL))
+            if (!ReadFile(hFile.Get(), &imageBaseAddress, 8, &lengthRead, NULL))
                 return;
             bits |= PEPLUS;
         } else
@@ -368,108 +365,108 @@ class CatalogAdminContext;
 
 class CatalogHandle : boost::noncopyable
 {
-	friend class CatalogAdminContext;
-	HCATINFO catalogHandle;
-	PVOID context;
-	CatalogHandle(PVOID context_, HCATINFO catalogHandle_)
-		: catalogHandle(catalogHandle_)
-		, context(context_)
-	{
-	}
+    friend class CatalogAdminContext;
+    HCATINFO catalogHandle;
+    PVOID context;
+    CatalogHandle(PVOID context_, HCATINFO catalogHandle_)
+        : catalogHandle(catalogHandle_)
+        , context(context_)
+    {
+    }
 public:
-	CatalogHandle(CatalogHandle&& other)
-		: catalogHandle(other.catalogHandle)
-		, context(other.context)
-	{
-		other.context = nullptr;
-		other.catalogHandle = 0;
-	}
-	CATALOG_INFO GetInfo() const
-	{
-		CATALOG_INFO InfoStruct = { sizeof(CATALOG_INFO) };
-		if ( !CryptCATCatalogInfoFromContext(catalogHandle, &InfoStruct, 0) )
-		{
-			Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
-		}
+    CatalogHandle(CatalogHandle&& other)
+        : catalogHandle(other.catalogHandle)
+        , context(other.context)
+    {
+        other.context = nullptr;
+        other.catalogHandle = 0;
+    }
+    CATALOG_INFO GetInfo() const
+    {
+        CATALOG_INFO InfoStruct = { sizeof(CATALOG_INFO) };
+        if ( !CryptCATCatalogInfoFromContext(catalogHandle, &InfoStruct, 0) )
+        {
+            Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
+        }
 
-		return InfoStruct;
-	}
-	~CatalogHandle()
-	{
-		if (context != nullptr)
-		{
-			CryptCATAdminReleaseCatalogContext(context, catalogHandle, 0);
-		}
-	}
+        return InfoStruct;
+    }
+    ~CatalogHandle()
+    {
+        if (context != nullptr)
+        {
+            CryptCATAdminReleaseCatalogContext(context, catalogHandle, 0);
+        }
+    }
 };
 
 class CatalogAdminContext : boost::noncopyable
 {
-	PVOID context_;
+    PVOID context_;
 public:
-	CatalogAdminContext()
-		: context_(nullptr)
-	{
-		if( !CryptCATAdminAcquireContext(&context_, NULL, 0) )
-		{
-			Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
-		}
-	}
-	~CatalogAdminContext()
-	{
-		CryptCATAdminReleaseContext(context_, 0);
-	}
-	CatalogHandle EnumCatalogFromHash(BYTE* hashData, DWORD hashLength)
-	{
-		HCATINFO catInfo = CryptCATAdminEnumCatalogFromHash(context_, hashData, hashLength, 0, NULL);
-		if (catInfo == 0)
-		{
-			Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
-		}
-		else
-		{
-			return CatalogHandle(context_, catInfo);
-		}
-	}
+    CatalogAdminContext()
+        : context_(nullptr)
+    {
+        if( !CryptCATAdminAcquireContext(&context_, NULL, 0) )
+        {
+            Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
+        }
+    }
+    ~CatalogAdminContext()
+    {
+        CryptCATAdminReleaseContext(context_, 0);
+    }
+    CatalogHandle EnumCatalogFromHash(BYTE* hashData, DWORD hashLength)
+    {
+        HCATINFO catInfo = CryptCATAdminEnumCatalogFromHash(context_, hashData, hashLength, 0, NULL);
+        if (catInfo == 0)
+        {
+            Instalog::SystemFacades::Win32Exception::ThrowFromLastError();
+        }
+        else
+        {
+            return CatalogHandle(context_, catInfo);
+        }
+    }
 };
 
 static bool CallWinVerifyTrust(WINTRUST_DATA& wintrustStructure)
 {
-	//Call our verification function.
-	GUID actionGuid = WINTRUST_ACTION_GENERIC_VERIFY_V2;
-	LONG returnVal = WinVerifyTrust(static_cast<HWND>(INVALID_HANDLE_VALUE), &actionGuid, &wintrustStructure); // nothrow (open)
-	wintrustStructure.dwStateAction = WTD_STATEACTION_CLOSE; // nothrow
-	WinVerifyTrust(0, &actionGuid, &wintrustStructure); // nothrow (close)
-	return returnVal == 0;
+    //Call our verification function.
+    GUID actionGuid = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+    LONG returnVal = WinVerifyTrust(static_cast<HWND>(INVALID_HANDLE_VALUE), &actionGuid, &wintrustStructure); // nothrow (open)
+    wintrustStructure.dwStateAction = WTD_STATEACTION_CLOSE; // nothrow
+    WinVerifyTrust(0, &actionGuid, &wintrustStructure); // nothrow (close)
+    return returnVal == 0;
 }
 
 void FileData::sigVerify() const
 {
-	WINTRUST_DATA WintrustStructure = { sizeof(WINTRUST_DATA) };
-	
-	//Open file.
-	Instalog::UniqueHandle fileHandle = this->getFileHandle(true);
-	if( !fileHandle.IsOpen() )
-	{
-		return;
-	}
-	try
-	{
-		//Get a context for signature verification.
-		CatalogAdminContext adminContext;
+    WINTRUST_DATA WintrustStructure = { sizeof(WINTRUST_DATA) };
+    
+    //Open file.
+    Instalog::UniqueHandle fileHandle = this->getFileHandle(true);
+    if( !fileHandle.IsOpen() )
+    {
+        return;
+    }
+    try
+    {
+        //Get a context for signature verification.
+        CatalogAdminContext adminContext;
 
-		// Allocate memory. Guess that CryptCatAdminCalcHashFromFileHandle uses SHA-1, which
-		// is 20 bytes.
-		DWORD const hashGuess = 20;
-		DWORD hashSize = hashGuess;
-		Instalog::OptimisticBuffer<hashGuess> hash(hashSize);
+        // Allocate memory. Guess that CryptCatAdminCalcHashFromFileHandle uses SHA-1, which
+        // is 20 bytes.
+        DWORD const hashGuess = 20;
+        DWORD hashSize = hashGuess;
+        Instalog::OptimisticBuffer<hashGuess> hash(hashSize);
 
-		//Actually calculate the hash
-		if( !CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, hash.Get(), 0) )
-		{
+        //Actually calculate the hash
+        if( !CryptCATAdminCalcHashFromFileHandle(fileHandle.Get(), &hashSize, hash.Get(), 0) )
+        {
             if (::GetLastError() != ERROR_INSUFFICIENT_BUFFER)
             {
-			    return;
+                return;
             }
 
             assert(false && "SHA-1 guess wrong.");
@@ -478,173 +475,173 @@ void FileData::sigVerify() const
             {
                 return;
             }
-		}
+        }
 
-		//Convert the hash to a string.
-		std::unique_ptr<wchar_t> hashString(new wchar_t[hashSize * 2 + 1]);
-		for( unsigned int i = 0; i < hashSize; i++ )
-		{
-			::swprintf_s(hashString.get() + (i * 2), 3, L"%02X", hash[i]);
-		}
+        //Convert the hash to a string.
+        std::unique_ptr<wchar_t> hashString(new wchar_t[hashSize * 2 + 1]);
+        for( unsigned int i = 0; i < hashSize; i++ )
+        {
+            ::swprintf_s(hashString.get() + (i * 2), 3, L"%02X", hash[i]);
+        }
 
-		CatalogHandle catalog = adminContext.EnumCatalogFromHash(hash.Get(), hashSize);
-		CATALOG_INFO info = catalog.GetInfo();
+        CatalogHandle catalog = adminContext.EnumCatalogFromHash(hash.Get(), hashSize);
+        CATALOG_INFO info = catalog.GetInfo();
 
-		//Fill in catalog info structure.
-		WINTRUST_CATALOG_INFO WintrustCatalogStructure = { sizeof(WINTRUST_CATALOG_INFO) };
-		WintrustCatalogStructure.dwCatalogVersion = 0;
-		WintrustCatalogStructure.pcwszCatalogFilePath = info.wszCatalogFile;
-		WintrustCatalogStructure.cbCalculatedFileHash = hashSize;
-		WintrustCatalogStructure.pbCalculatedFileHash = hash.Get();
-		WintrustCatalogStructure.pcwszMemberTag = hashString.get();
-		WintrustCatalogStructure.pcwszMemberFilePath = this->fileName.c_str();
+        //Fill in catalog info structure.
+        WINTRUST_CATALOG_INFO WintrustCatalogStructure = { sizeof(WINTRUST_CATALOG_INFO) };
+        WintrustCatalogStructure.dwCatalogVersion = 0;
+        WintrustCatalogStructure.pcwszCatalogFilePath = info.wszCatalogFile;
+        WintrustCatalogStructure.cbCalculatedFileHash = hashSize;
+        WintrustCatalogStructure.pbCalculatedFileHash = hash.Get();
+        WintrustCatalogStructure.pcwszMemberTag = hashString.get();
+        WintrustCatalogStructure.pcwszMemberFilePath = this->fileName.c_str();
 
-		WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
-		WintrustStructure.pPolicyCallbackData = 0;
-		WintrustStructure.pSIPClientData = 0;
-		WintrustStructure.dwUIChoice = WTD_UI_NONE;
-		WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
-		WintrustStructure.dwUnionChoice = WTD_CHOICE_CATALOG;
-		WintrustStructure.pCatalog = &WintrustCatalogStructure;
-		WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
-		WintrustStructure.dwUIContext = WTD_UICONTEXT_EXECUTE;
+        WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
+        WintrustStructure.pPolicyCallbackData = 0;
+        WintrustStructure.pSIPClientData = 0;
+        WintrustStructure.dwUIChoice = WTD_UI_NONE;
+        WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
+        WintrustStructure.dwUnionChoice = WTD_CHOICE_CATALOG;
+        WintrustStructure.pCatalog = &WintrustCatalogStructure;
+        WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
+        WintrustStructure.dwUIContext = WTD_UICONTEXT_EXECUTE;
         WintrustStructure.dwProvFlags = WTD_CACHE_ONLY_URL_RETRIEVAL;
-		if (CallWinVerifyTrust(WintrustStructure))
-		{
-			bits |= SIGVALID;
-		}
-	}
-	catch (Instalog::SystemFacades::Win32Exception const&)
-	{
-		WINTRUST_FILE_INFO WintrustFileStructure = { sizeof(WINTRUST_FILE_INFO) };
-		WintrustFileStructure.pcwszFilePath = this->fileName.c_str();
-		WintrustFileStructure.hFile = fileHandle.Get();
-		WintrustFileStructure.pgKnownSubject = NULL;
+        if (CallWinVerifyTrust(WintrustStructure))
+        {
+            bits |= SIGVALID;
+        }
+    }
+    catch (Instalog::SystemFacades::Win32Exception const&)
+    {
+        WINTRUST_FILE_INFO WintrustFileStructure = { sizeof(WINTRUST_FILE_INFO) };
+        WintrustFileStructure.pcwszFilePath = this->fileName.c_str();
+        WintrustFileStructure.hFile = fileHandle.Get();
+        WintrustFileStructure.pgKnownSubject = NULL;
 
-		WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
-		WintrustStructure.dwUnionChoice = WTD_CHOICE_FILE;
-		WintrustStructure.pFile = &WintrustFileStructure;
-		WintrustStructure.dwUIChoice = WTD_UI_NONE;
-		WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
-		WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
-		WintrustStructure.dwProvFlags = WTD_SAFER_FLAG | WTD_CACHE_ONLY_URL_RETRIEVAL;
-		if (CallWinVerifyTrust(WintrustStructure))
-		{
-			bits |= SIGVALID;
-		}
-	}
+        WintrustStructure.cbStruct = sizeof(WINTRUST_DATA);
+        WintrustStructure.dwUnionChoice = WTD_CHOICE_FILE;
+        WintrustStructure.pFile = &WintrustFileStructure;
+        WintrustStructure.dwUIChoice = WTD_UI_NONE;
+        WintrustStructure.fdwRevocationChecks = WTD_REVOKE_NONE;
+        WintrustStructure.dwStateAction = WTD_STATEACTION_VERIFY;
+        WintrustStructure.dwProvFlags = WTD_SAFER_FLAG | WTD_CACHE_ONLY_URL_RETRIEVAL;
+        if (CallWinVerifyTrust(WintrustStructure))
+        {
+            bits |= SIGVALID;
+        }
+    }
 }
 
 
 inline std::wstring GetHashErrorMessage(DWORD error)
 {
-	if (error == ERROR_LOCK_VIOLATION)
-	{
-		return std::wstring(L"!HASH: ERROR_LOCK_VIOLATION !!!!", 32);
-	}
-	else
-	{
-		wchar_t buff[33];
-		_snwprintf_s(buff, 32, L"!HASH: WIN32 ERROR 0x%08X !!", error);
-		return std::wstring(buff, 32);
-	}
+    if (error == ERROR_LOCK_VIOLATION)
+    {
+        return std::wstring(L"!HASH: ERROR_LOCK_VIOLATION !!!!", 32);
+    }
+    else
+    {
+        wchar_t buff[33];
+        _snwprintf_s(buff, 32, L"!HASH: WIN32 ERROR 0x%08X !!", error);
+        return std::wstring(buff, 32);
+    }
 }
 
 template <typename hashType> 
 std::wstring FileData::getHash() const
 {
-	using std::swap;
+    using std::swap;
 
-	OVERLAPPED overlappedIoBlock = {};
-	HANDLE file;
-	disable64.disableFS();
-	file = ::CreateFileW(getFileName().c_str(),GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED, nullptr);
-	DWORD error = GetLastError();
-	disable64.enableFS();
-	if (file == INVALID_HANDLE_VALUE)
-	{
-		return GetHashErrorMessage(error);
-	}
+    OVERLAPPED overlappedIoBlock = {};
+    HANDLE file;
+    disable64.disableFS();
+    file = ::CreateFileW(getFileName().c_str(),GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED, nullptr);
+    DWORD error = GetLastError();
+    disable64.enableFS();
+    if (file == INVALID_HANDLE_VALUE)
+    {
+        return GetHashErrorMessage(error);
+    }
 
-	hashType hash;
-	typedef unsigned char byte;
-	auto const bytesToAttempt = 1024 * 4; //4k
-	byte backingBuffer[bytesToAttempt * 2];
-	byte* readingBuffer = backingBuffer;
-	byte* hashingBuffer = readingBuffer + bytesToAttempt;
-	DWORD lastBytesRead = 0;
+    hashType hash;
+    typedef unsigned char byte;
+    auto const bytesToAttempt = 1024 * 4; //4k
+    byte backingBuffer[bytesToAttempt * 2];
+    byte* readingBuffer = backingBuffer;
+    byte* hashingBuffer = readingBuffer + bytesToAttempt;
+    DWORD lastBytesRead = 0;
 
-	for (;;)
-	{
-		// Move the spot we are reading forward
-		DWORD oldOffset = overlappedIoBlock.Offset;
-		overlappedIoBlock.Offset += lastBytesRead;
-		if (oldOffset > overlappedIoBlock.Offset)
-		{
-			++overlappedIoBlock.OffsetHigh;
-		}
+    for (;;)
+    {
+        // Move the spot we are reading forward
+        DWORD oldOffset = overlappedIoBlock.Offset;
+        overlappedIoBlock.Offset += lastBytesRead;
+        if (oldOffset > overlappedIoBlock.Offset)
+        {
+            ++overlappedIoBlock.OffsetHigh;
+        }
 
-		// Fire off a new read call
-		if (::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock) == 0)
-		{
-			DWORD error = ::GetLastError();
-			if (error == ERROR_HANDLE_EOF)
-			{
-				if (lastBytesRead != 0)
-				{
-					// Hash what we just read
-					hash.Update(hashingBuffer, lastBytesRead);
-				}
-				break;
-			}
-			else if (error != ERROR_IO_PENDING)
-			{
-				CloseHandle(file);
-				return GetHashErrorMessage(error);
-			}
-		}
+        // Fire off a new read call
+        if (::ReadFile(file, readingBuffer, bytesToAttempt, nullptr, &overlappedIoBlock) == 0)
+        {
+            DWORD error = ::GetLastError();
+            if (error == ERROR_HANDLE_EOF)
+            {
+                if (lastBytesRead != 0)
+                {
+                    // Hash what we just read
+                    hash.Update(hashingBuffer, lastBytesRead);
+                }
+                break;
+            }
+            else if (error != ERROR_IO_PENDING)
+            {
+                CloseHandle(file);
+                return GetHashErrorMessage(error);
+            }
+        }
 
-		if (lastBytesRead != 0)
-		{
-			// Hash what we just read
-			hash.Update(hashingBuffer, lastBytesRead);
-		}
+        if (lastBytesRead != 0)
+        {
+            // Hash what we just read
+            hash.Update(hashingBuffer, lastBytesRead);
+        }
 
-		::WaitForSingleObject(file, INFINITE);
-		if (::GetOverlappedResult(file, &overlappedIoBlock, &lastBytesRead, true) == 0)
-		{
-			DWORD error = GetLastError();
-			if (error == ERROR_HANDLE_EOF)
-			{
-				break;
-			}
-			else if (error != 0)
-			{
-				CloseHandle(file);
-				return GetHashErrorMessage(error);
-			}
-		}
+        ::WaitForSingleObject(file, INFINITE);
+        if (::GetOverlappedResult(file, &overlappedIoBlock, &lastBytesRead, true) == 0)
+        {
+            DWORD error = GetLastError();
+            if (error == ERROR_HANDLE_EOF)
+            {
+                break;
+            }
+            else if (error != 0)
+            {
+                CloseHandle(file);
+                return GetHashErrorMessage(error);
+            }
+        }
 
-		// Swap in the new buffer for reading
-		swap(readingBuffer, hashingBuffer);
-	}
+        // Swap in the new buffer for reading
+        swap(readingBuffer, hashingBuffer);
+    }
 
-	CloseHandle(file);
+    CloseHandle(file);
 
-	std::unique_ptr<byte[]> rawHash(new byte[hash.DigestSize()]);
-	hash.Final(rawHash.get());
+    std::unique_ptr<byte[]> rawHash(new byte[hash.DigestSize()]);
+    hash.Final(rawHash.get());
 
-	std::wstring result;
-	static const wchar_t constantHexArray[] = L"0123456789ABCDEF";
-	result.resize(hash.DigestSize() * 2);
-	DWORD len = hash.DigestSize();
-	for (unsigned short int idx = 0; idx < len; idx++)
-	{
-		result[(len*2-1)-2*idx] = constantHexArray[(rawHash[(len-1)-idx] & 0x0F)];
-		result[(len*2-1)-(2*idx+1)] = constantHexArray[(rawHash[(len-1)-idx] & 0xF0) >> 4];
-	}
+    std::wstring result;
+    static const wchar_t constantHexArray[] = L"0123456789ABCDEF";
+    result.resize(hash.DigestSize() * 2);
+    DWORD len = hash.DigestSize();
+    for (unsigned short int idx = 0; idx < len; idx++)
+    {
+        result[(len*2-1)-2*idx] = constantHexArray[(rawHash[(len-1)-idx] & 0x0F)];
+        result[(len*2-1)-(2*idx+1)] = constantHexArray[(rawHash[(len-1)-idx] & 0xF0) >> 4];
+    }
 
-	return result;
+    return result;
 }
 
 #pragma warning (push)
@@ -1147,9 +1144,15 @@ void FileData::write()
             case L'u':
             case L'U':
                 if(isDirectory())
+                {
                     line.append(L"--------");
+                }
                 else
-                    line.append(boost::lexical_cast<std::wstring >(getSize()));
+                {
+                    wchar_t sizeTemp[21];
+                    int result = swprintf_s(sizeTemp, L"%I64u", getSize());
+                    line.append(sizeTemp, std::max(result, 0));
+                }
                 break;
             case L'V':
             case L'v':
