@@ -569,11 +569,13 @@ class LexicalAnalyzer : boost::noncopyable
     SourceLocation parameterStart;
     SourceLocation parameterEnd;
     ArgumentType argumentType;
+    std::wstring errorMessage;
 public:
     LexicalAnalyzer(std::unique_ptr<ILoadLineResolver> loadLineResolver_, std::wstring inputString);
     std::wstring GetLexicalTokenRaw() const;
     std::wstring GetLexicalTokenArgument() const;
     std::wstring GetLexicalTokenParameter() const;
+    std::wstring const& GetErrorMessage() const throw();
     bool IsDashedArgument() const throw();
     bool NextLexicalToken();
 };

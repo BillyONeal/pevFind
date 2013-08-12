@@ -283,10 +283,9 @@ namespace pevFind { namespace tests
 
         TEST_METHOD(LexicalAnalyzerTest_QuotedArgument)
         {
-            LexicalAnalyzer uut(std::move(resolver), L"  \"argument spaced out\" --arg literal");
+            LexicalAnalyzer uut(std::move(resolver), L"  \"argument spaced out\" \"--arg literal\"");
             DoAssertLexical(uut, L"\"argument spaced out\"", L"argument spaced out", L"", false);
-            DoAssertLexical(uut, L"--arg", L"arg", L"", true);
-            DoAssertLexical(uut, L"literal", L"literal", L"", false);
+            DoAssertLexical(uut, L"\"--arg literal\"", L"--arg literal", L"", false);
             DoAssertLexicalEnd(uut);
         }
 
@@ -323,6 +322,21 @@ namespace pevFind { namespace tests
         {
             LexicalAnalyzer uut(std::move(resolver), L"--argument");
             DoAssertLexical(uut, L"--argument", L"argument", L"", true);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_SimpleQuotedParameter)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument\"param\" baz");
+            DoAssertLexical(uut, L"--argument\"param\"", L"argument", L"param", true);
+            DoAssertLexical(uut, L"baz", L"baz", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_SimpleQuotedParameterEnd)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument\"param\"");
+            DoAssertLexical(uut, L"--argument\"param\"", L"argument", L"param", true);
             DoAssertLexicalEnd(uut);
         }
     };
