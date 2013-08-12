@@ -9,10 +9,6 @@
 
 #include "pch.hpp"
 #include <stdexcept>
-#ifndef NDEBUG
-#include <iostream> //These are used to print debugging info to disk.
-#include <fstream>
-#endif
 #include <boost/xpressive/xpressive_static.hpp>
 #include <boost/algorithm/string.hpp>
 #include "utility.h"
@@ -899,11 +895,6 @@ void consoleParser::processLoadlineArgument(commandToken& token)
 {
     removeArgument(8, token.argument);
     std::wstring newCommands(loadFileAsString(getEndOrOption(token)));
-#ifndef NDEBUG
-    std::wofstream out(L"C:\\command.txt", std::ios::app | std::ios::out);
-    out << L"LINELOADED\r\n" << newCommands << L"\r\nENDLINELOADED\r\n";
-    out.close();
-#endif
     insertNewTokens(curToken, newCommands);
     token.argument.clear();
 }

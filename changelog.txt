@@ -1,3 +1,6 @@
+Changes in 1.5.18:
+* Removed use of the iostream libraries -> code size savings.
+
 Changes in 1.5.17:
 * Fixed "Remove embedded nulls from the end of version info strings."
   https://github.com/BillyONeal/pevFind/issues/20

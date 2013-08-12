@@ -7,9 +7,6 @@
 
 #include "pch.hpp"
 #include <vector>
-#include <stdexcept>
-#include <iostream>
-#include <fstream>
 #include "../LogCommon/Win32Exception.hpp"
 #include "../LogCommon/Process.hpp"
 
@@ -17,24 +14,21 @@ namespace plist {
 
     int main(int argc, wchar_t * argv[])
     {
-        std::wostream *output;
-        std::unique_ptr<std::wostream> destroyer;
+        FILE* output;
         if (argc > 1)
         {
-            destroyer.reset(new std::wofstream(argv[1]));
-            output = destroyer.get();
+            _wfopen_s(&output, argv[1], L"w");
         }
         else
         {
-            output = &std::wcout;
+            output = stdout;
         }
-		Instalog::SystemFacades::ProcessEnumerator enumerator;
-		for (auto& process : enumerator)
+        Instalog::SystemFacades::ProcessEnumerator enumerator;
+        for (auto const& process : enumerator)
         {
             try
             {
-                *output << process.GetExecutablePath() << std::endl;
-                output->clear();
+                std::fwprintf(output, L"%s\n", process.GetExecutablePath().c_str());
             }
             catch (Instalog::SystemFacades::Win32Exception const&)
             {
@@ -49,30 +43,27 @@ namespace clist {
 
     int main(int argc, wchar_t * argv[])
     {
-		std::wostream *output;
-		std::unique_ptr<std::wostream> destroyer;
-		if (argc > 1)
-		{
-			destroyer.reset(new std::wofstream(argv[1]));
-			output = destroyer.get();
-		}
-		else
-		{
-			output = &std::wcout;
-		}
-		Instalog::SystemFacades::ProcessEnumerator enumerator;
-		for (auto& process : enumerator)
-		{
-			try
-			{
-				*output << process.GetCmdLine() << std::endl;
-				output->clear();
-			}
-			catch (Instalog::SystemFacades::Win32Exception const&)
-			{
-			}
-		}
-		return 0;
+        FILE* output;
+        if (argc > 1)
+        {
+            _wfopen_s(&output, argv[1], L"w");
+        }
+        else
+        {
+            output = stdout;
+        }
+        Instalog::SystemFacades::ProcessEnumerator enumerator;
+        for (auto const& process : enumerator)
+        {
+            try
+            {
+                std::fwprintf(output, L"%s\n", process.GetCmdLine().c_str());
+            }
+            catch (Instalog::SystemFacades::Win32Exception const&)
+            {
+            }
+        }
+        return 0;
     }
 
 };

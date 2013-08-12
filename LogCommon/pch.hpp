@@ -13,10 +13,6 @@
 #include <iterator>
 #include <functional>
 #include <array>
-#include <iomanip>
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
 #include "ntstatus.h"
 
 #define NOMINMAX

@@ -6,7 +6,6 @@
 // regImport.cpp -- Implements the "rimport" subprogram.
 #include "pch.hpp"
 #include <vector>
-#include <iostream>
 #include <boost/algorithm/string/predicate.hpp>
 #include "regImport.h"
 #include "regscriptCompiler.h"
@@ -35,7 +34,7 @@ int main(int argc, wchar_t* argv[], DWORD wow64flags)
 #else
     op.printASM();
 #endif
-    std::wcerr << op.getOutput();
+    std::fwprintf(stderr, L"%s", op.getOutput().c_str());
     return 0;
 }
 

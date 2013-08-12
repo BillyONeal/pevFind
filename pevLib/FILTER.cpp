@@ -1,9 +1,9 @@
 #include "pch.hpp"
 #include <string>
+#include <cstdio>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <Shlwapi.h>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include "filter.h"
 #include "fileData.h"
@@ -11,7 +11,10 @@
 
 std::wstring sizeFilter::debugTreeInternal(const std::wstring& type) const
 {
-    return std::wstring(L"+ SIZEFILTER ").append(type).append(L" ").append(boost::lexical_cast<std::wstring>(size));
+    std::wstring result(13 + type.size() + 1 + 21 + 1, L'\0');
+    int resultLength = swprintf_s(&result[0], result.size() + 1, L"+ SIZEFILTER %s %I64u", type.c_str(), size);
+    result.resize(resultLength);
+    return result;
 }
 unsigned __int32 sizeFilter::getPriorityClass() const
 {

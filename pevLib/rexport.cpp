@@ -6,7 +6,6 @@
 // rexport.cpp - Implements the registry export sub program.
 
 #include "pch.hpp"
-#include <iostream>
 #include <stdexcept>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

@@ -9,7 +9,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
 #include "serviceControl.h"
 
 int serviceControl::main(int argc, wchar_t* argv[])
@@ -18,14 +17,18 @@ int serviceControl::main(int argc, wchar_t* argv[])
     if (boost::algorithm::iequals(argv[1], L"create"))
     {
         if (argc < 6) return 1;
+        DWORD serviceType;
+        if (swscanf_s(argv[4], L"%u", &serviceType) != 1) return 1;
+        DWORD startType;
+        if (swscanf_s(argv[5], L"%u", &startType) != 1) return 1;
         SC_HANDLE hSCM = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE | SC_MANAGER_CONNECT | STANDARD_RIGHTS_EXECUTE);
-        SC_HANDLE createdService = CreateService(
+        SC_HANDLE createdService = ::CreateServiceW(
             hSCM,
             argv[2],
             argc >= 6 ? argv[6] : NULL,
             SC_MANAGER_ALL_ACCESS,
-            boost::lexical_cast<DWORD>(argv[4]),
-            boost::lexical_cast<DWORD>(argv[5]),
+            serviceType,
+            startType,
             SERVICE_ERROR_IGNORE,
             argv[3],
             NULL,

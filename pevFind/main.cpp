@@ -6,8 +6,8 @@
 // pevFind.cpp -- Defines the main entry point for the executable. Bootstraps
 // associated subprograms.
 
-#include <iostream>
-#include <fstream>
+#include <cstdio>
+#include <cstring>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include "../pevLib/utility.h"
@@ -82,7 +82,7 @@ int __cdecl wmain(int argc, wchar_t* argv[])
     {
 #define STRINGIZE_LITERAL(x) #x
 #define STRINGIZE(x) STRINGIZE_LITERAL(x)
-        std::cerr << 
+        std::puts(
         "                         _____ _           _ \n"
         "        _ __   _____   _|  ___(_)_ __   __| |\n"
         "       | '_ \\ / _ \\ \\ / / |_  | | '_ \\ / _` |\n"
@@ -96,7 +96,7 @@ int __cdecl wmain(int argc, wchar_t* argv[])
         "  In accordance with Info-ZIP's License, it can be found at\n"
         "           http://billy-oneal.com/infozip.txt\n"
         "            Filename regular expressions library is\n"
-        " Copyright (C)1997-1998 by David R. Tribble, all rights reserved.\n\n";
-        std::cerr << except.what() << "\n";
+        " Copyright (C)1997-1998 by David R. Tribble, all rights reserved.\n");
+        std::fputs(except.what(), stderr);
     }
 }
