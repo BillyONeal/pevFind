@@ -21,6 +21,7 @@ namespace
         SkipDashes,
         InDashArgument,
         InQuotedParameter,
+        ColonDash,
         Complete
     };
 }
@@ -751,11 +752,27 @@ namespace pevFind
                     this->parameterStart = current;
                     this->parameterEnd = current;
                 }
+                else if (currentCharacter == L':')
+                {
+                    state = LexicalAnalyzerState::ColonDash;
+                    this->argumentEnd = current;
+                }
                 else if (currentCharacter == L'"')
                 {
                     state = LexicalAnalyzerState::InQuotedParameter;
                     this->argumentEnd = current;
                     this->parameterStart = std::min(size, current + 1);
+                }
+                break;
+            case LexicalAnalyzerState::ColonDash:
+                if (currentCharacter == L'"')
+                {
+                    state = LexicalAnalyzerState::InQuotedParameter;
+                    this->parameterStart = std::min(size, current + 1);
+                }
+                else if (currentCharacter != L':')
+                {
+                    state = LexicalAnalyzerState::InDashArgument;
                 }
                 break;
             case LexicalAnalyzerState::InQuotedParameter:
@@ -780,6 +797,7 @@ namespace pevFind
             // Fall through
         case LexicalAnalyzerState::FindEndLiteral:
         case LexicalAnalyzerState::InDashArgument:
+        case LexicalAnalyzerState::ColonDash:
             this->lexicalEnd = current;
             this->argumentEnd = current;
             this->parameterStart = current;
