@@ -569,6 +569,10 @@ enum class ArgumentType
     HashedQuotedParameter
 };
 
+/**
+ * Lexical analyzer.
+ * @sa boost::noncopyable
+ */
 class LexicalAnalyzer : boost::noncopyable
 {
     std::unique_ptr<ILoadLineResolver> loadLineResolver;
@@ -580,14 +584,43 @@ class LexicalAnalyzer : boost::noncopyable
     SourceLocation parameterStart;
     SourceLocation parameterEnd;
     ArgumentType argumentType;
-    std::wstring errorMessage;
 public:
+
+    /**
+     * Initializes a new instance of the LexicalAnalyzer class.
+     * @param loadLineResolver_ The load line resolver used to process --loadline directives.
+     * @param inputString The input string to process.
+     */
     LexicalAnalyzer(std::unique_ptr<ILoadLineResolver> loadLineResolver_, std::wstring inputString);
+
+    /**
+     * Gets the raw value of the current lexical token.
+     * @return The raw value of the current lexical token.
+     */
     std::wstring GetLexicalTokenRaw() const;
+
+    /**
+     * Gets the value of the lexical token argument.
+     * @return The lexical token argument value.
+     */
     std::wstring GetLexicalTokenArgument() const;
+
+    /**
+     * Gets the value of the lexical token parameter.
+     * @return The lexical token parameter value.
+     */
     std::wstring GetLexicalTokenParameter() const;
-    std::wstring const& GetErrorMessage() const throw();
+
+    /**
+     * Queries if the current lexical token is a dashed argument.
+     * @return true if the current lexical token is a dashed argument, false if not.
+     */
     bool IsDashedArgument() const throw();
+
+    /**
+     * Shifts this instance to the next lexical token.
+     * @return true if it succeeds, false if it fails.
+     */
     bool NextLexicalToken();
 };
 
