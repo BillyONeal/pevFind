@@ -379,14 +379,14 @@ namespace pevFind { namespace tests
             DoAssertLexicalEnd(uut);
         }
 
-        TEST_METHOD(LexicalAnalyzerTest_QuotedParameterWithEscapes)
+        TEST_METHOD(LexicalAnalyzerTest_QuotedArgumentWithEscapes)
         {
             LexicalAnalyzer uut(std::move(resolver), L"\"quoted parameter with \\\"quotes\"");
             DoAssertLexical(uut, L"\"quoted parameter with \\\"quotes\"", L"quoted parameter with \"quotes", L"", false);
             DoAssertLexicalEnd(uut);
         }
 
-        TEST_METHOD(LexicalAnalyzerTest_QuotedParameterWithEscapes2)
+        TEST_METHOD(LexicalAnalyzerTest_QuotedArgumentWithEscapes2)
         {
             LexicalAnalyzer uut(std::move(resolver), L"\"quoted parameter with \\\\\"quotes");
             DoAssertLexical(uut, L"\"quoted parameter with \\\\\"", L"quoted parameter with \\", L"", false);
@@ -394,7 +394,7 @@ namespace pevFind { namespace tests
             DoAssertLexicalEnd(uut);
         }
 
-        TEST_METHOD(LexicalAnalyzerTest_QuotedParameterWithEscapes3)
+        TEST_METHOD(LexicalAnalyzerTest_QuotedArgumentWithEscapes3)
         {
             LexicalAnalyzer uut(std::move(resolver), L"\"quoted parameter with \\\\\\\"quotes\"");
             DoAssertLexical(uut, L"\"quoted parameter with \\\\\\\"quotes\"", L"quoted parameter with \\\"quotes", L"", false);
