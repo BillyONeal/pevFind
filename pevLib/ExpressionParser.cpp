@@ -694,7 +694,14 @@ namespace pevFind
 
     std::wstring LexicalAnalyzer::GetLexicalTokenParameter() const
     {
-        return this->sm.StringForRange(this->parameterStart, this->parameterEnd);
+        if (this->argumentType == ArgumentType::DashedQuotedParameter)
+        {
+            return this->sm.DequoteRange(this->parameterStart, this->parameterEnd);
+        }
+        else
+        {
+            return this->sm.StringForRange(this->parameterStart, this->parameterEnd);
+        }
     }
 
     std::wstring const& LexicalAnalyzer::GetErrorMessage() const throw()
@@ -704,7 +711,7 @@ namespace pevFind
 
     bool LexicalAnalyzer::IsDashedArgument() const throw()
     {
-        return argumentType == ArgumentType::Dashed;
+        return argumentType == ArgumentType::Dashed || argumentType == ArgumentType::DashedQuotedParameter;
     }
 
     bool LexicalAnalyzer::NextLexicalToken()
@@ -805,6 +812,7 @@ namespace pevFind
                 else if (currentCharacter == L'"')
                 {
                     state = LexicalAnalyzerState::InQuotedParameter;
+                    this->argumentType = ArgumentType::DashedQuotedParameter;
                     this->argumentEnd = current;
                     this->parameterStart = std::min(size, current + 1);
                 }
@@ -813,6 +821,7 @@ namespace pevFind
                 if (currentCharacter == L'"')
                 {
                     state = LexicalAnalyzerState::InQuotedParameter;
+                    this->argumentType = ArgumentType::DashedQuotedParameter;
                     this->parameterStart = std::min(size, current + 1);
                 }
                 else if (currentCharacter != L':')
@@ -821,11 +830,20 @@ namespace pevFind
                 }
                 break;
             case LexicalAnalyzerState::InQuotedParameter:
-                if (currentCharacter == L'"')
+                if (currentCharacter == L'"' && (slashCount % 2 == 0))
                 {
                     state = LexicalAnalyzerState::Complete;
                     this->parameterEnd = current;
                     this->lexicalEnd = std::min(size, current + 1);
+                }
+
+                if (currentCharacter == L'\\')
+                {
+                    ++slashCount;
+                }
+                else
+                {
+                    slashCount = 0;
                 }
                 break;
             case LexicalAnalyzerState::Complete:
@@ -849,6 +867,7 @@ namespace pevFind
             this->parameterEnd = current;
             break;
         case LexicalAnalyzerState::FindEndQuoted:
+        case LexicalAnalyzerState::InQuotedParameter:
             throw std::exception("Missing quote end");
             break;
         case LexicalAnalyzerState::Complete:

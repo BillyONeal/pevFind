@@ -564,7 +564,8 @@ enum class ArgumentType
     Uninitialized,
     Literal,
     Quoted,
-    Dashed
+    Dashed,
+    DashedQuotedParameter
 };
 
 class LexicalAnalyzer : boost::noncopyable
