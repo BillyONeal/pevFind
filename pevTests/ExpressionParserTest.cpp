@@ -378,6 +378,28 @@ namespace pevFind { namespace tests
             DoAssertLexical(uut, L"--argument:::", L"argument:::", L"", true);
             DoAssertLexicalEnd(uut);
         }
+
+        TEST_METHOD(LexicalAnalyzerTest_QuotedParameterWithEscapes)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"\"quoted parameter with \\\"quotes\"");
+            DoAssertLexical(uut, L"\"quoted parameter with \\\"quotes\"", L"quoted parameter with \"quotes", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_QuotedParameterWithEscapes2)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"\"quoted parameter with \\\\\"quotes");
+            DoAssertLexical(uut, L"\"quoted parameter with \\\\\"", L"quoted parameter with \\", L"", false);
+            DoAssertLexical(uut, L"quotes", L"quotes", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_QuotedParameterWithEscapes3)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"\"quoted parameter with \\\\\\\"quotes\"");
+            DoAssertLexical(uut, L"\"quoted parameter with \\\\\\\"quotes\"", L"quoted parameter with \\\"quotes", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
     };
 
     TEST_CLASS(CaseInsensitiveConstantTest)

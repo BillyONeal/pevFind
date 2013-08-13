@@ -532,6 +532,34 @@ namespace pevFind
         return std::wstring(iterator + begin, iterator + end);
     }
 
+    std::wstring SourceManager::DequoteRange( SourceLocation begin, SourceLocation end ) const
+    {
+        assert(begin <= end);
+        std::wstring result;
+        result.reserve(end - begin);
+        SourceLocation slashCount = 0;
+        for (; begin != end; ++begin)
+        {
+            wchar_t const currentCharacter = backingBuffer[begin];
+            if (currentCharacter == L'\\')
+            {
+                ++slashCount;
+                continue;
+            }
+            
+            if (slashCount != 0)
+            {
+                result.append(currentCharacter == L'"' ? slashCount / 2 : slashCount, L'\\');
+                slashCount = 0;
+            }
+            
+            result.push_back(currentCharacter);
+        }
+
+        result.append(slashCount / 2, L'\\');
+        return result;
+    }
+
     LoadLineResult::LoadLineResult(std::wstring&& lineOrError_, bool success_)
         : lineOrError(std::move(lineOrError_))
         , success(success_)
@@ -654,7 +682,14 @@ namespace pevFind
 
     std::wstring LexicalAnalyzer::GetLexicalTokenArgument() const
     {
-        return this->sm.StringForRange(this->argumentStart, this->argumentEnd);
+        if (this->argumentType == ArgumentType::Quoted)
+        {
+            return this->sm.DequoteRange(this->argumentStart, this->argumentEnd);
+        }
+        else
+        {
+            return this->sm.StringForRange(this->argumentStart, this->argumentEnd);
+        }
     }
 
     std::wstring LexicalAnalyzer::GetLexicalTokenParameter() const
@@ -676,6 +711,7 @@ namespace pevFind
     {
         auto const size = this->sm.size();
         LexicalAnalyzerState state = LexicalAnalyzerState::Initial;
+        SourceLocation slashCount = 0;
         this->lexicalStart = this->sm.FindNextPredicateMatchAfter(this->lexicalEnd, std::not1(IsWhitespace()));
         this->argumentType = ArgumentType::Uninitialized;
         auto current = this->lexicalStart;
@@ -734,13 +770,22 @@ namespace pevFind
                 }
                 break;
             case LexicalAnalyzerState::FindEndQuoted:
-                if (currentCharacter == L'"')
+                if (currentCharacter == L'"' && (slashCount % 2 == 0))
                 {
                     state = LexicalAnalyzerState::Complete;
                     this->argumentEnd = current;
                     this->lexicalEnd = std::min(size, current + 1);
                     this->parameterStart = this->lexicalEnd;
                     this->parameterEnd = this->lexicalEnd;
+                }
+                
+                if (currentCharacter == L'\\')
+                {
+                    ++slashCount;
+                }
+                else
+                {
+                    slashCount = 0;
                 }
                 break;
             case LexicalAnalyzerState::InDashArgument:

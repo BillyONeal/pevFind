@@ -443,6 +443,15 @@ public:
      * @return A string comprising the characters in the range [begin, end)
      */
     std::wstring StringForRange(SourceLocation begin, SourceLocation end) const;
+
+    /**
+     * Dequote processes a range. Takes the "inside" of a quoted range and returns the literal
+     * string value of that range.
+     * @param begin The beginning of the range to dequote.
+     * @param end The end of the range to dequote.
+     * @return A string comprising the literal value of the range inside the quotes.
+     */
+    std::wstring DequoteRange(SourceLocation begin, SourceLocation end) const;
 };
 
 /**
