@@ -21,6 +21,8 @@ namespace
         SkipDashes,
         InDashArgument,
         InQuotedParameter,
+        InHashedParameter,
+        InHashedParameterEndCheck,
         ColonDash,
         Complete
     };
@@ -711,7 +713,15 @@ namespace pevFind
 
     bool LexicalAnalyzer::IsDashedArgument() const throw()
     {
-        return argumentType == ArgumentType::Dashed || argumentType == ArgumentType::DashedQuotedParameter;
+        switch (this->argumentType)
+        {
+        case ArgumentType::Dashed:
+        case ArgumentType::DashedQuotedParameter:
+        case ArgumentType::HashedQuotedParameter:
+            return true;
+        default:
+            return false;
+        }
     }
 
     bool LexicalAnalyzer::NextLexicalToken()
@@ -816,6 +826,13 @@ namespace pevFind
                     this->argumentEnd = current;
                     this->parameterStart = std::min(size, current + 1);
                 }
+                else if (currentCharacter == L'#')
+                {
+                    state = LexicalAnalyzerState::InHashedParameter;
+                    this->argumentType = ArgumentType::HashedQuotedParameter;
+                    this->argumentEnd = current;
+                    this->parameterStart = std::min(size, current + 1);
+                }
                 break;
             case LexicalAnalyzerState::ColonDash:
                 if (currentCharacter == L'"')
@@ -824,7 +841,17 @@ namespace pevFind
                     this->argumentType = ArgumentType::DashedQuotedParameter;
                     this->parameterStart = std::min(size, current + 1);
                 }
-                else if (currentCharacter != L':')
+                else if (currentCharacter == L'#')
+                {
+                    state = LexicalAnalyzerState::InHashedParameter;
+                    this->argumentType = ArgumentType::HashedQuotedParameter;
+                    this->parameterStart = std::min(size, current + 1);
+                }
+                else if (currentCharacter == L':')
+                {
+                    this->argumentEnd = current;
+                }
+                else
                 {
                     state = LexicalAnalyzerState::InDashArgument;
                 }
@@ -844,6 +871,24 @@ namespace pevFind
                 else
                 {
                     slashCount = 0;
+                }
+                break;
+            case LexicalAnalyzerState::InHashedParameter:
+                if (currentCharacter == L'#')
+                {
+                    state = LexicalAnalyzerState::InHashedParameterEndCheck;
+                }
+                break;
+            case LexicalAnalyzerState::InHashedParameterEndCheck:
+                if (IsWhitespace()(currentCharacter))
+                {
+                    state = LexicalAnalyzerState::Complete;
+                    this->parameterEnd = current - 1;
+                    this->lexicalEnd = current;
+                }
+                else
+                {
+                    state = LexicalAnalyzerState::InHashedParameter;
                 }
                 break;
             case LexicalAnalyzerState::Complete:
@@ -866,9 +911,16 @@ namespace pevFind
             this->parameterStart = current;
             this->parameterEnd = current;
             break;
+        case LexicalAnalyzerState::InHashedParameterEndCheck:
+            this->lexicalEnd = current;
+            this->parameterEnd = current - 1;
+            break;
         case LexicalAnalyzerState::FindEndQuoted:
         case LexicalAnalyzerState::InQuotedParameter:
             throw std::exception("Missing quote end");
+            break;
+        case LexicalAnalyzerState::InHashedParameter:
+            throw std::exception("Missing hash end");
             break;
         case LexicalAnalyzerState::Complete:
             // Purposely does nothing.

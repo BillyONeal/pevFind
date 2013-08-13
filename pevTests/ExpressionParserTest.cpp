@@ -328,31 +328,31 @@ namespace pevFind { namespace tests
 
         TEST_METHOD(LexicalAnalyzerTest_SimpleQuotedParameter)
         {
-            LexicalAnalyzer uut(std::move(resolver), L"--argument\"param\" baz");
-            DoAssertLexical(uut, L"--argument\"param\"", L"argument", L"param", true);
+            LexicalAnalyzer uut(std::move(resolver), L"--argument\"pa ram\" baz");
+            DoAssertLexical(uut, L"--argument\"pa ram\"", L"argument", L"pa ram", true);
             DoAssertLexical(uut, L"baz", L"baz", L"", false);
             DoAssertLexicalEnd(uut);
         }
 
         TEST_METHOD(LexicalAnalyzerTest_SimpleQuotedParameterEnd)
         {
-            LexicalAnalyzer uut(std::move(resolver), L"--argument\"param\"");
-            DoAssertLexical(uut, L"--argument\"param\"", L"argument", L"param", true);
+            LexicalAnalyzer uut(std::move(resolver), L"--argument\"pa ram\"");
+            DoAssertLexical(uut, L"--argument\"pa ram\"", L"argument", L"pa ram", true);
             DoAssertLexicalEnd(uut);
         }
 
         TEST_METHOD(LexicalAnalyzerTest_SimpleQuotedParameterColon)
         {
-            LexicalAnalyzer uut(std::move(resolver), L"--argument:\"param\" baz");
-            DoAssertLexical(uut, L"--argument:\"param\"", L"argument", L"param", true);
+            LexicalAnalyzer uut(std::move(resolver), L"--argument:\"par am\" baz");
+            DoAssertLexical(uut, L"--argument:\"par am\"", L"argument", L"par am", true);
             DoAssertLexical(uut, L"baz", L"baz", L"", false);
             DoAssertLexicalEnd(uut);
         }
 
         TEST_METHOD(LexicalAnalyzerTest_SimpleQuotedParameterEndColon)
         {
-            LexicalAnalyzer uut(std::move(resolver), L"--argument:\"param\"");
-            DoAssertLexical(uut, L"--argument:\"param\"", L"argument", L"param", true);
+            LexicalAnalyzer uut(std::move(resolver), L"--argument:\"para m\"");
+            DoAssertLexical(uut, L"--argument:\"para m\"", L"argument", L"para m", true);
             DoAssertLexicalEnd(uut);
         }
 
@@ -372,7 +372,7 @@ namespace pevFind { namespace tests
             DoAssertLexicalEnd(uut);
         }
 
-        TEST_METHOD(LexicalAnalyzerTest_SimpleQuotedParameterEndColonEnd)
+        TEST_METHOD(LexicalAnalyzerTest_SimpleParameterEndColonEnd)
         {
             LexicalAnalyzer uut(std::move(resolver), L"--argument:::");
             DoAssertLexical(uut, L"--argument:::", L"argument:::", L"", true);
@@ -420,6 +420,44 @@ namespace pevFind { namespace tests
         {
             LexicalAnalyzer uut(std::move(resolver), L"--arg\"quoted parameter with \\\\\\\"quotes\"");
             DoAssertLexical(uut, L"--arg\"quoted parameter with \\\\\\\"quotes\"", L"arg", L"quoted parameter with \\\"quotes", true);
+            DoAssertLexicalEnd(uut);
+        }
+
+
+        TEST_METHOD(LexicalAnalyzerTest_SimpleHashedParameter)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument#param val# baz");
+            DoAssertLexical(uut, L"--argument#param val#", L"argument", L"param val", true);
+            DoAssertLexical(uut, L"baz", L"baz", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_SimpleHashedParameterEnd)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument#param val#");
+            DoAssertLexical(uut, L"--argument#param val#", L"argument", L"param val", true);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_SimpleHashedParameterColon)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument:#param val# baz");
+            DoAssertLexical(uut, L"--argument:#param val#", L"argument", L"param val", true);
+            DoAssertLexical(uut, L"baz", L"baz", L"", false);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_SimpleHashedParameterEndColon)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument:#param val#");
+            DoAssertLexical(uut, L"--argument:#param val#", L"argument", L"param val", true);
+            DoAssertLexicalEnd(uut);
+        }
+
+        TEST_METHOD(LexicalAnalyzerTest_SimpleHashedParameterEndColon2)
+        {
+            LexicalAnalyzer uut(std::move(resolver), L"--argument::#param val#");
+            DoAssertLexical(uut, L"--argument::#param val#", L"argument:", L"param val", true);
             DoAssertLexicalEnd(uut);
         }
     };
