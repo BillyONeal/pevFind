@@ -32,8 +32,6 @@
     <ClCompile Include="regImport.cpp" />
     <ClCompile Include="registry.cpp" />
     <ClCompile Include="regscriptCompiler.cpp" />
-    <ClCompile Include="reportAssembler.cpp" />
-    <ClCompile Include="reportComponents.cpp" />
     <ClCompile Include="rexport.cpp" />
     <ClCompile Include="serviceControl.cpp" />
     <ClCompile Include="timeoutThread.cpp" />
@@ -45,14 +43,12 @@
     <ClCompile Include="volumeEnumerate.cpp" />
     <ClCompile Include="zip.cpp" />
     <ClCompile Include="zipIt.cpp" />
+    <ClCompile Include="FileInformationBlock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
       <Filter>Precompiled</Filter>
     </ClInclude>
-    <ClInclude Include="reportAssembler.hpp" />
-    <ClInclude Include="reportComponents.hpp" />
-    <ClInclude Include="Version.hpp" />
     <ClInclude Include="zipIt.h" />
     <ClInclude Include="clsidCompressor.h" />
     <ClInclude Include="consoleParser.h" />
@@ -89,5 +85,6 @@
     <ClInclude Include="volumeEnumerate.h" />
     <ClInclude Include="wait.hpp" />
     <ClInclude Include="zip.h" />
+    <ClInclude Include="FileInformationBlocks.hpp" />
   </ItemGroup>
 </Project>

@@ -42,6 +42,7 @@
     <ClCompile Include="exec.cpp" />
     <ClCompile Include="ExpressionParser.cpp" />
     <ClCompile Include="fileData.cpp" />
+    <ClCompile Include="FileInformationBlock.cpp" />
     <ClCompile Include="filesScanner.cpp" />
     <ClCompile Include="FILTER.cpp" />
     <ClCompile Include="fpattern.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="exec.h" />
     <ClInclude Include="ExpressionParser.hpp" />
     <ClInclude Include="fileData.h" />
+    <ClInclude Include="FileInformationBlocks.hpp" />
     <ClInclude Include="filesScanner.h" />
     <ClInclude Include="FILTER.h" />
     <ClInclude Include="fpattern.h" />
