@@ -1,5 +1,9 @@
 Changes in 1.5.18:
 * Removed use of the iostream libraries -> code size savings.
+* Reverted changes to GetShortFileName, resolves issue #19
+  https://github.com/BillyONeal/pevFind/issues/19 and #21
+  https://github.com/BillyONeal/pevFind/issues/21
+* Changed trailing null dropping to only drop a single trailing null.
 
 Changes in 1.5.17:
 * Fixed "Remove embedded nulls from the end of version info strings."
