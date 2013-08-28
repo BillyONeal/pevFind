@@ -1,3 +1,7 @@
+Changes in 1.5.19:
+* Fixed a bug whereby PEV could produce empty files from PLIST and CLIST.
+  https://github.com/BillyONeal/pevFind/issues/23
+
 Changes in 1.5.18:
 * Removed use of the iostream libraries -> code size savings.
 * Reverted changes to GetShortFileName, resolves issue #19
