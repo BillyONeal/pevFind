@@ -122,29 +122,16 @@ std::wstring convertUnicode(const std::string &uni)
 #pragma comment(lib, "shlwapi")
 std::wstring GetShortPathNameStr(std::wstring longPath)
 {
-    bool relative = ::PathIsRelativeW(longPath.c_str()) != 0;
-    if (!relative)
-    {
-        longPath.insert(0, L"\\\\?\\");
-    }
-
-    DWORD bufferlen = GetShortPathNameW(longPath.c_str(), nullptr, 0);
-    if (bufferlen == 0)
+    wchar_t tempBuff[MAX_PATH];
+    DWORD bufferLen = ::GetShortPathNameW(longPath.c_str(),tempBuff,MAX_PATH);
+    if (bufferLen == 0)
     {
         DWORD err = GetLastError();
-        std::wstringstream ss;
-        ss << L"ERROR(0x" << std::setw(8) << std::setfill(L'0') << std::hex << err << L")";
-        return ss.str();
+        bufferLen = swprintf_s(tempBuff, L"ERROR(0x%08X)", err);
+        assert(bufferLen != -1);
     }
 
-    std::wstring result(bufferlen, L'\0');
-    GetShortPathNameW(longPath.c_str(),&result[0],bufferlen);
-    if (!relative)
-    {
-        result.erase(0, 4);
-    }
-
-    return result;
+    return std::wstring(tempBuff, bufferLen);
 }
 std::wstring& expandEnvironmentString(std::wstring& toExpand)
 {

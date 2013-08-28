@@ -731,8 +731,8 @@ std::wstring FileData::getVersionInformationString(const std::wstring& requested
                 result.append(L" / ");
             }
 
-            // Preserve embedded nulls, but remove trailing nulls.
-            while (retStringLength != 0 && retString[retStringLength - 1] == L'\0')
+            // Remove trailing null if it exists.
+            if (retStringLength != 0 && retString[retStringLength - 1] == L'\0')
             {
                 --retStringLength;
             }

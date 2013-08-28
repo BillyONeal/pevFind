@@ -17,3 +17,5 @@ thirdParty/cryptopp562/adhoc.cpp
 *.vsp
 TestResults/*
 Drop
+*~
+

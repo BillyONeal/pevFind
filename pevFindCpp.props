@@ -17,8 +17,8 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   <PropertyGroup>
-    <IncludePath>$(SolutionDir)thirdParty\;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)Build\$(Configuration)_$(Platform)\</OutDir>
+    <IncludePath>$(MSBuildThisFileDirectory)\thirdParty\;$(IncludePath)</IncludePath>
+    <OutDir>$(MSBuildThisFileDirectory)\Build\$(Configuration)_$(Platform)\</OutDir>
     <IntDir>$(OutDir)Intermediate\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)\pevFindVersion.props" />
