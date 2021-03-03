@@ -1,4 +1,6 @@
-pevFind is under the BSL, for it's code. As this file is documentatoin, the
+This is a "frankenstein" batch file helper tool I wrote at the behest of a BleepingComputer.com and TechSupportForum.com contributor known as "sUBs" back when I was in middle/high school. It's preserved here in case people want to look at it but in no way should be considered best practices or anything like that :).
+
+pevFind is under the BSL, for it's code. As this file is documentation, the
 BSL is not appropriate. Therefore, I am releasing this file in the package
 under the Creative Commons Attribution 3.0 Unported license. For more info,
 see: http://creativecommons.org/licenses/by/3.0/
@@ -15,8 +17,8 @@ pevFind <subprogram> <options>
 pevFind is a combination of an enhanced vFind and other tools.
     The first argument is the name of the subprogram inside of pevFind you wish to invoke.
     If no sub-program is specified, it will default to vFind behavior.
-    
-    
+
+
 #### Subprogram: vFind  ##################################################################
 
   --c
@@ -46,7 +48,7 @@ pevFind is a combination of an enhanced vFind and other tools.
     #n = newline
     #o = Internal Name
     #p = PE information
-        123456 
+        123456
         1      Is pe file
          2     Has debug info
           3    Has valid signature
@@ -64,7 +66,7 @@ pevFind is a combination of an enhanced vFind and other tools.
     #x = Special Build
     #y = Header checksum in hex. Will be ten characters, 0xAAAAAAAA
     #z = Calculated checksum in hex. Will be ten characters, 0xAAAAAAAA
-    Example: --custom:##c . #m #u #t #F# Will print something like 
+    Example: --custom:##c . #m #u #t #F# Will print something like
     2008-01-01 17:01 . 2000-08-31 08:00 51200 --a------ C:\WINDOWS\NirCmd.exe
     The string must start with # and end with # -- this is what marks the bounds
     of the argument. Therefore, you DON'T NEED QUOTES when using --custom.
@@ -74,10 +76,10 @@ pevFind is a combination of an enhanced vFind and other tools.
 
   -e Display PE information -- This is the same as --custom:#[#p] #f#
   --peinfo
-  
+
   --enable-filesystem-redirector-64 Enable WOW64's filesystem redirection functions.
   --fs32
-  
+
   -ea Choose encoding (default)
   -eo
   -eu8
@@ -87,14 +89,14 @@ pevFind is a combination of an enhanced vFind and other tools.
   --encodingutf8
   --encodingutf16  (Note that windows doesn't take anything outside the Basic
   Multilingual Plane; Therefore this option could also correctly be called UCS-2.)
-  
+
   Also note that when output is not redirected to a file, encoding has no effect --
   WriteConsole will output visible console characters no matter what the codepage, etc.
   Windows handles that automaticly.
-  
+
   -ex
   --expand Expand all vFind regex directories to remove ~ pseudo-directories.
-  
+
   -f  Show the full path, rather than the relative path
   --full
     Most of the time this command will have no effect. Whenever you prefix a regex
@@ -106,12 +108,12 @@ pevFind is a combination of an enhanced vFind and other tools.
     regex. Such results are undefined. Because without this directive is designed
     soley to preserve compatability with vFind, and vFind supports only one regex
     at a time.
-  
+
   --filelook Shows more information about the files. Same as --custom#---- #f ----
   #nCompany: #d#nFile Description: #e#nFile Version: #g#nProduct Name: #h#nCopyright:
   #i#nOriginal file name: #j#nFile Size: #u#nCreated Time: #c#nModified Time: #m#n
   Accessed Time: #a#nMD5: #5#nSHA1: #1#
-  
+
   --files[:]["]path["]
   Example usage: pevFind -tp --filestemp00
   Example usage: pevFind -tf --files:temp00
@@ -124,49 +126,49 @@ pevFind is a combination of an enhanced vFind and other tools.
   Example usage:
   pevFind -tp -sd:mdate --files:temp00 --filestemp02 --files"C:\Program Files\temp00"
   Multiple uses will simply add the files together.
-  
+
   -k PEV Kill mode
     Searches for processes that match PEV's tree, and silently terminates them.
-  
+
   -l  Use long listing matching vFind's L command.
   --long   This is the same as --custom:##t #s #m #f#
-  
+
   -loadline[:]["]file["]
   Loads commands from file and replaces that in the command line stream.
-  
+
   --limit[:]XX Limit count to XX items
-  
+
   -m  Use short DOS filenames (Same as --custom:##8#)
   --short
-  
+
   -md5[:]["]<<HASH>>["]
   Tests if file's MD5 matches "hash"
-  
+
   -md5list[:]["]File["]
   -md5elist[:]["]File["]
   Loads a newline delimited list of MD5s from File to test
   The e list variant will return true on errors.
-  
+
   -nrvf#regex#
   Creates a non-recursive VFindRegex object. This is for when you want a single
   regex to have non-recursive properties, as opposed to the -r switch, which
   changes the entire mode for pevFind.
   If it makes it any easier to remember, it stands for "Non Recursive Vfind Regex"
-  
+
   -n  Print summary
   --summary
-  
+
   -output[:]["]<FILE>["]
   Directs output to <FILE> rather than stdout.
-  
+
   -preg#<REGEX>#
   Returns true when the file in question matches the specified perl
   regex (filename). Note that at least one vFind regex (or a use of
   the -files directive) is required to limit the scope of the search.
-  
+
   -r  Disable recursion (Do not search subdirectories)
   --norecursion
-  
+
   -sa Sort ascending by    NOTE: Default is UNSORTED!
     SIZE
     DATE (defaults to modified)
@@ -176,7 +178,7 @@ pevFind is a combination of an enhanced vFind and other tools.
     HDATE PE Header Date
     NAME
     INAME Case insensitive name sort. (Over 2x time of standard name sort)
-    
+
   -sd Sort descending by
     SIZE
     DATE (defaults to modified)
@@ -186,14 +188,14 @@ pevFind is a combination of an enhanced vFind and other tools.
     HDATE PE Header Date
     NAME
     INAME Case insensitive name sort. (Over 2x time of standard name sort)
-  
+
   Multiple sort commands will result in a lower order of sort. For example,
   to group items by size and then break ties by sorting by date, use
   something like -sa:size -sa:date. The order obtained should be the order
   in which the commmands are listed, if the sort commands are separated by
   "intersting" items, such as AND, OR, XOR, etc, the results of the sort
   are undefined.
-  
+
   When a sort is performed, all entries which match the commandline's
   criteria will be copied into RAM. The entire sort operation is preformed
   in RAM, and will take at most n log n comparisons, where n is the number
@@ -203,10 +205,10 @@ pevFind is a combination of an enhanced vFind and other tools.
   of RAM while running. This should be fine, as this data is allowed to
   be cached by the Pagefile, but it would be wise to avoid using the
   sort methods if the results are expected to be exceedingly large.
-  
+
   -sha1[:]["]<<HASH>>["]
   Tests if file's SHA1 matches "hash"
-  
+
   -sha1list[:]["]File["]
   -sha1elist[:]["]File["]
   Loads a newline delimited list of SHA1s from File to test
@@ -214,7 +216,7 @@ pevFind is a combination of an enhanced vFind and other tools.
 
   -skip[:]"<path>"
   Directs pevFind to not enter <path> when calculating results.
-  
+
   --tx
   --timeout Timeout after x number of ms.
   When this switch is present, pevFind starts a second thread which simply
@@ -233,7 +235,7 @@ pevFind is a combination of an enhanced vFind and other tools.
 
   SomeVFindRegex
     Any unknown sequence which has no - will be interpreted as a vFind regex.
-    
+
   -t[:][!]... which is a type filter (Same as vfind)
         a Archive
         b 64 Bit PE file (PE+ format)
@@ -261,43 +263,43 @@ pevFind is a combination of an enhanced vFind and other tools.
         t Temporary
         v Volume label
         w Writable
-  
+
   -s[:][+|G|-|L|!|=] size above | below | not | equals
-  
+
   -s[:]NUMBER-NUMBER size range
-  
+
   -d[c|m|a][:][+|-|!|=] Date after / before / not / equals
   Default is modified, but c will use created and a will use access date.
-  
+
   -d[c|m|a][:][G|L] Date more than x days ago or less than x days ago.
   Default is days (D) but supported suffixes are S(econds), MM(inutes), H(ours), D(ays), W(eeks), M(onths), Y(ears)
   At this point leap years aren't handled correctly but I don't think that's a
   major problem. When calculating this date, pevFind will use the UTC time and subtract
   the specified length from it. It will then pivot on that date as greater than or less than.
-  
+
   Note: Date ranges are not supported because - specifies a range, but - s are used
   in the way dates are specified. Supporting - range would result in ambiguous
   cases. If you need a date range, use more than one -d argument.
-  
+
   If you are using a absolute date which contains a space, you have an alternate method of
   specifying quotes which is a bit more readable. Instead of
   "-d+2008-01-02 11:32"
   you can put the quote after the +, -, !, =, G, or L, like so:
   -d+"2008-01-02 11:32"
   I find this quite a bit more readable.
-  
+
   not
     Inverts the following directives
-    
+
   and
     ANDs the following directives
-  
+
   or
     ORs the following directives
-    
+
   xor
     XORs the following directives
-    
+
   Brackets -- That is, { }
 
   Order of operations:  Brackets {}
@@ -305,7 +307,7 @@ pevFind is a combination of an enhanced vFind and other tools.
                         OR
                         XOR
                         Everything else
-                        
+
   Expression = andand AND andand
   AndAnd = orand OR orand
   OrAnd = xorand XOR xorand
@@ -394,20 +396,20 @@ Lists commandlines of all processes on the system.
 
 #### Subprogram: SC  #####################################################################
 
-CREATE: 
+CREATE:
     NAME BINPATH TYPE START [DISPLAYNAME]
     Note that type and start take numbers, not the friendly names. Look up the values
     here: http://msdn.microsoft.com/en-us/library/ms682450(VS.85).aspx
-    
+
 DELETE:
     NAME
-    
+
 STOP:
     NAME
 
 START:
     NAME
-    
+
 #### Subprogram: RIMPORT  ################################################################
 
 pevFind RIMPORT [ LOOSE ] <FILE>
